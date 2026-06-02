@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>모듈랩 — 업무 자동화 디지털 툴 쇼핑몰</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --blue: #2563EB;
+  --blue-dark: #1D4ED8;
+  --blue-light: #EFF6FF;
+  --blue-mid: #BFDBFE;
+  --navy: #0F172A;
+  --navy2: #1E293B;
+  --navy3: #334155;
+  --green: #16A34A;
+  --slate: #64748B;
+  --slate-light: #F1F5F9;
+  --border: #E2E8F0;
+  --white: #FFFFFF;
+  --text: #0F172A;
+  --text2: #475569;
+  --text3: #94A3B8;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { font-family: 'Noto Sans KR', sans-serif; color: var(--text); background: var(--white); line-height: 1.6; }
+a { text-decoration: none; color: inherit; }
+img { max-width: 100%; display: block; }
+
+/* ───── NAVBAR ───── */
+.nav {
+  position: sticky; top: 0; z-index: 200;
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+}
+.nav-inner {
+  max-width: 1280px; margin: 0 auto;
+  padding: 0 40px; height: 72px;
+  display: flex; align-items: center; gap: 24px;
+}
+.nav-logo {
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 26px; letter-spacing: 0.04em;
+  color: var(--navy); flex-shrink: 0;
+}
+.nav-logo span { color: var(--blue); }
+.logo-mark {
+  width: 36px; height: 36px;
+  background: var(--blue); border-radius: 8px;
+  position: relative; overflow: hidden; flex-shrink: 0;
+}
+.logo-mark::before {
+  content: ''; position: absolute; top: 4px; left: 4px;
+  width: 15px; height: 15px;
+  background: rgba(255,255,255,0.3); border-radius: 3px;
+}
+.logo-mark::after {
+  content: ''; position: absolute; bottom: 4px; right: 4px;
+  width: 15px; height: 15px;
+  background: #16A34A; border-radius: 3px;
+}
+
+/* desktop nav links */
+.nav-cats {
+  display: flex; align-items: center; gap: 2px;
+  list-style: none; flex: 1; overflow: hidden;
+}
+.nav-cats li a {
+  padding: 6px 10px; font-size: 13px; font-weight: 500;
+  color: var(--text2); border-radius: 6px;
+  transition: all .15s; white-space: nowrap;
+  display: block;
+}
+.nav-cats li a:hover { background: var(--slate-light); color: var(--text); }
+.nav-cats li a.active { color: var(--blue); background: var(--blue-light); }
+.nav-cats li a.hot { color: #DC2626; font-weight: 700; }
+
+.nav-search {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--slate-light); border: 1px solid var(--border);
+  border-radius: 8px; padding: 8px 14px; width: 200px; flex-shrink: 0;
+}
+.nav-search input {
+  border: none; background: none; outline: none;
+  font-size: 13px; color: var(--text); font-family: inherit; width: 100%;
+}
+.nav-search input::placeholder { color: var(--text3); }
+
+.nav-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.nav-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: 8px;
+  font-size: 13px; font-weight: 500;
+  cursor: pointer; border: none; font-family: inherit; transition: all .15s;
+}
+.nav-btn-ghost { background: none; color: var(--text2); border: 1px solid var(--border); }
+.nav-btn-ghost:hover { background: var(--slate-light); }
+.nav-btn-primary { background: var(--blue); color: white; }
+.nav-btn-primary:hover { background: var(--blue-dark); }
+.cart-btn {
+  position: relative; width: 40px; height: 40px;
+  border-radius: 8px; background: var(--slate-light);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 18px; flex-shrink: 0;
+}
+.cart-badge {
+  position: absolute; top: -4px; right: -4px;
+  width: 18px; height: 18px; background: var(--blue);
+  color: white; font-size: 10px; font-weight: 700;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* mobile hamburger */
+.hamburger {
+  display: none; flex-direction: column; gap: 5px;
+  width: 40px; height: 40px; border: 1px solid var(--border);
+  border-radius: 8px; background: var(--slate-light);
+  align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0;
+}
+.hamburger span {
+  display: block; width: 18px; height: 2px;
+  background: var(--text2); border-radius: 2px;
+  transition: all .2s;
+}
+
+/* mobile drawer */
+.mobile-drawer {
+  display: none;
+  position: fixed; inset: 0; z-index: 300;
+}
+.drawer-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,.4);
+}
+.drawer-panel {
+  position: absolute; top: 0; right: 0;
+  width: min(320px, 85vw); height: 100%;
+  background: var(--white);
+  padding: 24px;
+  overflow-y: auto;
+  transform: translateX(100%);
+  transition: transform .25s ease;
+}
+.mobile-drawer.open .drawer-panel { transform: translateX(0); }
+.drawer-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 24px;
+}
+.drawer-close {
+  width: 36px; height: 36px; border-radius: 8px;
+  border: 1px solid var(--border); background: none;
+  font-size: 20px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.drawer-search {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--slate-light); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 14px; margin-bottom: 20px;
+}
+.drawer-search input {
+  border: none; background: none; outline: none;
+  font-size: 14px; color: var(--text); font-family: inherit; width: 100%;
+}
+.drawer-nav { list-style: none; }
+.drawer-nav li a {
+  display: block; padding: 12px 0;
+  font-size: 15px; font-weight: 500; color: var(--text2);
+  border-bottom: 1px solid var(--border);
+}
+.drawer-nav li:last-child a { border-bottom: none; }
+.drawer-nav li a.hot { color: #DC2626; }
+.drawer-btns { display: flex; gap: 8px; margin-top: 24px; }
+.drawer-btns .nav-btn { flex: 1; justify-content: center; }
+
+/* ───── HERO ───── */
+.hero {
+  background: var(--navy);
+  display: grid; grid-template-columns: 1fr 500px;
+  min-height: 520px; overflow: hidden;
+}
+.hero-left {
+  padding: 80px 40px 80px 80px;
+  display: flex; flex-direction: column; justify-content: center;
+}
+.hero-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(37,99,235,.2);
+  border: 1px solid rgba(37,99,235,.4);
+  border-radius: 20px; padding: 5px 14px;
+  font-size: 12px; font-weight: 500; color: var(--blue-mid);
+  margin-bottom: 24px; width: fit-content;
+  font-family: 'JetBrains Mono', monospace; letter-spacing: .05em;
+  animation: fadeUp .5s ease both;
+}
+.hero-tag::before {
+  content: ''; width: 6px; height: 6px;
+  background: var(--blue); border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.6;transform:scale(.8)} }
+@keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+.hero-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(42px, 5vw, 68px);
+  line-height: 1; letter-spacing: .02em; color: white; margin-bottom: 16px;
+  animation: fadeUp .5s .1s ease both;
+}
+.hero-title .accent { color: var(--blue-mid); }
+.hero-sub {
+  font-size: clamp(14px, 1.5vw, 16px); color: #94A3B8;
+  max-width: 480px; margin-bottom: 36px;
+  font-weight: 300; line-height: 1.7;
+  animation: fadeUp .5s .2s ease both;
+}
+.hero-btns {
+  display: flex; gap: 12px; flex-wrap: wrap;
+  animation: fadeUp .5s .3s ease both;
+}
+.btn-hero-primary {
+  padding: 14px 28px; background: var(--blue); color: white;
+  border: none; border-radius: 10px;
+  font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit;
+  transition: all .2s;
+}
+.btn-hero-primary:hover { background: var(--blue-dark); transform: translateY(-1px); }
+.btn-hero-ghost {
+  padding: 14px 28px; background: transparent; color: white;
+  border: 1px solid rgba(255,255,255,.25); border-radius: 10px;
+  font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit;
+  transition: all .2s;
+}
+.btn-hero-ghost:hover { background: rgba(255,255,255,.08); }
+.hero-stats {
+  display: flex; gap: 32px; flex-wrap: wrap;
+  margin-top: 48px; padding-top: 32px;
+  border-top: 1px solid rgba(255,255,255,.08);
+  animation: fadeUp .5s .4s ease both;
+}
+.hero-stat-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 26px; font-weight: 500; color: white;
+}
+.hero-stat-label { font-size: 12px; color: #64748B; margin-top: 2px; }
+
+.hero-right {
+  background: linear-gradient(135deg, #1E3A5F 0%, #0F172A 100%);
+  display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden; padding: 40px;
+}
+.hero-right::before {
+  content: ''; position: absolute; top: -100px; right: -100px;
+  width: 400px; height: 400px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(37,99,235,.15) 0%, transparent 70%);
+}
+.hero-mockup {
+  width: 100%; max-width: 380px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 16px; padding: 20px; position: relative; z-index: 1;
+}
+.mockup-bar { display: flex; gap: 6px; margin-bottom: 16px; }
+.mockup-dot { width: 10px; height: 10px; border-radius: 50%; }
+.mockup-dot:nth-child(1){background:#EF4444}
+.mockup-dot:nth-child(2){background:#F59E0B}
+.mockup-dot:nth-child(3){background:#22C55E}
+.mockup-row {
+  height: 12px; border-radius: 3px;
+  background: rgba(255,255,255,.08); margin-bottom: 8px;
+}
+.mockup-row.blue{background:rgba(37,99,235,.4);width:60%}
+.mockup-row.short{width:40%}
+.mockup-row.shorter{width:70%}
+.mockup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+.mockup-card {
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 8px; padding: 12px;
+}
+.mockup-card-dot { width: 28px; height: 28px; border-radius: 6px; margin-bottom: 8px; }
+.mockup-card:nth-child(1) .mockup-card-dot{background:rgba(37,99,235,.5)}
+.mockup-card:nth-child(2) .mockup-card-dot{background:rgba(22,163,74,.5)}
+.mockup-card:nth-child(3) .mockup-card-dot{background:rgba(234,179,8,.5)}
+.mockup-card:nth-child(4) .mockup-card-dot{background:rgba(168,85,247,.5)}
+.mockup-line{height:8px;border-radius:2px;background:rgba(255,255,255,.08);margin-bottom:5px}
+.mockup-line.short{width:60%}
+
+/* ───── TRUST BAR ───── */
+.trust-bar {
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: var(--slate-light); padding: 20px 0;
+}
+.trust-inner {
+  max-width: 1280px; margin: 0 auto; padding: 0 40px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap;
+}
+.trust-item {
+  display: flex; align-items: center; gap: 10px;
+  flex: 1; min-width: 180px;
+}
+.trust-icon {
+  width: 36px; height: 36px; background: var(--white);
+  border: 1px solid var(--border); border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0;
+}
+.trust-text strong { font-size: 13px; font-weight: 700; color: var(--text); display: block; }
+.trust-text span { font-size: 12px; color: var(--text3); }
+.trust-divider { width: 1px; height: 36px; background: var(--border); flex-shrink: 0; }
+
+/* ───── SHARED SECTION WRAPPER ───── */
+.section-wrap {
+  max-width: 1280px; margin: 0 auto;
+  padding: 60px 40px;
+}
+.section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 24px; gap: 12px;
+}
+.section-title {
+  font-size: clamp(18px, 2.5vw, 22px); font-weight: 700; color: var(--text);
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.section-title-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 500;
+  color: var(--blue); background: var(--blue-light);
+  padding: 3px 8px; border-radius: 4px; letter-spacing: .05em;
+}
+.section-more {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; font-weight: 500; color: var(--blue);
+  padding: 8px 16px; border: 1px solid var(--blue-mid);
+  border-radius: 8px; cursor: pointer; transition: all .15s;
+  background: var(--blue-light); white-space: nowrap;
+}
+.section-more:hover { background: var(--blue); color: white; }
+
+/* ───── PROMO CARDS ───── */
+.promo-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+}
+.promo-card {
+  border-radius: 16px; overflow: hidden; position: relative;
+  min-height: 200px; display: flex; flex-direction: column;
+  justify-content: flex-end; padding: 24px; cursor: pointer;
+  transition: transform .2s;
+}
+.promo-card:hover { transform: translateY(-3px); }
+.promo-card-bg { position: absolute; inset: 0; z-index: 0; }
+.promo-card:nth-child(1) .promo-card-bg{background:linear-gradient(135deg,#1E3A5F,#2563EB)}
+.promo-card:nth-child(2) .promo-card-bg{background:linear-gradient(135deg,#14532D,#16A34A)}
+.promo-card:nth-child(3) .promo-card-bg{background:linear-gradient(135deg,#3B1764,#7C3AED)}
+.promo-card-content { position: relative; z-index: 1; }
+.promo-badge {
+  display: inline-block; background: rgba(255,255,255,.2);
+  color: white; font-size: 11px; font-weight: 700;
+  padding: 3px 10px; border-radius: 20px; margin-bottom: 10px; letter-spacing: .05em;
+}
+.promo-card-title { font-size: 18px; font-weight: 700; color: white; margin-bottom: 4px; }
+.promo-card-sub { font-size: 13px; color: rgba(255,255,255,.7); margin-bottom: 16px; }
+.promo-card-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.3);
+  color: white; font-size: 12px; font-weight: 600;
+  padding: 7px 14px; border-radius: 7px; cursor: pointer; font-family: inherit;
+  transition: background .15s;
+}
+.promo-card-btn:hover { background: rgba(255,255,255,.25); }
+
+/* ───── PRODUCT GRID ───── */
+.product-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+}
+.product-grid-2 {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;
+  max-width: 660px;
+}
+.product-card {
+  border: 1px solid var(--border); border-radius: 12px;
+  overflow: hidden; background: var(--white); transition: all .2s; cursor: pointer;
+}
+.product-card:hover {
+  box-shadow: 0 8px 24px rgba(0,0,0,.1);
+  transform: translateY(-2px); border-color: var(--blue-mid);
+}
+.product-img {
+  aspect-ratio: 16/10; background: var(--slate-light);
+  display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+}
+.product-img-inner {
+  width: 80%; height: 70%; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center; font-size: 32px;
+}
+.product-cat-badge {
+  position: absolute; top: 10px; left: 10px;
+  font-size: 10px; font-weight: 700; padding: 3px 8px;
+  border-radius: 4px; letter-spacing: .04em;
+}
+.badge-excel{background:#DCFCE7;color:#15803D}
+.badge-sheets{background:#FEF9C3;color:#A16207}
+.badge-short{background:#EDE9FE;color:#6D28D9}
+.product-body { padding: 14px 16px 16px; }
+.product-name {
+  font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 4px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.product-creator { font-size: 12px; color: var(--text3); margin-bottom: 12px; }
+.product-footer { display: flex; align-items: center; justify-content: space-between; }
+.product-price {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px; font-weight: 500; color: var(--text);
+}
+.product-price .won { font-size: 12px; font-weight: 400; margin-right: 1px; }
+.add-btn {
+  padding: 7px 14px; background: var(--navy); color: white;
+  border: none; border-radius: 7px; font-size: 12px; font-weight: 600;
+  cursor: pointer; font-family: inherit; transition: all .15s;
+}
+.add-btn:hover { background: var(--blue); }
+
+/* ───── BANNER ───── */
+.banner-section {
+  background: var(--navy2); overflow: hidden;
+}
+.banner-inner {
+  max-width: 1280px; margin: 0 auto; padding: 0 80px;
+  display: grid; grid-template-columns: 1fr 480px;
+  align-items: center; min-height: 260px;
+}
+.banner-left { padding: 60px 0; }
+.banner-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; letter-spacing: .15em;
+  color: var(--blue-mid); margin-bottom: 12px; text-transform: uppercase;
+}
+.banner-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(36px, 4vw, 48px); line-height: 1;
+  color: white; letter-spacing: .02em; margin-bottom: 12px;
+}
+.banner-sub { font-size: 14px; color: #64748B; margin-bottom: 24px; max-width: 420px; }
+.banner-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 13px 26px; background: var(--blue); color: white;
+  border: none; border-radius: 10px;
+  font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit;
+  transition: all .2s;
+}
+.banner-btn:hover { background: var(--blue-dark); transform: translateY(-1px); }
+.banner-right {
+  display: flex; align-items: center; justify-content: center; padding: 40px 0;
+}
+.banner-visual {
+  width: 100%; max-width: 340px; height: 180px;
+  background: rgba(37,99,235,.08);
+  border: 1px solid rgba(37,99,235,.15); border-radius: 16px;
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.banner-visual-text {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 80px; color: rgba(37,99,235,.15); letter-spacing: .05em;
+}
+
+/* ───── FEATURES ───── */
+.features-section {
+  max-width: 1280px; margin: 0 auto;
+  padding: 60px 40px; border-top: 1px solid var(--border);
+}
+.features-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; }
+.feature-item { text-align: center; }
+.feature-icon {
+  width: 56px; height: 56px; margin: 0 auto 16px;
+  background: var(--blue-light); border: 1px solid var(--blue-mid);
+  border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px;
+}
+.feature-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.feature-desc { font-size: 13px; color: var(--text3); line-height: 1.6; }
+
+/* ───── FOOTER ───── */
+footer { background: var(--navy); color: white; }
+.footer-inner {
+  max-width: 1280px; margin: 0 auto; padding: 60px 40px 48px;
+  display: grid; grid-template-columns: 260px 1fr 1fr 1fr; gap: 48px;
+}
+.footer-brand .logo-wrap { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.footer-brand .brand-name {
+  font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: .04em; color: white;
+}
+.footer-brand .brand-name span { color: #60A5FA; }
+.footer-brand p { font-size: 13px; color: #64748B; line-height: 1.7; }
+.footer-col h4 { font-size: 13px; font-weight: 700; color: white; margin-bottom: 16px; }
+.footer-col ul { list-style: none; }
+.footer-col ul li { margin-bottom: 10px; }
+.footer-col ul li a { font-size: 13px; color: #64748B; transition: color .15s; }
+.footer-col ul li a:hover { color: white; }
+.footer-bottom {
+  border-top: 1px solid rgba(255,255,255,.08);
+  padding: 20px 40px; max-width: 1280px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+}
+.footer-bottom p { font-size: 12px; color: #475569; }
+.footer-biz { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #334155; letter-spacing: .03em; }
+
+/* ═══════════════════════════════════════
+   RESPONSIVE BREAKPOINTS
+═══════════════════════════════════════ */
+
+/* ── 1024px: tablet landscape ── */
+@media (max-width: 1024px) {
+  .nav-inner { padding: 0 24px; gap: 16px; }
+  .nav-cats { display: none; }
+  .nav-search { display: none; }
+  .hamburger { display: flex; }
+  .nav-btn-ghost { display: none; }
+
+  .hero { grid-template-columns: 1fr; }
+  .hero-right { display: none; }
+  .hero-left { padding: 60px 40px; }
+
+  .trust-inner { padding: 0 24px; }
+  .trust-divider { display: none; }
+
+  .section-wrap { padding: 48px 24px; }
+
+  .promo-grid { grid-template-columns: 1fr 1fr; }
+  .promo-card:nth-child(3) { grid-column: 1 / -1; }
+
+  .product-grid { grid-template-columns: repeat(2, 1fr); }
+
+  .banner-inner { padding: 0 40px; grid-template-columns: 1fr; }
+  .banner-right { display: none; }
+  .banner-left { padding: 48px 0; }
+
+  .features-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; }
+
+  .footer-inner { grid-template-columns: 1fr 1fr; gap: 32px; padding: 48px 24px 40px; }
+  .footer-bottom { padding: 20px 24px; }
+}
+
+/* ── 768px: tablet portrait ── */
+@media (max-width: 768px) {
+  .nav-inner { padding: 0 20px; }
+
+  .hero-left { padding: 48px 20px; }
+  .hero-stats { gap: 20px; }
+  .hero-stat-num { font-size: 22px; }
+
+  .trust-inner { padding: 0 20px; gap: 16px; }
+  .trust-item { min-width: 140px; }
+
+  .section-wrap { padding: 40px 20px; }
+
+  .promo-grid { grid-template-columns: 1fr; }
+  .promo-card:nth-child(3) { grid-column: auto; }
+
+  .product-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .product-grid-2 { grid-template-columns: 1fr; max-width: 100%; }
+
+  .banner-inner { padding: 0 20px; }
+
+  .features-section { padding: 40px 20px; }
+  .features-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+
+  .footer-inner { grid-template-columns: 1fr; gap: 32px; padding: 40px 20px 32px; }
+  .footer-bottom { padding: 16px 20px; flex-direction: column; align-items: flex-start; }
+}
+
+/* ── 480px: mobile ── */
+@media (max-width: 480px) {
+  .nav-inner { padding: 0 16px; height: 60px; }
+  .nav-logo { font-size: 22px; }
+  .logo-mark { width: 30px; height: 30px; }
+
+  .hero-left { padding: 40px 16px; }
+  .hero-btns { flex-direction: column; }
+  .btn-hero-primary, .btn-hero-ghost { width: 100%; text-align: center; justify-content: center; }
+  .hero-stats { gap: 16px; }
+
+  .trust-inner { flex-direction: column; align-items: flex-start; gap: 12px; padding: 0 16px; }
+  .trust-bar { padding: 16px 0; }
+
+  .section-wrap { padding: 32px 16px; }
+  .section-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+
+  .promo-card { min-height: 160px; }
+  .promo-card-title { font-size: 16px; }
+  .promo-card-sub { display: none; }
+
+  .product-grid { grid-template-columns: 1fr; }
+  .product-grid-2 { grid-template-columns: 1fr; }
+  .product-img { aspect-ratio: 16/9; }
+
+  .banner-inner { padding: 0 16px; }
+  .banner-left { padding: 36px 0; }
+  .banner-btn { width: 100%; justify-content: center; }
+
+  .features-section { padding: 32px 16px; }
+  .features-grid { grid-template-columns: 1fr; gap: 20px; }
+  .feature-item { text-align: left; display: flex; align-items: flex-start; gap: 16px; }
+  .feature-icon { margin: 0; flex-shrink: 0; }
+
+  .footer-inner { padding: 32px 16px; }
+  .footer-bottom { padding: 14px 16px; }
+  .footer-biz { font-size: 10px; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">
+      <div class="logo-mark"></div>
+      Modu<span>Lab</span>
+    </a>
+
+    <!-- desktop links -->
+    <ul class="nav-cats">
+      <li><a href="#" class="active">전체</a></li>
+      <li><a href="#">엑셀 프로그램</a></li>
+      <li><a href="#">구글시트</a></li>
+      <li><a href="#">숏폼 템플릿</a></li>
+      <li><a href="#">상세페이지</a></li>
+      <li><a href="#">홈페이지 제작</a></li>
+      <li><a href="#">프로그램 제작</a></li>
+      <li><a href="#" class="hot">🔥 할인</a></li>
+    </ul>
+
+    <div class="nav-search">
+      <span style="color:var(--text3);font-size:14px;">🔍</span>
+      <input type="text" placeholder="상품 검색...">
+    </div>
+
+    <div class="nav-actions">
+      <button class="nav-btn nav-btn-ghost">로그인</button>
+      <button class="nav-btn nav-btn-primary">회원가입</button>
+      <div class="cart-btn">🛒<div class="cart-badge">0</div></div>
+      <div class="hamburger" id="hamburgerBtn" onclick="openDrawer()">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- MOBILE DRAWER -->
+<div class="mobile-drawer" id="mobileDrawer">
+  <div class="drawer-backdrop" onclick="closeDrawer()"></div>
+  <div class="drawer-panel">
+    <div class="drawer-header">
+      <a href="#" class="nav-logo" style="font-size:20px;">
+        <div class="logo-mark" style="width:28px;height:28px;"></div>
+        Modu<span>Lab</span>
+      </a>
+      <button class="drawer-close" onclick="closeDrawer()">✕</button>
+    </div>
+    <div class="drawer-search">
+      <span style="color:var(--text3);">🔍</span>
+      <input type="text" placeholder="상품 검색...">
+    </div>
+    <ul class="drawer-nav">
+      <li><a href="#">전체 상품</a></li>
+      <li><a href="#">엑셀 프로그램</a></li>
+      <li><a href="#">구글시트 자동화</a></li>
+      <li><a href="#">숏폼 템플릿</a></li>
+      <li><a href="#">상세페이지 제작</a></li>
+      <li><a href="#">홈페이지 제작</a></li>
+      <li><a href="#">프로그램 제작</a></li>
+      <li><a href="#" class="hot">🔥 할인 상품</a></li>
+      <li><a href="#">마이페이지</a></li>
+      <li><a href="#">장바구니 🛒</a></li>
+      <li><a href="#">문의하기</a></li>
+    </ul>
+    <div class="drawer-btns">
+      <button class="nav-btn nav-btn-ghost" style="flex:1;justify-content:center;">로그인</button>
+      <button class="nav-btn nav-btn-primary" style="flex:1;justify-content:center;">회원가입</button>
+    </div>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-left">
+    <div class="hero-tag">NEW · 2026 업무 자동화 툴</div>
+    <h1 class="hero-title">
+      혼자 일해도<br>
+      <span class="accent">팀처럼</span> 돌아가는<br>
+      업무 시스템
+    </h1>
+    <p class="hero-sub">6년간 직접 쓰며 검증한 엑셀·구글시트 자동화 툴.<br>클릭 한 번으로 반복 업무를 끝내세요.</p>
+    <div class="hero-btns">
+      <button class="btn-hero-primary">지금 둘러보기 →</button>
+      <button class="btn-hero-ghost">제작 의뢰하기</button>
+    </div>
+    <div class="hero-stats">
+      <div><div class="hero-stat-num">30+</div><div class="hero-stat-label">외주 제작 완료</div></div>
+      <div><div class="hero-stat-num">6Y</div><div class="hero-stat-label">자동화 전문 경력</div></div>
+      <div><div class="hero-stat-num">9개</div><div class="hero-stat-label">판매 중인 툴</div></div>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="hero-mockup">
+      <div class="mockup-bar">
+        <div class="mockup-dot"></div><div class="mockup-dot"></div><div class="mockup-dot"></div>
+      </div>
+      <div class="mockup-row blue"></div>
+      <div class="mockup-row short"></div>
+      <div class="mockup-row shorter"></div>
+      <div class="mockup-row" style="width:50%"></div>
+      <div class="mockup-grid">
+        <div class="mockup-card"><div class="mockup-card-dot"></div><div class="mockup-line"></div><div class="mockup-line short"></div></div>
+        <div class="mockup-card"><div class="mockup-card-dot"></div><div class="mockup-line"></div><div class="mockup-line short"></div></div>
+        <div class="mockup-card"><div class="mockup-card-dot"></div><div class="mockup-line"></div><div class="mockup-line short"></div></div>
+        <div class="mockup-card"><div class="mockup-card-dot"></div><div class="mockup-line"></div><div class="mockup-line short"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST BAR -->
+<div class="trust-bar">
+  <div class="trust-inner">
+    <div class="trust-item"><div class="trust-icon">⚡</div><div class="trust-text"><strong>즉시 다운로드</strong><span>결제 즉시 이메일 발송</span></div></div>
+    <div class="trust-divider"></div>
+    <div class="trust-item"><div class="trust-icon">🛡️</div><div class="trust-text"><strong>오류 무제한 수정</strong><span>작동 문제 발생 시 무료 지원</span></div></div>
+    <div class="trust-divider"></div>
+    <div class="trust-item"><div class="trust-icon">✅</div><div class="trust-text"><strong>직접 검증된 도구</strong><span>6년간 실무에서 사용한 툴</span></div></div>
+    <div class="trust-divider"></div>
+    <div class="trust-item"><div class="trust-icon">💳</div><div class="trust-text"><strong>안전한 결제</strong><span>토스페이먼츠 PG 연동</span></div></div>
+  </div>
+</div>
+
+<!-- PROMO CARDS -->
+<div class="section-wrap" style="padding-bottom:0;">
+  <div class="promo-grid">
+    <div class="promo-card"><div class="promo-card-bg"></div><div class="promo-card-content"><div class="promo-badge">BEST SELLER</div><div class="promo-card-title">엑셀 자동화 프로그램</div><div class="promo-card-sub">9,900원부터 시작</div><button class="promo-card-btn">지금 보기 →</button></div></div>
+    <div class="promo-card"><div class="promo-card-bg"></div><div class="promo-card-content"><div class="promo-badge">구글 GAS 연동</div><div class="promo-card-title">구글시트 자동화</div><div class="promo-card-sub">어디서든 접근 가능</div><button class="promo-card-btn">지금 보기 →</button></div></div>
+    <div class="promo-card"><div class="promo-card-bg"></div><div class="promo-card-content"><div class="promo-badge">맞춤 제작</div><div class="promo-card-title">홈페이지 · 프로그램 제작</div><div class="promo-card-sub">지금 바로 문의하세요</div><button class="promo-card-btn">문의하기 →</button></div></div>
+  </div>
+</div>
+
+<!-- PRODUCT SECTION: 엑셀 -->
+<div class="section-wrap">
+  <div class="section-header">
+    <div class="section-title">엑셀 프로그램 <span class="section-title-tag">7 PRODUCTS</span></div>
+    <a href="#" class="section-more">전체 보기 →</a>
+  </div>
+  <div class="product-grid">
+    <div class="product-card">
+      <div class="product-img" style="background:#EFF6FF;"><div class="product-img-inner" style="background:#DBEAFE;">📊</div><div class="product-cat-badge badge-excel">EXCEL</div></div>
+      <div class="product-body"><div class="product-name">프로젝트 관리 자동화</div><div class="product-creator">by 모듈랩 · 엑셀</div><div class="product-footer"><div class="product-price"><span class="won">₩</span>19,900</div><button class="add-btn">담기</button></div></div>
+    </div>
+    <div class="product-card">
+      <div class="product-img" style="background:#F0FDF4;"><div class="product-img-inner" style="background:#DCFCE7;">💰</div><div class="product-cat-badge badge-excel">EXCEL</div></div>
+      <div class="product-body"><div class="product-name">가계부 자동화</div><div class="product-creator">by 모듈랩 · 엑셀</div><div class="product-footer"><div class="product-price"><span class="won">₩</span>9,900</div><button class="add-btn">담기</button></div></div>
+    </div>
+    <div class="product-card">
+      <div class="product-img" style="background:#FFF7ED;"><div class="product-img-inner" style="background:#FED7AA;">👥</div><div class="product-cat-badge badge-excel">EXCEL</div></div>
+      <div class="product-body"><div class="product-name">급여 관리 자동화</div><div class="product-creator">by 모듈랩 · 엑셀</div><div class="product-footer"><div class="product-price"><span class="won">₩</span>29,900</div><button class="add-btn">담기</button></div></div>
+    </div>
+    <div class="product-card">
+      <div class="product-img" style="background:#FFF1F2;"><div class="product-img-inner" style="background:#FFE4E6;">📈</div><div class="product-cat-badge badge-excel">EXCEL</div></div>
+      <div class="product-body"><div class="product-name">마진 계산기</div><div class="product-creator">by 모듈랩 · 엑셀</div><div class="product-footer"><div class="product-price"><span class="won">₩</span>9,900</div><button class="add-btn">담기</button></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- PRODUCT SECTION: 구글시트 -->
+<div class="section-wrap" style="padding-top:0;">
+  <div class="section-header">
+    <div class="section-title">구글시트 자동화 <span class="section-title-tag">2 PRODUCTS</span></div>
+    <a href="#" class="section-more">전체 보기 →</a>
+  </div>
+  <div class="product-grid-2">
+    <div class="product-card">
+      <div class="product-img" style="background:#FEFCE8;"><div class="product-img-inner" style="background:#FEF9C3;">🔧</div><div class="product-cat-badge badge-sheets">SHEETS</div></div>
+      <div class="product-body"><div class="product-name">구글시트 자동화 A</div><div class="product-creator">by 모듈랩 · 구글시트</div><div class="product-footer"><div class="product-price"><span class="won">₩</span>19,900</div><button class="add-btn">담기</button></div></div>
+    </div>
+    <div class="product-card">
+      <div class="product-img" style="background:#F0F9FF;"><div class="product-img-inner" style="background:#E0F2FE;">⚙️</div><div class="product-cat-badge badge-sheets">SHEETS</div></div>
+      <div class="product-body"><div class="product-name">구글시트 자동화 B</div><div class="product-creator">by 모듈랩 · 구글시트</div><div class="product-footer"><div class="product-price"><span class="won">₩</span>29,900</div><button class="add-btn">담기</button></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- BANNER -->
+<section class="banner-section">
+  <div class="banner-inner">
+    <div class="banner-left">
+      <div class="banner-eyebrow">CUSTOM ORDER · 맞춤 제작</div>
+      <div class="banner-title">내 업무에 딱 맞는<br>시스템이 필요하다면</div>
+      <p class="banner-sub">CRM, 재고관리, 홈페이지까지 — 30개 이상의 외주 제작 경험으로 당신만의 자동화 시스템을 만들어드립니다.</p>
+      <button class="banner-btn">카카오로 문의하기 →</button>
+    </div>
+    <div class="banner-right">
+      <div class="banner-visual"><div class="banner-visual-text">ML</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST FEATURES -->
+<section class="features-section">
+  <div class="features-grid">
+    <div class="feature-item"><div class="feature-icon">⚡</div><div><div class="feature-title">즉시 다운로드</div><div class="feature-desc">결제 완료 즉시 등록 이메일로 파일을 자동 발송합니다</div></div></div>
+    <div class="feature-item"><div class="feature-icon">🛡️</div><div><div class="feature-title">오류 무제한 수정</div><div class="feature-desc">작동에 문제가 생기면 언제든 무료로 지원합니다</div></div></div>
+    <div class="feature-item"><div class="feature-icon">✅</div><div><div class="feature-title">6년 실무 검증</div><div class="feature-desc">직접 업무에 써보고 검증된 도구만 판매합니다</div></div></div>
+    <div class="feature-item"><div class="feature-icon">💬</div><div><div class="feature-title">카카오 1:1 상담</div><div class="feature-desc">궁금한 점은 카카오채널로 바로 문의하세요</div></div></div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="logo-wrap"><div class="logo-mark"></div><div class="brand-name">Modu<span>Lab</span></div></div>
+      <p>혼자 일해도 팀처럼 돌아가는<br>업무 시스템을 만듭니다.</p>
+    </div>
+    <div class="footer-col">
+      <h4>카테고리</h4>
+      <ul>
+        <li><a href="#">엑셀 프로그램</a></li>
+        <li><a href="#">구글시트 자동화</a></li>
+        <li><a href="#">숏폼 템플릿</a></li>
+        <li><a href="#">상세페이지 제작</a></li>
+        <li><a href="#">홈페이지 제작</a></li>
+        <li><a href="#">프로그램 제작</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>빠른 링크</h4>
+      <ul>
+        <li><a href="#">홈</a></li>
+        <li><a href="#">판매자 소개</a></li>
+        <li><a href="#">할인 상품</a></li>
+        <li><a href="#">문의하기</a></li>
+        <li><a href="#">마이페이지</a></li>
+        <li><a href="#">장바구니</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>정책 안내</h4>
+      <ul>
+        <li><a href="#">이용약관</a></li>
+        <li><a href="#">개인정보처리방침</a></li>
+        <li><a href="#">라이선스 정책</a></li>
+        <li><a href="#">환불 정책</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 ModuLab. All rights reserved.</p>
+    <div class="footer-biz">사업자등록번호: 000-00-00000 · 통신판매업: 제0000-서울-0000호</div>
+  </div>
+</footer>
+
+<script>
+function openDrawer() {
+  const d = document.getElementById('mobileDrawer');
+  d.style.display = 'block';
+  setTimeout(() => d.classList.add('open'), 10);
+  document.body.style.overflow = 'hidden';
+}
+function closeDrawer() {
+  const d = document.getElementById('mobileDrawer');
+  d.classList.remove('open');
+  setTimeout(() => { d.style.display = 'none'; }, 260);
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+</script>
+</body>
+</html>
