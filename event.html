@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>할인 이벤트 — 모듈랩</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-left">
+      <div class="hamburger" onclick="openDrawer()">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+    <div class="nav-center">
+      <a href="index.html" class="nav-logo">
+        <div class="logo-mark"></div>
+        Modu<span>Lab</span>
+      </a>
+    </div>
+    <div class="nav-right">
+      <div class="nav-search">
+        <span style="color:var(--text3);font-size:14px;">🔍</span>
+        <input type="text" placeholder="상품 검색...">
+      </div>
+      <button class="nav-btn nav-btn-ghost">로그인</button>
+      <button class="nav-btn nav-btn-primary">회원가입</button>
+      <div class="cart-btn">🛒<div class="cart-badge">0</div></div>
+    </div>
+  </div>
+</nav>
+
+<!-- DRAWER -->
+<div class="drawer-overlay" id="drawerOverlay">
+  <div class="drawer-backdrop" onclick="closeDrawer()"></div>
+  <div class="drawer-panel">
+    <div class="drawer-header">
+      <div class="drawer-logo">
+        <div class="logo-mark" style="width:28px;height:28px;"></div>
+        Modu<span>Lab</span>
+      </div>
+      <button class="drawer-close" onclick="closeDrawer()">✕</button>
+    </div>
+    <div class="drawer-search">
+      <span style="color:var(--text3);">🔍</span>
+      <input type="text" placeholder="상품 검색...">
+    </div>
+    <div class="drawer-section-title">카테고리</div>
+    <ul class="drawer-nav">
+      <li><a href="index.html"><span class="cat-icon">🏠</span>전체 상품</a></li>
+      <li><a href="category-excel.html"><span class="cat-icon">📊</span>엑셀 프로그램</a></li>
+      <li><a href="category-sheets.html"><span class="cat-icon">🔧</span>구글시트 자동화</a></li>
+      <li><a href="category-short.html"><span class="cat-icon">🎬</span>숏폼 템플릿</a></li>
+      <li><a href="category-detail.html"><span class="cat-icon">🖼️</span>상세페이지 제작</a></li>
+      <li><a href="category-web.html"><span class="cat-icon">🌐</span>홈페이지 제작</a></li>
+      <li><a href="category-program.html"><span class="cat-icon">⚙️</span>프로그램 제작</a></li>
+      <li><a href="event.html" class="hot active-cat"><span class="cat-icon">🎁</span>이벤트</a></li>
+    </ul>
+    <div class="drawer-divider"></div>
+    <div class="drawer-section-title">내 계정</div>
+    <ul class="drawer-nav">
+      <li><a href="#"><span class="cat-icon">👤</span>마이페이지</a></li>
+      <li><a href="#"><span class="cat-icon">🛒</span>장바구니</a></li>
+      <li><a href="category-program.html"><span class="cat-icon">💬</span>문의하기</a></li>
+    </ul>
+    <div class="drawer-btns">
+      <button class="nav-btn nav-btn-ghost">로그인</button>
+      <button class="nav-btn nav-btn-primary">회원가입</button>
+    </div>
+  </div>
+</div>
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb">
+  <a href="index.html">홈</a>
+  <span style="color:var(--border);">›</span>
+  <span>이벤트 · 할인</span>
+</div>
+
+<!-- EVENT HERO -->
+<section class="event-hero">
+  <div class="event-hero-inner">
+    <div class="event-tag">🔥 LIMITED OFFER · 2026 JUNE</div>
+    <h1 class="event-hero-title">6월 특별 이벤트</h1>
+    <p class="event-hero-sub">지금만 누릴 수 있는 혜택을 놓치지 마세요.<br>신규 가입부터 번들 구매까지 최대 30% 할인!</p>
+  </div>
+</section>
+
+<!-- EVENTS -->
+<div class="section-wrap">
+  <div class="event-grid">
+
+    <!-- 이벤트 1 -->
+    <div class="event-card">
+      <div class="event-card-top" style="background:linear-gradient(135deg,#EFF6FF 0%,#DBEAFE 100%);">
+        <span class="event-card-emoji">🎁</span>
+        <div class="event-period limited">2026.06.01 ~ 06.30</div>
+        <div class="event-card-title">신규가입 웰컴 쿠폰</div>
+        <div class="event-card-desc">가입 즉시 첫 구매에 사용 가능한 20% 할인 쿠폰을 드립니다. 모든 상품에 적용 가능.</div>
+      </div>
+      <div class="event-card-bottom">
+        <div class="event-discount" style="color:var(--blue);">20% OFF</div>
+        <a href="#" class="event-cta" style="background:var(--blue);">회원가입 →</a>
+      </div>
+    </div>
+
+    <!-- 이벤트 2 -->
+    <div class="event-card">
+      <div class="event-card-top" style="background:linear-gradient(135deg,#F0FDF4 0%,#DCFCE7 100%);">
+        <span class="event-card-emoji">⭐</span>
+        <div class="event-period ongoing">상시 진행</div>
+        <div class="event-card-title">리뷰 작성 포인트 적립</div>
+        <div class="event-card-desc">구매한 상품에 후기를 작성하면 500P를 적립해드립니다. 포인트는 다음 구매 시 현금처럼 사용 가능.</div>
+      </div>
+      <div class="event-card-bottom">
+        <div class="event-discount" style="color:var(--green);">+500P</div>
+        <a href="#" class="event-cta" style="background:var(--green);">후기 쓰기 →</a>
+      </div>
+    </div>
+
+    <!-- 이벤트 3 -->
+    <div class="event-card">
+      <div class="event-card-top" style="background:linear-gradient(135deg,#FFF7ED 0%,#FED7AA 100%);">
+        <span class="event-card-emoji">🛒</span>
+        <div class="event-period limited">2026.06.01 ~ 06.14</div>
+        <div class="event-card-title">번들 구매 추가 할인</div>
+        <div class="event-card-desc">2개 이상 동시 구매 시 전체 금액의 30%를 추가 할인해드립니다. 기간 한정 이벤트.</div>
+      </div>
+      <div class="event-card-bottom">
+        <div class="event-discount" style="color:#EA580C;">30% OFF</div>
+        <a href="category-excel.html" class="event-cta" style="background:#EA580C;">상품 보기 →</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- FEATURED PRODUCTS -->
+<div class="section-wrap" style="padding-top:0;">
+  <div class="section-header">
+    <div class="section-title">이벤트 추천 상품 <span class="section-title-tag">BEST DEAL</span></div>
+    <a href="category-excel.html" class="section-more">전체 보기 →</a>
+  </div>
+  <div class="mkt-grid">
+
+    <a href="product.html?id=excel-hh&cat=excel&name=가계부+자동화&price=9900&emoji=💰" class="mkt-card">
+      <div class="mkt-card-img" style="background:#F0FDF4;">
+        <div style="background:#DCFCE7;width:75%;height:65%;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:52px;">💰</div>
+        <span class="mkt-badge">판매중</span>
+      </div>
+      <div class="mkt-card-body">
+        <div class="mkt-card-name">가계부 자동화</div>
+        <div class="mkt-card-desc">수입·지출 자동 집계 및 월별/카테고리별 통계. 예산 초과 알림 기능</div>
+        <div class="mkt-card-price">₩9,900</div>
+        <div class="mkt-card-meta"><span>👁 512</span><span>↓ 87</span><span class="mkt-card-seller">by 모듈랩</span></div>
+      </div>
+    </a>
+
+    <a href="product.html?id=excel-margin&cat=excel&name=마진+계산기&price=9900&emoji=📈" class="mkt-card">
+      <div class="mkt-card-img" style="background:#FFF1F2;">
+        <div style="background:#FFE4E6;width:75%;height:65%;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:52px;">📈</div>
+        <span class="mkt-badge">판매중</span>
+      </div>
+      <div class="mkt-card-body">
+        <div class="mkt-card-name">마진 계산기</div>
+        <div class="mkt-card-desc">단가·마진율·수익률 즉시 분석. 쇼핑몰·도매 사업자에게 최적화된 도구</div>
+        <div class="mkt-card-price">₩9,900</div>
+        <div class="mkt-card-meta"><span>👁 341</span><span>↓ 56</span><span class="mkt-card-seller">by 모듈랩</span></div>
+      </div>
+    </a>
+
+    <a href="product.html?id=excel-pm&cat=excel&name=프로젝트+관리+자동화&price=19900&emoji=📊" class="mkt-card">
+      <div class="mkt-card-img" style="background:#EFF6FF;">
+        <div style="background:#DBEAFE;width:75%;height:65%;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:52px;">📊</div>
+        <span class="mkt-badge">판매중</span>
+      </div>
+      <div class="mkt-card-body">
+        <div class="mkt-card-name">프로젝트 관리 자동화</div>
+        <div class="mkt-card-desc">업무 일정·진행률·담당자를 한눈에 관리. 자동 알림 & 상태 추적 기능 포함</div>
+        <div class="mkt-card-price">₩19,900</div>
+        <div class="mkt-card-meta"><span>👁 248</span><span>↓ 31</span><span class="mkt-card-seller">by 모듈랩</span></div>
+      </div>
+    </a>
+
+    <a href="product.html?id=sheets-pm&cat=sheets&name=구글시트+프로젝트+관리&price=19900&emoji=🔧" class="mkt-card">
+      <div class="mkt-card-img" style="background:#FEFCE8;">
+        <div style="background:#FEF9C3;width:75%;height:65%;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:52px;">🔧</div>
+        <span class="mkt-badge">판매중</span>
+      </div>
+      <div class="mkt-card-body">
+        <div class="mkt-card-name">구글시트 프로젝트 관리</div>
+        <div class="mkt-card-desc">실시간 공유·협업이 가능한 클라우드 프로젝트 관리. GAS 자동화 알림 포함</div>
+        <div class="mkt-card-price">₩19,900</div>
+        <div class="mkt-card-meta"><span>👁 214</span><span>↓ 27</span><span class="mkt-card-seller">by 모듈랩</span></div>
+      </div>
+    </a>
+
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="logo-wrap"><div class="logo-mark"></div><div class="brand-name">Modu<span>Lab</span></div></div>
+      <p>혼자 일해도 팀처럼 돌아가는<br>업무 시스템을 만듭니다.</p>
+    </div>
+    <div class="footer-col">
+      <h4>카테고리</h4>
+      <ul>
+        <li><a href="category-excel.html">엑셀 프로그램</a></li>
+        <li><a href="category-sheets.html">구글시트 자동화</a></li>
+        <li><a href="category-short.html">숏폼 템플릿</a></li>
+        <li><a href="category-detail.html">상세페이지 제작</a></li>
+        <li><a href="category-web.html">홈페이지 제작</a></li>
+        <li><a href="category-program.html">프로그램 제작</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>빠른 링크</h4>
+      <ul>
+        <li><a href="index.html">홈</a></li>
+        <li><a href="#">판매자 소개</a></li>
+        <li><a href="event.html">할인 상품</a></li>
+        <li><a href="category-program.html">문의하기</a></li>
+        <li><a href="#">마이페이지</a></li>
+        <li><a href="#">장바구니</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>정책 안내</h4>
+      <ul>
+        <li><a href="#">이용약관</a></li>
+        <li><a href="#">개인정보처리방침</a></li>
+        <li><a href="#">라이선스 정책</a></li>
+        <li><a href="#">환불 정책</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 ModuLab. All rights reserved.</p>
+    <div class="footer-biz">사업자등록번호: 000-00-00000 · 통신판매업: 제0000-서울-0000호</div>
+  </div>
+</footer>
+
+<script>
+function openDrawer() {
+  const d = document.getElementById('drawerOverlay');
+  d.style.display = 'block';
+  setTimeout(() => d.classList.add('open'), 10);
+  document.body.style.overflow = 'hidden';
+}
+function closeDrawer() {
+  const d = document.getElementById('drawerOverlay');
+  d.classList.remove('open');
+  setTimeout(() => { d.style.display = 'none'; }, 260);
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+</script>
+</body>
+</html>

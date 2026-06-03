@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>로그인 — 모듈랩</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+
+<!-- ══ 소셜 SDK ══
+  Google: https://console.cloud.google.com → OAuth 2.0 Client ID 발급
+  Kakao:  https://developers.kakao.com     → JavaScript 키 발급
+  Naver:  https://developers.naver.com     → Client ID 발급
+-->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://t1.kakaocdn.net/kakao_js_sdk/2.6.0/kakao.min.js" integrity="sha384-6MFdIr0zOira1CHQkedUqJVql0YtcZA1P0nbPrQYJXVJZUkTk/oX4U9GhUIs3/z8" crossorigin="anonymous"></script>
+
+<style>
+/* ── Login page layout ── */
+.login-page {
+  min-height: calc(100vh - 72px);
+  background: var(--slate-light);
+  display: flex; align-items: center; justify-content: center;
+  padding: 40px 20px;
+}
+.login-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 40px;
+  width: 100%; max-width: 440px;
+  box-shadow: 0 8px 40px rgba(0,0,0,.08);
+}
+.login-brand {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--navy);
+  margin-bottom: 6px;
+}
+.login-brand span { color: var(--blue); }
+.login-headline {
+  text-align: center; font-size: 15px; font-weight: 700;
+  color: var(--text); margin-bottom: 28px; line-height: 1.5;
+}
+.login-headline small { display: block; font-size: 13px; font-weight: 400; color: var(--text2); margin-top: 4px; }
+
+/* form */
+.login-form { display: flex; flex-direction: column; gap: 12px; }
+.login-input {
+  width: 100%; padding: 13px 16px;
+  border: 1px solid var(--border); border-radius: 10px;
+  font-size: 14px; font-family: inherit; color: var(--text);
+  outline: none; transition: border-color .15s;
+  background: var(--white);
+}
+.login-input:focus { border-color: var(--blue); }
+.login-input::placeholder { color: var(--text3); }
+.login-remember {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; color: var(--text2); cursor: pointer;
+}
+.login-remember input[type="checkbox"] {
+  width: 16px; height: 16px; accent-color: var(--blue); cursor: pointer;
+}
+.login-btn-primary {
+  width: 100%; padding: 14px;
+  background: var(--blue); color: white;
+  border: none; border-radius: 10px;
+  font-size: 15px; font-weight: 700; cursor: pointer;
+  font-family: inherit; transition: background .15s;
+  margin-top: 4px;
+}
+.login-btn-primary:hover { background: var(--blue-dark); }
+
+.login-links {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  font-size: 13px; color: var(--text3); margin-top: 4px;
+}
+.login-links a { color: var(--text2); transition: color .15s; }
+.login-links a:hover { color: var(--blue); }
+.login-links-sep { color: var(--border); }
+
+/* divider */
+.login-divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 20px 0; color: var(--text3); font-size: 13px;
+}
+.login-divider::before, .login-divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+
+/* social buttons */
+.social-btns { display: flex; flex-direction: column; gap: 10px; }
+.social-btn {
+  width: 100%; padding: 13px 16px;
+  border-radius: 10px; border: 1.5px solid var(--border);
+  background: var(--white); cursor: pointer;
+  font-size: 14px; font-weight: 500; font-family: inherit;
+  display: flex; align-items: center; gap: 12px;
+  transition: all .15s; color: var(--text);
+}
+.social-btn:hover { border-color: #aaa; background: var(--slate-light); }
+.social-btn-icon {
+  width: 22px; height: 22px; border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700; flex-shrink: 0;
+}
+.social-btn-google .social-btn-icon { background: white; border: 1px solid #e0e0e0; }
+.social-btn-naver .social-btn-icon { background: #03C75A; color: white; font-size: 12px; font-family: 'Noto Sans KR', sans-serif; }
+.social-btn-kakao { border-color: #FEE500; background: #FEE500; }
+.social-btn-kakao:hover { background: #F7DC00; border-color: #F7DC00; }
+.social-btn-kakao .social-btn-icon { background: transparent; font-size: 18px; }
+.social-btn-label { flex: 1; text-align: center; }
+
+.login-signup-cta {
+  text-align: center; margin-top: 24px; padding-top: 20px;
+  border-top: 1px solid var(--border);
+  font-size: 13px; color: var(--text2);
+}
+.login-signup-cta a { color: var(--blue); font-weight: 700; }
+
+/* toast */
+.toast {
+  position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%);
+  background: var(--navy); color: white; padding: 12px 24px;
+  border-radius: 10px; font-size: 13px; font-weight: 500;
+  opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 999;
+  white-space: nowrap;
+}
+.toast.show { opacity: 1; }
+
+@media (max-width: 480px) {
+  .login-card { padding: 28px 20px; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-left">
+      <div class="hamburger" onclick="openDrawer()">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+    <div class="nav-center">
+      <a href="index.html" class="nav-logo">
+        <div class="logo-mark"></div>
+        Modu<span>Lab</span>
+      </a>
+    </div>
+    <div class="nav-right">
+      <div class="nav-search">
+        <span style="color:var(--text3);font-size:14px;">🔍</span>
+        <input type="text" placeholder="상품 검색...">
+      </div>
+      <button class="nav-btn nav-btn-ghost" onclick="location.href='login.html'">로그인</button>
+      <button class="nav-btn nav-btn-primary" onclick="location.href='register.html'">회원가입</button>
+      <div class="cart-btn">🛒<div class="cart-badge">0</div></div>
+    </div>
+  </div>
+</nav>
+
+<!-- DRAWER -->
+<div class="drawer-overlay" id="drawerOverlay">
+  <div class="drawer-backdrop" onclick="closeDrawer()"></div>
+  <div class="drawer-panel">
+    <div class="drawer-header">
+      <div class="drawer-logo">
+        <div class="logo-mark" style="width:28px;height:28px;"></div>
+        Modu<span>Lab</span>
+      </div>
+      <button class="drawer-close" onclick="closeDrawer()">✕</button>
+    </div>
+    <div class="drawer-search">
+      <span style="color:var(--text3);">🔍</span>
+      <input type="text" placeholder="상품 검색...">
+    </div>
+    <div class="drawer-section-title">카테고리</div>
+    <ul class="drawer-nav">
+      <li><a href="index.html"><span class="cat-icon">🏠</span>전체 상품</a></li>
+      <li><a href="category-excel.html"><span class="cat-icon">📊</span>엑셀 프로그램</a></li>
+      <li><a href="category-sheets.html"><span class="cat-icon">🔧</span>구글시트 자동화</a></li>
+      <li><a href="category-short.html"><span class="cat-icon">🎬</span>숏폼 템플릿</a></li>
+      <li><a href="category-detail.html"><span class="cat-icon">🖼️</span>상세페이지 제작</a></li>
+      <li><a href="category-web.html"><span class="cat-icon">🌐</span>홈페이지 제작</a></li>
+      <li><a href="category-program.html"><span class="cat-icon">⚙️</span>프로그램 제작</a></li>
+      <li><a href="event.html" class="hot"><span class="cat-icon">🎁</span>이벤트</a></li>
+    </ul>
+    <div class="drawer-divider"></div>
+    <div class="drawer-section-title">내 계정</div>
+    <ul class="drawer-nav">
+      <li><a href="login.html"><span class="cat-icon">👤</span>마이페이지</a></li>
+      <li><a href="#"><span class="cat-icon">🛒</span>장바구니</a></li>
+      <li><a href="category-program.html"><span class="cat-icon">💬</span>문의하기</a></li>
+    </ul>
+    <div class="drawer-btns">
+      <button class="nav-btn nav-btn-ghost" onclick="location.href='login.html'">로그인</button>
+      <button class="nav-btn nav-btn-primary" onclick="location.href='register.html'">회원가입</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN PAGE -->
+<div class="login-page">
+  <div class="login-card">
+
+    <!-- 브랜드 -->
+    <div class="login-brand">
+      <div class="logo-mark" style="width:28px;height:28px;"></div>
+      Modu<span>Lab</span>
+    </div>
+    <div class="login-headline">
+      모듈랩에 오신 것을 환영합니다
+      <small>업무 자동화 툴을 지금 바로 시작하세요</small>
+    </div>
+
+    <!-- 이메일/비밀번호 로그인 -->
+    <form class="login-form" onsubmit="handleLogin(event)">
+      <input type="text" class="login-input" placeholder="아이디 또는 이메일" id="loginId" autocomplete="username">
+      <input type="password" class="login-input" placeholder="비밀번호" id="loginPw" autocomplete="current-password">
+      <label class="login-remember">
+        <input type="checkbox" id="rememberMe"> 로그인 상태 유지
+      </label>
+      <button type="submit" class="login-btn-primary">로그인</button>
+    </form>
+
+    <div class="login-links">
+      <a href="register.html">회원가입</a>
+      <span class="login-links-sep">|</span>
+      <a href="#">아이디/비밀번호 찾기</a>
+    </div>
+
+    <!-- 소셜 로그인 -->
+    <div class="login-divider">또는</div>
+
+    <div class="social-btns">
+      <!-- Google -->
+      <button class="social-btn social-btn-google" onclick="loginWithGoogle()">
+        <div class="social-btn-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        </div>
+        <span class="social-btn-label">구글 계정으로 로그인</span>
+      </button>
+
+      <!-- Naver -->
+      <button class="social-btn social-btn-naver" onclick="loginWithNaver()">
+        <div class="social-btn-icon">N</div>
+        <span class="social-btn-label">네이버 계정으로 로그인</span>
+      </button>
+
+      <!-- Kakao -->
+      <button class="social-btn social-btn-kakao" onclick="loginWithKakao()">
+        <div class="social-btn-icon">💬</div>
+        <span class="social-btn-label" style="color:#3A1D1D;">카카오 계정으로 로그인</span>
+      </button>
+    </div>
+
+    <div class="login-signup-cta">
+      아직 회원이 아니신가요? <a href="register.html">회원가입</a>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="logo-wrap"><div class="logo-mark"></div><div class="brand-name">Modu<span>Lab</span></div></div>
+      <p>혼자 일해도 팀처럼 돌아가는<br>업무 시스템을 만듭니다.</p>
+    </div>
+    <div class="footer-col">
+      <h4>카테고리</h4>
+      <ul>
+        <li><a href="category-excel.html">엑셀 프로그램</a></li>
+        <li><a href="category-sheets.html">구글시트 자동화</a></li>
+        <li><a href="category-short.html">숏폼 템플릿</a></li>
+        <li><a href="category-detail.html">상세페이지 제작</a></li>
+        <li><a href="category-web.html">홈페이지 제작</a></li>
+        <li><a href="category-program.html">프로그램 제작</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>빠른 링크</h4>
+      <ul>
+        <li><a href="index.html">홈</a></li>
+        <li><a href="login.html">로그인</a></li>
+        <li><a href="register.html">회원가입</a></li>
+        <li><a href="event.html">할인 상품</a></li>
+        <li><a href="category-program.html">문의하기</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>정책 안내</h4>
+      <ul>
+        <li><a href="#">이용약관</a></li>
+        <li><a href="#">개인정보처리방침</a></li>
+        <li><a href="#">라이선스 정책</a></li>
+        <li><a href="#">환불 정책</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 ModuLab. All rights reserved.</p>
+    <div class="footer-biz">사업자등록번호: 000-00-00000 · 통신판매업: 제0000-서울-0000호</div>
+  </div>
+</footer>
+
+<script>
+/* ── Drawer ── */
+function openDrawer() {
+  const d = document.getElementById('drawerOverlay');
+  d.style.display = 'block';
+  setTimeout(() => d.classList.add('open'), 10);
+  document.body.style.overflow = 'hidden';
+}
+function closeDrawer() {
+  const d = document.getElementById('drawerOverlay');
+  d.classList.remove('open');
+  setTimeout(() => { d.style.display = 'none'; }, 260);
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+
+/* ── Toast ── */
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+/* ── 일반 로그인 ── */
+function handleLogin(e) {
+  e.preventDefault();
+  const id = document.getElementById('loginId').value.trim();
+  const pw = document.getElementById('loginPw').value;
+  if (!id || !pw) { showToast('아이디와 비밀번호를 입력해주세요.'); return; }
+  showToast('로그인 기능은 서버 연동 후 사용 가능합니다.');
+}
+
+/* ── Google 로그인 ──
+   설정: https://console.cloud.google.com
+   1. 새 프로젝트 생성 → OAuth 2.0 클라이언트 ID 발급
+   2. 승인된 JavaScript 원본에 사이트 URL 추가
+   3. 아래 YOUR_GOOGLE_CLIENT_ID 교체
+*/
+const GOOGLE_CLIENT_ID = '374241975724-2vo9j6eqa9i62aeug7cpck8g4e7ojpfs.apps.googleusercontent.com';
+
+function loginWithGoogle() {
+  const redirectUri = encodeURIComponent(window.location.origin + '/login.html');
+  const scope = encodeURIComponent('email profile openid');
+  const state = Math.random().toString(36).substring(2);
+  sessionStorage.setItem('oauth_state', state);
+  window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${decodeURIComponent(redirectUri)}&response_type=token&scope=${scope}&state=${state}`;
+}
+
+/* ── Kakao 로그인 ──
+   설정: https://developers.kakao.com
+   1. 앱 추가 → JavaScript 키 복사
+   2. 플랫폼 → 사이트 도메인 등록
+   3. 카카오 로그인 → 활성화 + Redirect URI 등록
+   4. 아래 YOUR_KAKAO_APP_KEY 교체
+*/
+const KAKAO_APP_KEY = 'YOUR_KAKAO_APP_KEY';
+
+function loginWithKakao() {
+  if (KAKAO_APP_KEY === 'YOUR_KAKAO_APP_KEY') {
+    showToast('Kakao App Key를 설정해주세요. (login.html 주석 참고)');
+    return;
+  }
+  if (!Kakao.isInitialized()) Kakao.init(KAKAO_APP_KEY);
+  Kakao.Auth.authorize({
+    redirectUri: window.location.origin + '/login.html'
+  });
+}
+
+/* ── Naver 로그인 ──
+   설정: https://developers.naver.com
+   1. 애플리케이션 등록 → 네이버 로그인 API 선택
+   2. Client ID / Client Secret 발급
+   3. Callback URL 등록
+   4. 아래 YOUR_NAVER_CLIENT_ID 교체
+*/
+const NAVER_CLIENT_ID = 'YOUR_NAVER_CLIENT_ID';
+
+function loginWithNaver() {
+  if (NAVER_CLIENT_ID === 'YOUR_NAVER_CLIENT_ID') {
+    showToast('Naver Client ID를 설정해주세요. (login.html 주석 참고)');
+    return;
+  }
+  const state = Math.random().toString(36).substring(2);
+  const callbackUrl = encodeURIComponent(window.location.origin + '/login.html');
+  window.location.href = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${NAVER_CLIENT_ID}&redirect_uri=${callbackUrl}&state=${state}`;
+}
+
+/* ── Google OAuth 콜백 처리 ── */
+(function() {
+  const hash = new URLSearchParams(window.location.hash.replace('#', ''));
+  const accessToken = hash.get('access_token');
+  if (accessToken) {
+    fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${accessToken}`)
+      .then(r => r.json())
+      .then(user => {
+        showToast(`구글 로그인 성공: ${user.name}`);
+        history.replaceState(null, '', window.location.pathname);
+        // TODO: 로그인 상태 저장 및 페이지 이동
+      });
+  }
+})();
+</script>
+</body>
+</html>

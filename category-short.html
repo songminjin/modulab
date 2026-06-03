@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>숏폼 템플릿 — 모듈랩</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-left">
+      <div class="hamburger" onclick="openDrawer()">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+    <div class="nav-center">
+      <a href="index.html" class="nav-logo">
+        <div class="logo-mark"></div>
+        Modu<span>Lab</span>
+      </a>
+    </div>
+    <div class="nav-right">
+      <div class="nav-search">
+        <span style="color:var(--text3);font-size:14px;">🔍</span>
+        <input type="text" placeholder="상품 검색...">
+      </div>
+      <button class="nav-btn nav-btn-ghost">로그인</button>
+      <button class="nav-btn nav-btn-primary">회원가입</button>
+      <div class="cart-btn">🛒<div class="cart-badge">0</div></div>
+    </div>
+  </div>
+</nav>
+
+<!-- DRAWER -->
+<div class="drawer-overlay" id="drawerOverlay">
+  <div class="drawer-backdrop" onclick="closeDrawer()"></div>
+  <div class="drawer-panel">
+    <div class="drawer-header">
+      <div class="drawer-logo">
+        <div class="logo-mark" style="width:28px;height:28px;"></div>
+        Modu<span>Lab</span>
+      </div>
+      <button class="drawer-close" onclick="closeDrawer()">✕</button>
+    </div>
+    <div class="drawer-search">
+      <span style="color:var(--text3);">🔍</span>
+      <input type="text" placeholder="상품 검색...">
+    </div>
+    <div class="drawer-section-title">카테고리</div>
+    <ul class="drawer-nav">
+      <li><a href="index.html"><span class="cat-icon">🏠</span>전체 상품</a></li>
+      <li><a href="category-excel.html"><span class="cat-icon">📊</span>엑셀 프로그램</a></li>
+      <li><a href="category-sheets.html"><span class="cat-icon">🔧</span>구글시트 자동화</a></li>
+      <li><a href="category-short.html" class="active-cat"><span class="cat-icon">🎬</span>숏폼 템플릿</a></li>
+      <li><a href="category-detail.html"><span class="cat-icon">🖼️</span>상세페이지 제작</a></li>
+      <li><a href="category-web.html"><span class="cat-icon">🌐</span>홈페이지 제작</a></li>
+      <li><a href="category-program.html"><span class="cat-icon">⚙️</span>프로그램 제작</a></li>
+      <li><a href="event.html" class="hot"><span class="cat-icon">🎁</span>이벤트</a></li>
+    </ul>
+    <div class="drawer-divider"></div>
+    <div class="drawer-section-title">내 계정</div>
+    <ul class="drawer-nav">
+      <li><a href="#"><span class="cat-icon">👤</span>마이페이지</a></li>
+      <li><a href="#"><span class="cat-icon">🛒</span>장바구니</a></li>
+      <li><a href="category-program.html"><span class="cat-icon">💬</span>문의하기</a></li>
+    </ul>
+    <div class="drawer-btns">
+      <button class="nav-btn nav-btn-ghost">로그인</button>
+      <button class="nav-btn nav-btn-primary">회원가입</button>
+    </div>
+  </div>
+</div>
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb">
+  <a href="index.html">홈</a>
+  <span style="color:var(--border);">›</span>
+  <span>숏폼 템플릿</span>
+</div>
+
+<!-- CATEGORY HERO V2 -->
+<section class="cat-hero-v2" style="background:linear-gradient(135deg,#F5F3FF 0%,#EDE9FE 100%);">
+  <div class="cat-hero-v2-inner">
+    <div class="cat-hero-v2-tag" style="background:rgba(109,40,217,.1);border-color:rgba(109,40,217,.2);color:#6D28D9;">🎬 SHORT-FORM · 1 PRODUCT</div>
+    <h1 class="cat-hero-v2-title">숏폼 편집 템플릿</h1>
+    <p class="cat-hero-v2-sub">CapCut / Premiere Pro 호환 숏폼 편집 템플릿.<br>자막·효과·트랜지션을 클릭 한 번으로 적용하세요.</p>
+    <div class="cat-hero-v2-search">
+      <span style="color:var(--text3);font-size:15px;">🔍</span>
+      <input type="text" placeholder="숏폼 템플릿 검색...">
+    </div>
+  </div>
+</section>
+
+<!-- PRODUCTS -->
+<div class="section-wrap">
+  <div style="max-width:360px;">
+    <a href="product.html?id=short-pack&cat=short&name=숏폼+편집+템플릿+Pack&price=0&emoji=🎬" class="mkt-card">
+      <div class="mkt-card-img" style="background:#F5F3FF;">
+        <div style="background:#EDE9FE; width:75%; height:65%; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:52px;">🎬</div>
+        <span class="mkt-badge" style="background:#7C3AED;">가격협의</span>
+      </div>
+      <div class="mkt-card-body">
+        <div class="mkt-card-name">숏폼 편집 템플릿 Pack</div>
+        <div class="mkt-card-desc">CapCut·Premiere Pro 호환. 자막 20종·트랜지션 15종·BGM 싱크 가이드 포함. 9:16 최적화</div>
+        <div class="mkt-card-price inquiry-price">가격 협의 · 카카오 문의</div>
+        <div class="mkt-card-meta">
+          <span>👁 320</span>
+          <span>↓ 12</span>
+          <span class="mkt-card-seller">by 모듈랩</span>
+        </div>
+      </div>
+    </a>
+  </div>
+
+  <!-- FEATURE LIST -->
+  <div style="margin-top:56px;">
+    <div style="font-size:12px;font-family:'JetBrains Mono',monospace;letter-spacing:.1em;color:var(--blue);margin-bottom:10px;text-align:center;">WHAT'S INCLUDED</div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--navy);margin-bottom:28px;text-align:center;">템플릿 구성</div>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;max-width:720px;">
+      <div style="display:flex;align-items:flex-start;gap:14px;padding:20px;border:1px solid var(--border);border-radius:12px;">
+        <span style="font-size:24px;flex-shrink:0;">✍️</span>
+        <div><div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;">자막 템플릿 20종</div><div style="font-size:13px;color:var(--text2);">다양한 스타일의 자막 애니메이션 포함</div></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:14px;padding:20px;border:1px solid var(--border);border-radius:12px;">
+        <span style="font-size:24px;flex-shrink:0;">⚡</span>
+        <div><div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;">트랜지션 효과 15종</div><div style="font-size:13px;color:var(--text2);">유행하는 컷 전환 효과 포함</div></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:14px;padding:20px;border:1px solid var(--border);border-radius:12px;">
+        <span style="font-size:24px;flex-shrink:0;">🎵</span>
+        <div><div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;">BGM 싱크 가이드</div><div style="font-size:13px;color:var(--text2);">비트에 맞춘 편집 타이밍 가이드 포함</div></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:14px;padding:20px;border:1px solid var(--border);border-radius:12px;">
+        <span style="font-size:24px;flex-shrink:0;">📱</span>
+        <div><div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;">9:16 최적화</div><div style="font-size:13px;color:var(--text2);">틱톡·인스타 릴스·유튜브 쇼츠 최적화</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- INQUIRY SECTION -->
+<section class="inquiry-section">
+  <div class="inquiry-inner">
+    <div class="inquiry-title">가격이 궁금하신가요?</div>
+    <p class="inquiry-desc">원하시는 구성과 수량에 따라 가격이 달라집니다.<br>카카오로 문의해주시면 빠르게 안내드립니다.</p>
+    <div class="inquiry-btns">
+      <button class="inquiry-btn-kakao">💬 카카오로 문의하기</button>
+      <a href="index.html" class="inquiry-btn-ghost">다른 상품 보기</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="logo-wrap"><div class="logo-mark"></div><div class="brand-name">Modu<span>Lab</span></div></div>
+      <p>혼자 일해도 팀처럼 돌아가는<br>업무 시스템을 만듭니다.</p>
+    </div>
+    <div class="footer-col">
+      <h4>카테고리</h4>
+      <ul>
+        <li><a href="category-excel.html">엑셀 프로그램</a></li>
+        <li><a href="category-sheets.html">구글시트 자동화</a></li>
+        <li><a href="category-short.html">숏폼 템플릿</a></li>
+        <li><a href="category-detail.html">상세페이지 제작</a></li>
+        <li><a href="category-web.html">홈페이지 제작</a></li>
+        <li><a href="category-program.html">프로그램 제작</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>빠른 링크</h4>
+      <ul>
+        <li><a href="index.html">홈</a></li>
+        <li><a href="#">판매자 소개</a></li>
+        <li><a href="event.html">할인 상품</a></li>
+        <li><a href="category-program.html">문의하기</a></li>
+        <li><a href="#">마이페이지</a></li>
+        <li><a href="#">장바구니</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>정책 안내</h4>
+      <ul>
+        <li><a href="#">이용약관</a></li>
+        <li><a href="#">개인정보처리방침</a></li>
+        <li><a href="#">라이선스 정책</a></li>
+        <li><a href="#">환불 정책</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 ModuLab. All rights reserved.</p>
+    <div class="footer-biz">사업자등록번호: 000-00-00000 · 통신판매업: 제0000-서울-0000호</div>
+  </div>
+</footer>
+
+<script>
+function openDrawer() {
+  const d = document.getElementById('drawerOverlay');
+  d.style.display = 'block';
+  setTimeout(() => d.classList.add('open'), 10);
+  document.body.style.overflow = 'hidden';
+}
+function closeDrawer() {
+  const d = document.getElementById('drawerOverlay');
+  d.classList.remove('open');
+  setTimeout(() => { d.style.display = 'none'; }, 260);
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+</script>
+</body>
+</html>

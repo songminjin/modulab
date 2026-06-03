@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>상세페이지 제작 — 모듈랩</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-left">
+      <div class="hamburger" onclick="openDrawer()">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+    <div class="nav-center">
+      <a href="index.html" class="nav-logo">
+        <div class="logo-mark"></div>
+        Modu<span>Lab</span>
+      </a>
+    </div>
+    <div class="nav-right">
+      <div class="nav-search">
+        <span style="color:var(--text3);font-size:14px;">🔍</span>
+        <input type="text" placeholder="상품 검색...">
+      </div>
+      <button class="nav-btn nav-btn-ghost">로그인</button>
+      <button class="nav-btn nav-btn-primary">회원가입</button>
+      <div class="cart-btn">🛒<div class="cart-badge">0</div></div>
+    </div>
+  </div>
+</nav>
+
+<!-- DRAWER -->
+<div class="drawer-overlay" id="drawerOverlay">
+  <div class="drawer-backdrop" onclick="closeDrawer()"></div>
+  <div class="drawer-panel">
+    <div class="drawer-header">
+      <div class="drawer-logo">
+        <div class="logo-mark" style="width:28px;height:28px;"></div>
+        Modu<span>Lab</span>
+      </div>
+      <button class="drawer-close" onclick="closeDrawer()">✕</button>
+    </div>
+    <div class="drawer-search">
+      <span style="color:var(--text3);">🔍</span>
+      <input type="text" placeholder="상품 검색...">
+    </div>
+    <div class="drawer-section-title">카테고리</div>
+    <ul class="drawer-nav">
+      <li><a href="index.html"><span class="cat-icon">🏠</span>전체 상품</a></li>
+      <li><a href="category-excel.html"><span class="cat-icon">📊</span>엑셀 프로그램</a></li>
+      <li><a href="category-sheets.html"><span class="cat-icon">🔧</span>구글시트 자동화</a></li>
+      <li><a href="category-short.html"><span class="cat-icon">🎬</span>숏폼 템플릿</a></li>
+      <li><a href="category-detail.html" class="active-cat"><span class="cat-icon">🖼️</span>상세페이지 제작</a></li>
+      <li><a href="category-web.html"><span class="cat-icon">🌐</span>홈페이지 제작</a></li>
+      <li><a href="category-program.html"><span class="cat-icon">⚙️</span>프로그램 제작</a></li>
+      <li><a href="event.html" class="hot"><span class="cat-icon">🎁</span>이벤트</a></li>
+    </ul>
+    <div class="drawer-divider"></div>
+    <div class="drawer-section-title">내 계정</div>
+    <ul class="drawer-nav">
+      <li><a href="#"><span class="cat-icon">👤</span>마이페이지</a></li>
+      <li><a href="#"><span class="cat-icon">🛒</span>장바구니</a></li>
+      <li><a href="category-program.html"><span class="cat-icon">💬</span>문의하기</a></li>
+    </ul>
+    <div class="drawer-btns">
+      <button class="nav-btn nav-btn-ghost">로그인</button>
+      <button class="nav-btn nav-btn-primary">회원가입</button>
+    </div>
+  </div>
+</div>
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb">
+  <a href="index.html">홈</a>
+  <span style="color:var(--border);">›</span>
+  <span>상세페이지 제작</span>
+</div>
+
+<!-- SERVICE HERO -->
+<section class="service-hero">
+  <div class="service-hero-inner">
+    <div class="service-hero-tag">🖼️ DETAIL PAGE · 맞춤 제작</div>
+    <h1 class="service-hero-title">상세페이지 제작</h1>
+    <p class="service-hero-desc">스마트스토어·쿠팡·자사몰에 최적화된 고퀄리티 상세페이지.<br>구매 전환율을 높이는 카피라이팅 + 디자인 일괄 제공.</p>
+    <button class="service-hero-btn" onclick="document.getElementById('inquirySection').scrollIntoView({behavior:'smooth'})">카카오로 문의하기 →</button>
+  </div>
+</section>
+
+<!-- SERVICE CARDS -->
+<section class="service-section">
+  <div style="font-size:12px;font-family:'JetBrains Mono',monospace;letter-spacing:.1em;color:var(--blue);margin-bottom:10px;">WHAT WE OFFER</div>
+  <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--navy);margin-bottom:4px;">제공 서비스</div>
+  <p style="font-size:14px;color:var(--text2);margin-bottom:0;">상세페이지 제작에 필요한 모든 것을 담당합니다.</p>
+  <div class="service-cards">
+    <div class="service-card">
+      <div class="service-card-icon">✍️</div>
+      <div class="service-card-title">카피라이팅</div>
+      <div class="service-card-desc">상품의 핵심 가치를 전달하는 설득력 있는 문구. 구매 전환에 최적화된 카피 작성.</div>
+    </div>
+    <div class="service-card">
+      <div class="service-card-icon">🎨</div>
+      <div class="service-card-title">디자인 제작</div>
+      <div class="service-card-desc">브랜드 톤앤매너에 맞는 감각적인 상세페이지 디자인. Figma·Photoshop 작업.</div>
+    </div>
+    <div class="service-card">
+      <div class="service-card-icon">📱</div>
+      <div class="service-card-title">모바일 최적화</div>
+      <div class="service-card-desc">모바일 구매 비율을 고려한 세로형 레이아웃. 스마트스토어·쿠팡 규격 준수.</div>
+    </div>
+  </div>
+</section>
+
+<!-- PROCESS -->
+<section class="service-section" style="background:var(--slate-light); max-width:100%; padding:60px 40px;">
+  <div style="max-width:1280px; margin:0 auto;">
+    <div style="font-size:12px;font-family:'JetBrains Mono',monospace;letter-spacing:.1em;color:var(--blue);margin-bottom:10px;">HOW IT WORKS</div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--navy);margin-bottom:32px;">제작 프로세스</div>
+    <div class="process-steps">
+      <div class="process-step">
+        <div class="step-num">01</div>
+        <div class="step-content">
+          <div class="step-title">카카오 상담 접수</div>
+          <div class="step-desc">상품 정보, 타겟 고객, 레퍼런스를 공유해주세요. 24시간 내 답변드립니다.</div>
+          <span class="step-badge">카카오채널</span>
+        </div>
+      </div>
+      <div class="process-step">
+        <div class="step-num">02</div>
+        <div class="step-content">
+          <div class="step-title">견적 확정 & 계약금 입금</div>
+          <div class="step-desc">상세 견적을 안내드리고, 계약금(50%) 입금 후 작업을 시작합니다.</div>
+          <span class="step-badge">100만원 미만 선불</span>
+        </div>
+      </div>
+      <div class="process-step">
+        <div class="step-num">03</div>
+        <div class="step-content">
+          <div class="step-title">초안 검토 & 수정</div>
+          <div class="step-desc">1차 초안을 공유드리고 수정 의견을 반영합니다. 수정은 최대 3회 제공됩니다.</div>
+          <span class="step-badge">수정 3회 포함</span>
+        </div>
+      </div>
+      <div class="process-step">
+        <div class="step-num">04</div>
+        <div class="step-content">
+          <div class="step-title">최종 납품</div>
+          <div class="step-desc">잔금 입금 후 최종 파일(JPG, PNG, PSD)을 이메일로 발송합니다.</div>
+          <span class="step-badge">납기 1~2주</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="service-section">
+  <div style="font-size:12px;font-family:'JetBrains Mono',monospace;letter-spacing:.1em;color:var(--blue);margin-bottom:10px;">PRICING</div>
+  <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--navy);margin-bottom:4px;">요금 안내</div>
+  <p style="font-size:14px;color:var(--text2);margin-bottom:0;">상품 수량과 복잡도에 따라 가격이 달라질 수 있습니다.</p>
+  <div class="pricing-cards">
+    <div class="pricing-card">
+      <div class="pricing-name">BASIC</div>
+      <div class="pricing-price">협의</div>
+      <div class="pricing-price-sub">단품 상품 기준</div>
+      <ul class="pricing-features">
+        <li>카피라이팅 포함</li>
+        <li>디자인 제작</li>
+        <li>모바일 최적화</li>
+        <li>수정 3회 제공</li>
+        <li>납기 1~2주</li>
+      </ul>
+      <button class="pricing-card-btn" onclick="document.getElementById('inquirySection').scrollIntoView({behavior:'smooth'})">문의하기</button>
+    </div>
+    <div class="pricing-card featured">
+      <div class="pricing-featured-badge">RECOMMENDED</div>
+      <div class="pricing-name">BUNDLE</div>
+      <div class="pricing-price">협의</div>
+      <div class="pricing-price-sub">2개 이상 패키지 할인</div>
+      <ul class="pricing-features">
+        <li>카피라이팅 포함</li>
+        <li>디자인 제작</li>
+        <li>모바일 최적화</li>
+        <li>수정 3회 제공</li>
+        <li>패키지 할인 적용</li>
+      </ul>
+      <button class="pricing-card-btn" onclick="document.getElementById('inquirySection').scrollIntoView({behavior:'smooth'})">문의하기</button>
+    </div>
+    <div class="pricing-card">
+      <div class="pricing-name">PREMIUM</div>
+      <div class="pricing-price">협의</div>
+      <div class="pricing-price-sub">브랜드 키트 포함</div>
+      <ul class="pricing-features">
+        <li>카피라이팅 포함</li>
+        <li>브랜드 키트 제작</li>
+        <li>모바일 최적화</li>
+        <li>수정 무제한</li>
+        <li>소스 파일 제공</li>
+      </ul>
+      <button class="pricing-card-btn" onclick="document.getElementById('inquirySection').scrollIntoView({behavior:'smooth'})">문의하기</button>
+    </div>
+  </div>
+</section>
+
+<!-- INQUIRY -->
+<section class="inquiry-section" id="inquirySection">
+  <div class="inquiry-inner">
+    <div class="inquiry-title">지금 바로 문의하세요</div>
+    <p class="inquiry-desc">카카오채널로 문의하시면 24시간 내 답변드립니다.<br>레퍼런스 이미지를 함께 보내주시면 더 빠른 견적이 가능합니다.</p>
+    <div class="inquiry-btns">
+      <button class="inquiry-btn-kakao">💬 카카오로 문의하기</button>
+      <a href="index.html" class="inquiry-btn-ghost">다른 서비스 보기</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="logo-wrap"><div class="logo-mark"></div><div class="brand-name">Modu<span>Lab</span></div></div>
+      <p>혼자 일해도 팀처럼 돌아가는<br>업무 시스템을 만듭니다.</p>
+    </div>
+    <div class="footer-col">
+      <h4>카테고리</h4>
+      <ul>
+        <li><a href="category-excel.html">엑셀 프로그램</a></li>
+        <li><a href="category-sheets.html">구글시트 자동화</a></li>
+        <li><a href="category-short.html">숏폼 템플릿</a></li>
+        <li><a href="category-detail.html">상세페이지 제작</a></li>
+        <li><a href="category-web.html">홈페이지 제작</a></li>
+        <li><a href="category-program.html">프로그램 제작</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>빠른 링크</h4>
+      <ul>
+        <li><a href="index.html">홈</a></li>
+        <li><a href="#">판매자 소개</a></li>
+        <li><a href="event.html">할인 상품</a></li>
+        <li><a href="category-program.html">문의하기</a></li>
+        <li><a href="#">마이페이지</a></li>
+        <li><a href="#">장바구니</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>정책 안내</h4>
+      <ul>
+        <li><a href="#">이용약관</a></li>
+        <li><a href="#">개인정보처리방침</a></li>
+        <li><a href="#">라이선스 정책</a></li>
+        <li><a href="#">환불 정책</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 ModuLab. All rights reserved.</p>
+    <div class="footer-biz">사업자등록번호: 000-00-00000 · 통신판매업: 제0000-서울-0000호</div>
+  </div>
+</footer>
+
+<script>
+function openDrawer() {
+  const d = document.getElementById('drawerOverlay');
+  d.style.display = 'block';
+  setTimeout(() => d.classList.add('open'), 10);
+  document.body.style.overflow = 'hidden';
+}
+function closeDrawer() {
+  const d = document.getElementById('drawerOverlay');
+  d.classList.remove('open');
+  setTimeout(() => { d.style.display = 'none'; }, 260);
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+</script>
+</body>
+</html>
