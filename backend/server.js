@@ -41,6 +41,7 @@ app.use('/api/users', require('./routes/users'));
 app.use('/api/cart', require('./routes/cart'));
 app.use('/api/orders', require('./routes/orders'));
 app.use('/api/products', require('./routes/products'));
+app.use('/api/admin', require('./routes/admin'));
 
 // ── 헬스체크 ──
 app.get('/health', (req, res) => res.json({ status: 'ok', env: process.env.NODE_ENV }));

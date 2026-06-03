@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>관리자 로그인 — ModuLab SCM</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --blue: #2563EB; --navy: #0F172A; --border: #E2E8F0;
+  --text: #0F172A; --text2: #475569; --text3: #94A3B8;
+  --red: #DC2626; --red-light: #FEF2F2;
+  --slate-light: #F1F5F9; --white: #FFFFFF;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: var(--navy); min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.login-card {
+  width: 100%; max-width: 420px;
+  background: var(--white); border-radius: 16px;
+  padding: 40px 36px; box-shadow: 0 24px 60px rgba(0,0,0,.35);
+}
+.login-logo {
+  display: flex; align-items: center; gap: 10px;
+  justify-content: center; margin-bottom: 8px;
+}
+.logo-mark {
+  width: 36px; height: 36px; background: var(--blue); border-radius: 8px;
+  position: relative; overflow: hidden;
+}
+.logo-mark::before {
+  content: ''; position: absolute; top: 4px; left: 4px;
+  width: 14px; height: 14px; background: rgba(255,255,255,.3); border-radius: 2px;
+}
+.logo-mark::after {
+  content: ''; position: absolute; bottom: 4px; right: 4px;
+  width: 14px; height: 14px; background: #16A34A; border-radius: 2px;
+}
+.login-brand {
+  font-family: 'Bebas Neue', sans-serif; font-size: 26px;
+  letter-spacing: .04em; color: var(--navy);
+}
+.login-brand span { color: var(--blue); }
+.login-badge {
+  text-align: center; margin-bottom: 32px;
+}
+.admin-badge {
+  display: inline-block; font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; font-weight: 700; letter-spacing: .12em;
+  color: var(--text3); background: var(--slate-light);
+  border: 1px solid var(--border); padding: 3px 10px; border-radius: 4px;
+  margin-top: 4px;
+}
+.login-title { font-size: 18px; font-weight: 700; color: var(--text); text-align: center; margin-bottom: 4px; }
+.login-sub { font-size: 13px; color: var(--text3); text-align: center; margin-bottom: 28px; }
+.field { margin-bottom: 16px; }
+.field-label { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; display: block; }
+.field-input {
+  width: 100%; padding: 11px 14px;
+  border: 1px solid var(--border); border-radius: 8px;
+  font-size: 14px; font-family: inherit; color: var(--text);
+  background: var(--white); outline: none; transition: border-color .15s, box-shadow .15s;
+}
+.field-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
+.login-btn {
+  width: 100%; padding: 13px; background: var(--blue); color: white;
+  border: none; border-radius: 10px; font-size: 15px; font-weight: 700;
+  cursor: pointer; font-family: inherit; transition: all .15s; margin-top: 8px;
+}
+.login-btn:hover { background: #1D4ED8; }
+.login-error {
+  display: none; padding: 10px 14px; border-radius: 8px;
+  background: var(--red-light); color: var(--red);
+  font-size: 13px; border: 1px solid #FCA5A5; margin-bottom: 12px; text-align: center;
+}
+.login-footer {
+  text-align: center; margin-top: 24px; font-size: 12px; color: var(--text3);
+}
+.login-footer a { color: var(--blue); }
+</style>
+</head>
+<body>
+<div class="login-card">
+  <div class="login-logo">
+    <div class="logo-mark"></div>
+    <div class="login-brand">Modu<span>Lab</span></div>
+  </div>
+  <div class="login-badge"><span class="admin-badge">SCM ADMIN</span></div>
+  <div class="login-title">관리자 로그인</div>
+  <div class="login-sub">ModuLab SCM 관리자 전용 페이지입니다</div>
+
+  <div class="login-error" id="loginError">비밀번호가 올바르지 않습니다.</div>
+
+  <div class="field">
+    <label class="field-label" for="adminPw">비밀번호</label>
+    <input type="password" class="field-input" id="adminPw" placeholder="관리자 비밀번호를 입력하세요" onkeydown="if(event.key==='Enter')doLogin()">
+  </div>
+  <button class="login-btn" onclick="doLogin()">로그인</button>
+
+  <div class="login-footer">
+    <a href="../index.html">← 쇼핑몰로 돌아가기</a>
+  </div>
+</div>
+
+<script>
+(function() {
+  if (sessionStorage.getItem('modulab_admin')) location.href = 'dashboard.html';
+})();
+
+function doLogin() {
+  const pw = document.getElementById('adminPw').value;
+  const ADMIN_PW = localStorage.getItem('modulab_admin_pw') || 'admin1234';
+  if (pw === ADMIN_PW) {
+    sessionStorage.setItem('modulab_admin', 'true');
+    location.href = 'dashboard.html';
+  } else {
+    document.getElementById('loginError').style.display = 'block';
+    document.getElementById('adminPw').value = '';
+    document.getElementById('adminPw').focus();
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>상품 등록 — ModuLab 관리자</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --blue: #2563EB;
+  --blue-dark: #1D4ED8;
+  --blue-light: #EFF6FF;
+  --blue-mid: #BFDBFE;
+  --navy: #0F172A;
+  --navy2: #1E293B;
+  --navy3: #334155;
+  --green: #16A34A;
+  --green-light: #F0FDF4;
+  --red: #DC2626;
+  --red-light: #FEF2F2;
+  --yellow: #F59E0B;
+  --yellow-light: #FFFBEB;
+  --slate: #64748B;
+  --slate-light: #F1F5F9;
+  --border: #E2E8F0;
+  --white: #FFFFFF;
+  --text: #0F172A;
+  --text2: #475569;
+  --text3: #94A3B8;
+  --sidebar-w: 220px;
+  --header-h: 64px;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { font-family: 'Noto Sans KR', sans-serif; color: var(--text); background: #F8FAFC; line-height: 1.6; }
+a { text-decoration: none; color: inherit; }
+
+/* ── MOBILE GUARD ── */
+.mobile-guard {
+  display: none;
+  position: fixed; inset: 0; z-index: 9999;
+  background: var(--navy);
+  flex-direction: column; align-items: center; justify-content: center;
+  gap: 16px; text-align: center; padding: 32px;
+}
+.mobile-guard-icon { font-size: 48px; }
+.mobile-guard-title { font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: white; letter-spacing: .02em; }
+.mobile-guard-desc { font-size: 14px; color: #94A3B8; line-height: 1.7; }
+@media (max-width: 768px) {
+  .mobile-guard { display: flex; }
+}
+
+/* ── LAYOUT ── */
+.admin-layout { display: flex; min-height: 100vh; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: var(--sidebar-w); flex-shrink: 0;
+  background: var(--navy);
+  display: flex; flex-direction: column;
+  position: fixed; top: 0; left: 0; height: 100vh;
+  overflow-y: auto; z-index: 100;
+}
+.sidebar-logo {
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  display: flex; align-items: center; gap: 10px;
+}
+.logo-mark {
+  width: 32px; height: 32px; background: var(--blue); border-radius: 7px;
+  position: relative; overflow: hidden; flex-shrink: 0;
+}
+.logo-mark::before {
+  content: ''; position: absolute; top: 4px; left: 4px;
+  width: 13px; height: 13px; background: rgba(255,255,255,.3); border-radius: 2px;
+}
+.logo-mark::after {
+  content: ''; position: absolute; bottom: 4px; right: 4px;
+  width: 13px; height: 13px; background: #16A34A; border-radius: 2px;
+}
+.sidebar-logo-text {
+  font-family: 'Bebas Neue', sans-serif; font-size: 20px;
+  letter-spacing: .04em; color: white;
+}
+.sidebar-logo-text span { color: var(--blue); }
+.sidebar-admin-badge {
+  font-size: 9px; font-weight: 700; letter-spacing: .08em;
+  color: #64748B; padding: 2px 6px; border: 1px solid #334155;
+  border-radius: 3px; display: block; margin-top: 2px;
+}
+
+.sidebar-section { padding: 20px 12px 8px; }
+.sidebar-section-label {
+  font-size: 10px; font-weight: 700; letter-spacing: .1em;
+  color: #475569; text-transform: uppercase; padding: 0 8px; margin-bottom: 6px;
+}
+.sidebar-nav { list-style: none; }
+.sidebar-nav li a {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 10px; border-radius: 8px;
+  font-size: 13px; font-weight: 500; color: #94A3B8;
+  transition: all .15s; cursor: pointer;
+}
+.sidebar-nav li a:hover { background: rgba(255,255,255,.06); color: white; }
+.sidebar-nav li a.active { background: rgba(37,99,235,.2); color: #93C5FD; }
+.sidebar-nav li a.active .nav-icon { color: var(--blue); }
+.nav-icon { font-size: 15px; width: 18px; text-align: center; flex-shrink: 0; }
+.sidebar-sub { margin-left: 28px; margin-top: 2px; }
+.sidebar-sub li a {
+  font-size: 12px; padding: 6px 10px; color: #64748B; border-radius: 6px;
+}
+.sidebar-sub li a:hover { color: #94A3B8; background: rgba(255,255,255,.04); }
+.sidebar-sub li a.active { color: #93C5FD; background: rgba(37,99,235,.15); }
+
+.sidebar-bottom {
+  margin-top: auto; padding: 16px 12px;
+  border-top: 1px solid rgba(255,255,255,.06);
+}
+.sidebar-bottom a {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 10px; border-radius: 8px;
+  font-size: 13px; color: #64748B; transition: all .15s;
+}
+.sidebar-bottom a:hover { background: rgba(255,255,255,.06); color: #94A3B8; }
+
+/* ── MAIN ── */
+.main-wrap {
+  margin-left: var(--sidebar-w);
+  flex: 1; display: flex; flex-direction: column; min-height: 100vh;
+}
+
+/* ── HEADER ── */
+.admin-header {
+  position: sticky; top: 0; z-index: 50;
+  height: var(--header-h);
+  background: var(--white); border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 32px; gap: 16px;
+}
+.header-breadcrumb {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; color: var(--text3);
+}
+.header-breadcrumb a { color: var(--text3); transition: color .15s; }
+.header-breadcrumb a:hover { color: var(--blue); }
+.header-breadcrumb .sep { color: var(--border); }
+.header-breadcrumb .current { color: var(--text); font-weight: 600; }
+.header-right { display: flex; align-items: center; gap: 10px; }
+.header-noti-btn {
+  width: 36px; height: 36px; border-radius: 8px;
+  border: 1px solid var(--border); background: none;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; cursor: pointer; position: relative; transition: background .15s;
+}
+.header-noti-btn:hover { background: var(--slate-light); }
+.noti-dot {
+  position: absolute; top: 6px; right: 6px;
+  width: 7px; height: 7px; background: var(--red); border-radius: 50%;
+  border: 1.5px solid white;
+}
+.header-logout-btn {
+  padding: 7px 16px; border-radius: 8px;
+  border: 1px solid var(--border); background: none;
+  font-size: 13px; font-weight: 500; color: var(--text2);
+  cursor: pointer; font-family: inherit; transition: all .15s;
+}
+.header-logout-btn:hover { background: var(--red-light); border-color: #FCA5A5; color: var(--red); }
+.header-user {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 12px; border-radius: 8px;
+  background: var(--slate-light); border: 1px solid var(--border);
+}
+.header-user-avatar {
+  width: 28px; height: 28px; background: var(--blue);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 12px; color: white; font-weight: 700; flex-shrink: 0;
+}
+.header-user-name { font-size: 13px; font-weight: 500; color: var(--text2); }
+
+/* ── PAGE CONTENT ── */
+.page-content { padding: 32px; flex: 1; max-width: 1100px; width: 100%; }
+
+.page-title-row {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 28px; gap: 16px;
+}
+.page-title {
+  font-size: 22px; font-weight: 700; color: var(--text);
+}
+.page-title-sub { font-size: 13px; color: var(--text3); margin-top: 2px; }
+.title-btns { display: flex; gap: 8px; }
+
+/* ── FORM LAYOUT ── */
+.form-grid { display: grid; grid-template-columns: 1fr 340px; gap: 24px; align-items: start; }
+
+/* ── CARD ── */
+.card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 12px; padding: 24px; margin-bottom: 20px;
+}
+.card-title {
+  font-size: 14px; font-weight: 700; color: var(--text);
+  margin-bottom: 20px; padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+}
+.card-title-icon {
+  width: 28px; height: 28px; background: var(--blue-light);
+  border: 1px solid var(--blue-mid); border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; flex-shrink: 0;
+}
+
+/* ── FORM FIELDS ── */
+.field { margin-bottom: 18px; }
+.field:last-child { margin-bottom: 0; }
+.field-label {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; font-weight: 600; color: var(--text);
+  margin-bottom: 7px;
+}
+.field-label .required {
+  color: var(--red); font-size: 12px;
+}
+.field-hint {
+  font-size: 11px; color: var(--text3); margin-top: 5px; line-height: 1.5;
+}
+.field-input, .field-select, .field-textarea {
+  width: 100%; padding: 10px 14px;
+  border: 1px solid var(--border); border-radius: 8px;
+  font-size: 14px; font-family: inherit; color: var(--text);
+  background: var(--white); outline: none; transition: border-color .15s, box-shadow .15s;
+}
+.field-input:focus, .field-select:focus, .field-textarea:focus {
+  border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+}
+.field-input::placeholder, .field-textarea::placeholder { color: var(--text3); }
+.field-select { cursor: pointer; }
+.field-textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
+
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.field-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+.input-with-unit { position: relative; display: flex; align-items: center; }
+.input-with-unit .field-input { padding-right: 40px; }
+.input-unit {
+  position: absolute; right: 12px;
+  font-size: 13px; font-weight: 500; color: var(--text3);
+  pointer-events: none;
+}
+.input-prefix-wrap { position: relative; display: flex; align-items: center; }
+.input-prefix {
+  position: absolute; left: 12px;
+  font-size: 13px; font-weight: 500; color: var(--text3);
+  pointer-events: none;
+}
+.input-prefix-wrap .field-input { padding-left: 28px; }
+
+/* ── TOGGLE ── */
+.toggle-group { display: flex; gap: 8px; }
+.toggle-option {
+  flex: 1; padding: 9px 14px; border-radius: 8px;
+  border: 1.5px solid var(--border); background: var(--slate-light);
+  font-size: 13px; font-weight: 500; color: var(--text2);
+  cursor: pointer; text-align: center; transition: all .15s;
+  user-select: none;
+}
+.toggle-option:hover { border-color: var(--blue-mid); color: var(--blue); }
+.toggle-option.selected {
+  border-color: var(--blue); background: var(--blue-light);
+  color: var(--blue); font-weight: 700;
+}
+.toggle-option.selected-green {
+  border-color: var(--green); background: var(--green-light);
+  color: var(--green); font-weight: 700;
+}
+
+/* ── SWITCH ── */
+.switch-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 0; border-bottom: 1px solid var(--border);
+}
+.switch-row:last-child { border-bottom: none; padding-bottom: 0; }
+.switch-info { flex: 1; }
+.switch-label { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+.switch-desc { font-size: 12px; color: var(--text3); }
+.switch {
+  position: relative; width: 44px; height: 24px; flex-shrink: 0; margin-left: 16px;
+}
+.switch input { display: none; }
+.switch-track {
+  position: absolute; inset: 0; background: var(--border);
+  border-radius: 12px; cursor: pointer; transition: background .2s;
+}
+.switch-track::after {
+  content: ''; position: absolute;
+  top: 3px; left: 3px; width: 18px; height: 18px;
+  background: white; border-radius: 50%;
+  transition: transform .2s; box-shadow: 0 1px 3px rgba(0,0,0,.2);
+}
+.switch input:checked + .switch-track { background: var(--blue); }
+.switch input:checked + .switch-track::after { transform: translateX(20px); }
+.switch input:checked ~ .switch-track { background: var(--blue); }
+
+/* ── IMAGE UPLOAD ── */
+.upload-zone {
+  border: 2px dashed var(--border); border-radius: 10px;
+  background: var(--slate-light); padding: 28px 20px;
+  text-align: center; cursor: pointer; transition: all .2s;
+  position: relative; overflow: hidden;
+}
+.upload-zone:hover { border-color: var(--blue); background: var(--blue-light); }
+.upload-zone.dragging { border-color: var(--blue); background: var(--blue-light); }
+.upload-icon { font-size: 28px; margin-bottom: 8px; }
+.upload-title { font-size: 13px; font-weight: 600; color: var(--text2); margin-bottom: 4px; }
+.upload-sub { font-size: 11px; color: var(--text3); }
+.upload-zone input[type="file"] {
+  position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%;
+}
+.upload-preview {
+  display: none; position: relative;
+  border-radius: 8px; overflow: hidden; background: var(--slate-light);
+  aspect-ratio: 16/9;
+}
+.upload-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.upload-preview-remove {
+  position: absolute; top: 8px; right: 8px;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: rgba(0,0,0,.6); color: white;
+  border: none; font-size: 14px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.emoji-picker-row {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px;
+}
+.emoji-chip {
+  width: 44px; height: 44px; border-radius: 8px;
+  border: 1.5px solid var(--border); background: var(--slate-light);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; cursor: pointer; transition: all .15s;
+}
+.emoji-chip:hover { border-color: var(--blue-mid); background: var(--blue-light); }
+.emoji-chip.selected { border-color: var(--blue); background: var(--blue-light); }
+.thumb-preview {
+  width: 100%; aspect-ratio: 16/10; border-radius: 8px;
+  border: 1px solid var(--border); overflow: hidden; margin-top: 12px;
+  display: flex; align-items: center; justify-content: center;
+  background: #EFF6FF; font-size: 48px;
+  transition: background .2s;
+}
+
+/* ── FILE ATTACH ── */
+.file-drop {
+  border: 2px dashed var(--border); border-radius: 10px;
+  background: var(--slate-light); padding: 24px 20px;
+  text-align: center; cursor: pointer; transition: all .2s; position: relative;
+}
+.file-drop:hover { border-color: var(--blue); background: var(--blue-light); }
+.file-drop input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.file-attached {
+  display: none; padding: 12px 14px;
+  border: 1px solid var(--green); background: var(--green-light);
+  border-radius: 8px; margin-top: 10px;
+}
+.file-attached-inner { display: flex; align-items: center; gap: 10px; }
+.file-attached-icon { font-size: 20px; flex-shrink: 0; }
+.file-attached-name { font-size: 13px; font-weight: 600; color: var(--text); }
+.file-attached-size { font-size: 11px; color: var(--text3); font-family: 'JetBrains Mono', monospace; }
+.file-remove-btn {
+  margin-left: auto; background: none; border: none;
+  color: var(--text3); font-size: 16px; cursor: pointer; padding: 0 4px;
+}
+.file-remove-btn:hover { color: var(--red); }
+
+/* ── PRICE DISPLAY ── */
+.price-summary {
+  background: var(--slate-light); border-radius: 8px; padding: 14px 16px; margin-top: 12px;
+}
+.price-summary-row {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 13px; padding: 4px 0;
+}
+.price-summary-row.total { padding-top: 10px; margin-top: 8px; border-top: 1px solid var(--border); }
+.price-summary-label { color: var(--text2); }
+.price-summary-val {
+  font-family: 'JetBrains Mono', monospace; font-weight: 500; color: var(--text);
+}
+.price-summary-val.discount { color: var(--red); }
+.price-summary-val.final { font-size: 15px; font-weight: 700; color: var(--blue); }
+
+/* ── STATUS BADGE ── */
+.status-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 700; letter-spacing: .04em;
+}
+.status-badge.on { background: var(--green-light); color: var(--green); }
+.status-badge.off { background: var(--slate-light); color: var(--text3); }
+
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 10px 20px; border-radius: 8px;
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  font-family: inherit; border: none; transition: all .15s;
+  white-space: nowrap;
+}
+.btn-primary { background: var(--blue); color: white; }
+.btn-primary:hover { background: var(--blue-dark); }
+.btn-outline { background: var(--white); color: var(--text2); border: 1px solid var(--border); }
+.btn-outline:hover { background: var(--slate-light); }
+.btn-ghost { background: none; color: var(--text3); }
+.btn-ghost:hover { color: var(--text2); background: var(--slate-light); }
+.btn-sm { padding: 7px 14px; font-size: 13px; }
+.btn-lg { padding: 13px 28px; font-size: 15px; }
+.btn-danger { background: var(--red-light); color: var(--red); border: 1px solid #FCA5A5; }
+.btn-danger:hover { background: var(--red); color: white; }
+.btn-success { background: var(--green); color: white; }
+.btn-success:hover { background: #15803D; }
+
+/* ── COUPON / DISCOUNT SECTION ── */
+.coupon-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border: 1px solid var(--border);
+  border-radius: 8px; background: var(--slate-light); margin-bottom: 8px;
+}
+.coupon-item:last-child { margin-bottom: 0; }
+.coupon-check input[type="checkbox"] { accent-color: var(--blue); width: 16px; height: 16px; cursor: pointer; }
+.coupon-name { flex: 1; font-size: 13px; font-weight: 500; color: var(--text); }
+.coupon-rate {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; font-weight: 700; color: var(--red);
+}
+
+/* ── SEO / META ── */
+.char-count {
+  display: flex; justify-content: flex-end;
+  font-size: 11px; color: var(--text3); margin-top: 4px;
+  font-family: 'JetBrains Mono', monospace;
+}
+.char-count.warn { color: var(--yellow); }
+.char-count.over { color: var(--red); }
+
+/* ── STICKY SIDEBAR CARD ── */
+.sticky-card { position: sticky; top: calc(var(--header-h) + 24px); }
+
+/* ── DIVIDER ── */
+.divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+/* ── ALERT ── */
+.alert {
+  padding: 12px 16px; border-radius: 8px;
+  font-size: 13px; display: flex; align-items: flex-start; gap: 10px;
+  margin-bottom: 16px;
+}
+.alert-info { background: var(--blue-light); color: var(--blue-dark); border: 1px solid var(--blue-mid); }
+.alert-icon { flex-shrink: 0; font-size: 15px; }
+
+/* ── TOAST ── */
+#toast {
+  position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(80px);
+  background: var(--navy); color: white;
+  padding: 13px 24px; border-radius: 10px;
+  font-size: 14px; font-weight: 500;
+  display: flex; align-items: center; gap: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.25);
+  transition: transform .3s ease, opacity .3s ease; opacity: 0;
+  z-index: 9000; white-space: nowrap;
+}
+#toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+#toast.success .toast-icon::before { content: '✓'; color: #4ADE80; }
+#toast.error .toast-icon::before { content: '✕'; color: #F87171; }
+
+/* ── GAS STATUS INDICATOR ── */
+.gas-status {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; color: var(--text3); margin-top: 12px;
+  padding: 8px 12px; background: var(--slate-light);
+  border-radius: 6px;
+}
+.gas-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<!-- MOBILE GUARD -->
+<div class="mobile-guard">
+  <div class="mobile-guard-icon">🖥️</div>
+  <div class="mobile-guard-title">PC에서 접속해주세요</div>
+  <div class="mobile-guard-desc">관리자 페이지는 PC 환경에서만<br>정상적으로 이용할 수 있습니다.</div>
+</div>
+
+<div class="admin-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark"></div>
+      <div>
+        <div class="sidebar-logo-text">Modu<span>Lab</span></div>
+        <span class="sidebar-admin-badge">ADMIN SCM</span>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">메인 메뉴</div>
+      <ul class="sidebar-nav">
+        <li><a href="dashboard.html"><span class="nav-icon">📊</span>대시보드</a></li>
+        <li>
+          <a href="products.html" class="active"><span class="nav-icon">📦</span>상품 관리</a>
+          <ul class="sidebar-sub sidebar-nav">
+            <li><a href="products.html">상품 목록</a></li>
+            <li><a href="product-add.html" class="active">상품 등록</a></li>
+          </ul>
+        </li>
+        <li><a href="orders.html"><span class="nav-icon">🛒</span>주문 관리</a></li>
+        <li><a href="cs.html"><span class="nav-icon">💬</span>CS 관리</a></li>
+        <li><a href="settlement.html"><span class="nav-icon">💰</span>정산 현황판</a></li>
+      </ul>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">바로가기</div>
+      <ul class="sidebar-nav">
+        <li><a href="../index.html" target="_blank"><span class="nav-icon">🌐</span>쇼핑몰 보기</a></li>
+      </ul>
+    </div>
+
+    <div class="sidebar-bottom">
+      <a href="index.html" onclick="logout(event)"><span class="nav-icon">🚪</span>로그아웃</a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-wrap">
+
+    <!-- HEADER -->
+    <header class="admin-header">
+      <div class="header-breadcrumb">
+        <a href="dashboard.html">홈</a>
+        <span class="sep">›</span>
+        <a href="products.html">상품 관리</a>
+        <span class="sep">›</span>
+        <span class="current">상품 등록</span>
+      </div>
+      <div class="header-right">
+        <button class="header-noti-btn" title="알림">
+          🔔
+          <span class="noti-dot"></span>
+        </button>
+        <div class="header-user">
+          <div class="header-user-avatar">M</div>
+          <div class="header-user-name">관리자</div>
+        </div>
+        <button class="header-logout-btn" onclick="logout()">로그아웃</button>
+      </div>
+    </header>
+
+    <!-- PAGE CONTENT -->
+    <div class="page-content">
+      <div class="page-title-row">
+        <div>
+          <div class="page-title">상품 등록</div>
+          <div class="page-title-sub">새 상품 정보를 입력하고 Google Sheets에 자동 등록합니다</div>
+        </div>
+        <div class="title-btns">
+          <button class="btn btn-outline" onclick="saveDraft()">임시 저장</button>
+          <button class="btn btn-primary" onclick="submitProduct()">📤 등록 완료</button>
+        </div>
+      </div>
+
+      <div class="alert alert-info">
+        <span class="alert-icon">ℹ️</span>
+        <span>상품 등록 시 Google Sheets에 자동으로 행이 추가됩니다. <strong>상품 ID, 가격, 판매 파일 URL</strong>이 기록됩니다.</span>
+      </div>
+
+      <form id="productForm" onsubmit="return false;">
+        <div class="form-grid">
+
+          <!-- LEFT: 주요 입력 -->
+          <div class="form-left">
+
+            <!-- 기본 정보 -->
+            <div class="card">
+              <div class="card-title">
+                <div class="card-title-icon">📝</div>
+                기본 정보
+              </div>
+
+              <div class="field">
+                <label class="field-label">상품명 <span class="required">*</span></label>
+                <input type="text" class="field-input" id="productName" placeholder="예: 프로젝트 관리 자동화 v2.0" maxlength="80" oninput="updateCharCount(this, 'nameCount', 80); updatePreview()">
+                <div class="char-count" id="nameCount">0 / 80</div>
+              </div>
+
+              <div class="field-row">
+                <div class="field">
+                  <label class="field-label">카테고리 <span class="required">*</span></label>
+                  <select class="field-select" id="category" onchange="updatePreview()">
+                    <option value="">카테고리 선택</option>
+                    <option value="excel">엑셀 프로그램</option>
+                    <option value="sheets">구글시트 자동화</option>
+                    <option value="short">숏폼 템플릿</option>
+                    <option value="detail">상세페이지 제작</option>
+                    <option value="web">홈페이지 제작</option>
+                    <option value="program">프로그램 제작</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label class="field-label">판매 유형 <span class="required">*</span></label>
+                  <div class="toggle-group" id="saleTypeGroup">
+                    <div class="toggle-option selected" data-value="file" onclick="selectSaleType('file')">📂 파일 판매</div>
+                    <div class="toggle-option" data-value="inquiry" onclick="selectSaleType('inquiry')">💬 문의형</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="field">
+                <label class="field-label">상품 대표 설명 <span class="required">*</span></label>
+                <input type="text" class="field-input" id="productDesc" placeholder="예: 클릭 한 번으로 일정 관리를 자동화하는 엑셀 프로그램" maxlength="100" oninput="updateCharCount(this, 'descCount', 100)">
+                <div class="char-count" id="descCount">0 / 100</div>
+                <div class="field-hint">상품 카드에 표시되는 짧은 소개 문구입니다.</div>
+              </div>
+
+              <div class="field">
+                <label class="field-label">상세 설명</label>
+                <textarea class="field-textarea" id="productDetail" placeholder="상품 상세 페이지에 표시될 내용을 입력하세요.
+주요 기능, 포함 내용, 사용 방법, 시스템 요구사항 등을 작성해주세요." style="min-height:160px;" maxlength="2000" oninput="updateCharCount(this, 'detailCount', 2000)"></textarea>
+                <div class="char-count" id="detailCount">0 / 2000</div>
+              </div>
+            </div>
+
+            <!-- 가격 설정 -->
+            <div class="card">
+              <div class="card-title">
+                <div class="card-title-icon">💲</div>
+                가격 설정
+              </div>
+
+              <div class="field-row">
+                <div class="field">
+                  <label class="field-label">판매가 <span class="required">*</span></label>
+                  <div class="input-with-unit">
+                    <input type="number" class="field-input" id="price" placeholder="9900" min="0" step="100" oninput="calcPrice()">
+                    <span class="input-unit">원</span>
+                  </div>
+                </div>
+                <div class="field">
+                  <label class="field-label">할인가 <span style="font-size:11px;color:var(--text3);font-weight:400;">(선택)</span></label>
+                  <div class="input-with-unit">
+                    <input type="number" class="field-input" id="discountPrice" placeholder="0" min="0" step="100" oninput="calcPrice()">
+                    <span class="input-unit">원</span>
+                  </div>
+                  <div class="field-hint">0 입력 시 할인 미적용</div>
+                </div>
+              </div>
+
+              <div class="price-summary" id="priceSummary" style="display:none;">
+                <div class="price-summary-row">
+                  <span class="price-summary-label">정가</span>
+                  <span class="price-summary-val" id="summaryPrice">-</span>
+                </div>
+                <div class="price-summary-row">
+                  <span class="price-summary-label">할인 금액</span>
+                  <span class="price-summary-val discount" id="summaryDiscount">-</span>
+                </div>
+                <div class="price-summary-row">
+                  <span class="price-summary-label">할인율</span>
+                  <span class="price-summary-val discount" id="summaryRate">-</span>
+                </div>
+                <div class="price-summary-row total">
+                  <span class="price-summary-label" style="font-weight:700;">최종 판매가</span>
+                  <span class="price-summary-val final" id="summaryFinal">-</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 파일 첨부 -->
+            <div class="card" id="fileSection">
+              <div class="card-title">
+                <div class="card-title-icon">📁</div>
+                판매 파일 첨부
+              </div>
+              <div class="alert alert-info" style="margin-bottom:16px;">
+                <span class="alert-icon">⚡</span>
+                <span>결제 완료 즉시 구매자 이메일로 자동 발송됩니다. <strong>Google Drive에 업로드 후 공유 링크</strong>를 입력해주세요.</span>
+              </div>
+
+              <div class="field">
+                <label class="field-label">파일 공유 링크 <span class="required">*</span></label>
+                <input type="url" class="field-input" id="fileUrl" placeholder="https://drive.google.com/file/d/..." oninput="validateFileUrl(this)">
+                <div class="field-hint">Google Drive 또는 Dropbox 공유 링크를 붙여넣기 하세요.</div>
+              </div>
+
+              <div class="field">
+                <label class="field-label">파일명</label>
+                <input type="text" class="field-input" id="fileName" placeholder="예: 모듈랩_프로젝트관리_v1.0.xlsx">
+                <div class="field-hint">구매자에게 보여지는 파일명입니다.</div>
+              </div>
+
+              <div class="field">
+                <label class="field-label">파일 형식</label>
+                <select class="field-select" id="fileType">
+                  <option value="">선택</option>
+                  <option value="xlsx">.xlsx (엑셀)</option>
+                  <option value="xlsm">.xlsm (매크로 포함 엑셀)</option>
+                  <option value="gsheet">Google Sheets</option>
+                  <option value="zip">.zip (압축파일)</option>
+                  <option value="pdf">.pdf</option>
+                  <option value="capcut">CapCut 템플릿</option>
+                  <option value="other">기타</option>
+                </select>
+              </div>
+
+              <div class="gas-status">
+                <div class="gas-dot"></div>
+                <span>GAS 웹훅 연동 대기 중 — 등록 완료 시 Sheets에 자동 기록됩니다</span>
+              </div>
+            </div>
+
+            <!-- 쿠폰 / 할인 설정 -->
+            <div class="card">
+              <div class="card-title">
+                <div class="card-title-icon">🎁</div>
+                쿠폰 / 할인 적용
+              </div>
+              <div class="field-hint" style="margin-bottom:12px;">이 상품에 적용 가능한 쿠폰을 선택하세요.</div>
+
+              <div class="coupon-item">
+                <div class="coupon-check"><input type="checkbox" id="coupon1"></div>
+                <label class="coupon-name" for="coupon1">신규가입 쿠폰 (첫 구매 20% 할인)</label>
+                <span class="coupon-rate">-20%</span>
+              </div>
+              <div class="coupon-item">
+                <div class="coupon-check"><input type="checkbox" id="coupon2"></div>
+                <label class="coupon-name" for="coupon2">번들 이벤트 (2개 이상 구매 30% 추가 할인)</label>
+                <span class="coupon-rate">-30%</span>
+              </div>
+              <div class="coupon-item">
+                <div class="coupon-check"><input type="checkbox" id="coupon3"></div>
+                <label class="coupon-name" for="coupon3">리뷰 작성 적립 포인트 사용 허용</label>
+                <span class="coupon-rate" style="color:var(--blue);">500P</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- RIGHT: 썸네일 + 상태 -->
+          <div class="form-right">
+            <div class="sticky-card">
+
+              <!-- 노출 상태 -->
+              <div class="card">
+                <div class="card-title">
+                  <div class="card-title-icon">⚙️</div>
+                  노출 설정
+                </div>
+                <div class="switch-row">
+                  <div class="switch-info">
+                    <div class="switch-label">상품 노출 <span id="visibilityBadge" class="status-badge on">ON</span></div>
+                    <div class="switch-desc">OFF 시 쇼핑몰에서 숨겨집니다</div>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="visibility" checked onchange="toggleVisibility(this)">
+                    <span class="switch-track"></span>
+                  </label>
+                </div>
+                <div class="switch-row">
+                  <div class="switch-info">
+                    <div class="switch-label">신규 상품 뱃지</div>
+                    <div class="switch-desc">등록 후 2주간 NEW 표시</div>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="newBadge" checked>
+                    <span class="switch-track"></span>
+                  </label>
+                </div>
+                <div class="switch-row">
+                  <div class="switch-info">
+                    <div class="switch-label">베스트셀러 뱃지</div>
+                    <div class="switch-desc">메인 페이지 상단 노출</div>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="bestBadge">
+                    <span class="switch-track"></span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- 썸네일 -->
+              <div class="card">
+                <div class="card-title">
+                  <div class="card-title-icon">🖼️</div>
+                  썸네일 이미지
+                </div>
+
+                <div class="field-hint" style="margin-bottom:10px;">이모지 선택 또는 이미지 업로드</div>
+
+                <div class="upload-zone" id="uploadZone" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropFile(event)" onclick="document.getElementById('thumbFile').click()">
+                  <div class="upload-icon">🖼️</div>
+                  <div class="upload-title">클릭 또는 드래그하여 이미지 업로드</div>
+                  <div class="upload-sub">JPG, PNG, WebP / 최대 2MB<br>권장 비율 16:10</div>
+                  <input type="file" id="thumbFile" accept="image/*" onchange="previewImage(this)" style="display:none;">
+                </div>
+
+                <div class="upload-preview" id="thumbPreview">
+                  <img id="thumbImg" src="" alt="">
+                  <button class="upload-preview-remove" onclick="removeThumb()" type="button">✕</button>
+                </div>
+
+                <div style="margin-top:14px;">
+                  <div class="field-hint" style="margin-bottom:8px;">이모지로 대체 (이미지 없을 때)</div>
+                  <div class="emoji-picker-row" id="emojiPicker">
+                    <div class="emoji-chip selected" data-emoji="📊" onclick="selectEmoji(this)">📊</div>
+                    <div class="emoji-chip" data-emoji="💰" onclick="selectEmoji(this)">💰</div>
+                    <div class="emoji-chip" data-emoji="👥" onclick="selectEmoji(this)">👥</div>
+                    <div class="emoji-chip" data-emoji="📈" onclick="selectEmoji(this)">📈</div>
+                    <div class="emoji-chip" data-emoji="🔧" onclick="selectEmoji(this)">🔧</div>
+                    <div class="emoji-chip" data-emoji="⚙️" onclick="selectEmoji(this)">⚙️</div>
+                    <div class="emoji-chip" data-emoji="🎬" onclick="selectEmoji(this)">🎬</div>
+                    <div class="emoji-chip" data-emoji="🌐" onclick="selectEmoji(this)">🌐</div>
+                    <div class="emoji-chip" data-emoji="🖼️" onclick="selectEmoji(this)">🖼️</div>
+                    <div class="emoji-chip" data-emoji="📋" onclick="selectEmoji(this)">📋</div>
+                    <div class="emoji-chip" data-emoji="🏦" onclick="selectEmoji(this)">🏦</div>
+                    <div class="emoji-chip" data-emoji="📅" onclick="selectEmoji(this)">📅</div>
+                  </div>
+                </div>
+
+                <div class="thumb-preview" id="thumbPreviewBox">📊</div>
+                <div class="field-hint" style="margin-top:6px; text-align:center;">미리보기</div>
+              </div>
+
+              <!-- SEO 설정 -->
+              <div class="card">
+                <div class="card-title">
+                  <div class="card-title-icon">🔍</div>
+                  SEO 메타 설정
+                </div>
+                <div class="field">
+                  <label class="field-label">메타 제목</label>
+                  <input type="text" class="field-input" id="metaTitle" placeholder="빈칸 시 상품명 자동 사용" maxlength="60" oninput="updateCharCount(this, 'metaTitleCount', 60)">
+                  <div class="char-count" id="metaTitleCount">0 / 60</div>
+                </div>
+                <div class="field">
+                  <label class="field-label">메타 설명</label>
+                  <textarea class="field-textarea" id="metaDesc" placeholder="빈칸 시 상품 설명 자동 사용" maxlength="160" style="min-height:70px;" oninput="updateCharCount(this, 'metaDescCount', 160)"></textarea>
+                  <div class="char-count" id="metaDescCount">0 / 160</div>
+                </div>
+              </div>
+
+              <!-- 등록 버튼 (모바일용 없이 하단 고정) -->
+              <div class="card" style="background:var(--slate-light); border: none;">
+                <button class="btn btn-primary btn-lg" style="width:100%; justify-content:center;" type="button" onclick="submitProduct()">
+                  📤 상품 등록 완료
+                </button>
+                <div style="height:8px;"></div>
+                <button class="btn btn-outline" style="width:100%; justify-content:center;" type="button" onclick="saveDraft()">
+                  💾 임시 저장
+                </button>
+                <div class="gas-status" style="margin-top:12px; justify-content:center;">
+                  <div class="gas-dot"></div>
+                  <span>등록 시 Google Sheets 자동 기록</span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"><span class="toast-icon"></span><span id="toastMsg"></span></div>
+
+<script>
+/* ── AUTH CHECK ── */
+(function() {
+  if (!sessionStorage.getItem('modulab_admin')) {
+    location.href = 'index.html';
+  }
+})();
+
+function logout(e) {
+  if (e) e.preventDefault();
+  sessionStorage.removeItem('modulab_admin');
+  location.href = 'index.html';
+}
+
+/* ── SALE TYPE TOGGLE ── */
+let saleType = 'file';
+function selectSaleType(type) {
+  saleType = type;
+  document.querySelectorAll('#saleTypeGroup .toggle-option').forEach(el => {
+    el.className = 'toggle-option';
+    if (el.dataset.value === type) el.classList.add('selected');
+  });
+  document.getElementById('fileSection').style.display = (type === 'file') ? 'block' : 'none';
+  updatePreview();
+}
+
+/* ── PRICE CALC ── */
+function calcPrice() {
+  const price = parseInt(document.getElementById('price').value) || 0;
+  const discount = parseInt(document.getElementById('discountPrice').value) || 0;
+  const summary = document.getElementById('priceSummary');
+
+  if (price <= 0) { summary.style.display = 'none'; return; }
+  summary.style.display = 'block';
+
+  document.getElementById('summaryPrice').textContent = price.toLocaleString() + '원';
+
+  if (discount > 0 && discount < price) {
+    const diff = price - discount;
+    const rate = Math.round((diff / price) * 100);
+    document.getElementById('summaryDiscount').textContent = '-' + diff.toLocaleString() + '원';
+    document.getElementById('summaryRate').textContent = '-' + rate + '%';
+    document.getElementById('summaryFinal').textContent = discount.toLocaleString() + '원';
+  } else {
+    document.getElementById('summaryDiscount').textContent = '-';
+    document.getElementById('summaryRate').textContent = '-';
+    document.getElementById('summaryFinal').textContent = price.toLocaleString() + '원';
+  }
+}
+
+/* ── CHAR COUNT ── */
+function updateCharCount(el, countId, max) {
+  const len = el.value.length;
+  const el2 = document.getElementById(countId);
+  el2.textContent = len + ' / ' + max;
+  el2.className = 'char-count';
+  if (len >= max) el2.classList.add('over');
+  else if (len >= max * 0.85) el2.classList.add('warn');
+}
+
+/* ── EMOJI PICKER ── */
+let selectedEmoji = '📊';
+function selectEmoji(chip) {
+  document.querySelectorAll('.emoji-chip').forEach(c => c.classList.remove('selected'));
+  chip.classList.add('selected');
+  selectedEmoji = chip.dataset.emoji;
+  document.getElementById('thumbPreviewBox').textContent = selectedEmoji;
+
+  const cat = document.getElementById('category').value;
+  const colors = {
+    excel: ['#EFF6FF', '#DBEAFE'],
+    sheets: ['#FEFCE8', '#FEF9C3'],
+    short: ['#F5F3FF', '#EDE9FE'],
+    detail: ['#FFF1F2', '#FFE4E6'],
+    web: ['#EFF6FF', '#DBEAFE'],
+    program: ['#F8FAFC', '#F1F5F9'],
+    '': ['#EFF6FF', '#DBEAFE'],
+  };
+  const c = colors[cat] || colors[''];
+  document.getElementById('thumbPreviewBox').style.background = c[0];
+}
+
+/* ── THUMB UPLOAD ── */
+function previewImage(input) {
+  if (!input.files || !input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    document.getElementById('thumbImg').src = e.target.result;
+    document.getElementById('thumbPreview').style.display = 'block';
+    document.getElementById('uploadZone').style.display = 'none';
+    document.getElementById('thumbPreviewBox').style.display = 'none';
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+function removeThumb() {
+  document.getElementById('thumbImg').src = '';
+  document.getElementById('thumbPreview').style.display = 'none';
+  document.getElementById('uploadZone').style.display = 'block';
+  document.getElementById('thumbPreviewBox').style.display = 'flex';
+  document.getElementById('thumbFile').value = '';
+}
+
+function dragOver(e) {
+  e.preventDefault();
+  document.getElementById('uploadZone').classList.add('dragging');
+}
+function dragLeave(e) {
+  document.getElementById('uploadZone').classList.remove('dragging');
+}
+function dropFile(e) {
+  e.preventDefault();
+  document.getElementById('uploadZone').classList.remove('dragging');
+  const files = e.dataTransfer.files;
+  if (files.length > 0) {
+    const fakeInput = { files: files };
+    previewImage(fakeInput);
+  }
+}
+
+/* ── VISIBILITY TOGGLE ── */
+function toggleVisibility(checkbox) {
+  const badge = document.getElementById('visibilityBadge');
+  if (checkbox.checked) {
+    badge.textContent = 'ON';
+    badge.className = 'status-badge on';
+  } else {
+    badge.textContent = 'OFF';
+    badge.className = 'status-badge off';
+  }
+}
+
+/* ── FILE URL VALIDATE ── */
+function validateFileUrl(input) {
+  const val = input.value.trim();
+  if (val && !val.startsWith('http')) {
+    input.style.borderColor = 'var(--red)';
+  } else {
+    input.style.borderColor = '';
+  }
+}
+
+/* ── UPDATE PREVIEW ── */
+function updatePreview() {
+  const cat = document.getElementById('category').value;
+  const colors = {
+    excel: '#EFF6FF', sheets: '#FEFCE8', short: '#F5F3FF',
+    detail: '#FFF1F2', web: '#EFF6FF', program: '#F8FAFC', '': '#EFF6FF',
+  };
+  document.getElementById('thumbPreviewBox').style.background = colors[cat] || '#EFF6FF';
+}
+
+/* ── GENERATE PRODUCT ID ── */
+function generateProductId() {
+  const cat = document.getElementById('category').value || 'prod';
+  const ts = Date.now().toString(36).toUpperCase();
+  return cat.toUpperCase() + '-' + ts;
+}
+
+/* ── TOAST ── */
+function showToast(msg, type = 'success') {
+  const toast = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  toast.className = type;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3200);
+}
+
+/* ── DRAFT SAVE ── */
+function saveDraft() {
+  const data = collectFormData();
+  localStorage.setItem('modulab_product_draft', JSON.stringify(data));
+  showToast('임시 저장 완료', 'success');
+}
+
+function collectFormData() {
+  return {
+    productName: document.getElementById('productName').value,
+    category: document.getElementById('category').value,
+    saleType,
+    productDesc: document.getElementById('productDesc').value,
+    productDetail: document.getElementById('productDetail').value,
+    price: document.getElementById('price').value,
+    discountPrice: document.getElementById('discountPrice').value,
+    fileUrl: document.getElementById('fileUrl')?.value,
+    fileName: document.getElementById('fileName')?.value,
+    fileType: document.getElementById('fileType')?.value,
+    visibility: document.getElementById('visibility').checked,
+    newBadge: document.getElementById('newBadge').checked,
+    bestBadge: document.getElementById('bestBadge').checked,
+    selectedEmoji,
+    coupon1: document.getElementById('coupon1').checked,
+    coupon2: document.getElementById('coupon2').checked,
+    coupon3: document.getElementById('coupon3').checked,
+    metaTitle: document.getElementById('metaTitle').value,
+    metaDesc: document.getElementById('metaDesc').value,
+    productId: generateProductId(),
+    createdAt: new Date().toISOString(),
+  };
+}
+
+/* ── VALIDATE ── */
+function validateForm(data) {
+  if (!data.productName.trim()) return '상품명을 입력해주세요.';
+  if (!data.category) return '카테고리를 선택해주세요.';
+  if (!data.productDesc.trim()) return '상품 대표 설명을 입력해주세요.';
+  if (!data.price || parseInt(data.price) <= 0) return '판매가를 입력해주세요.';
+  if (data.saleType === 'file' && !data.fileUrl?.trim()) return '판매 파일 링크를 입력해주세요.';
+  return null;
+}
+
+/* ── SUBMIT ── */
+async function submitProduct() {
+  const data = collectFormData();
+  const err = validateForm(data);
+  if (err) { showToast(err, 'error'); return; }
+
+  const submitBtn = document.querySelector('.btn-success') || document.querySelector('.btn-primary[onclick="submitProduct()"]');
+
+  // Google Sheets 자동 기록 (GAS_ENDPOINT 설정 필요)
+  const GAS_ENDPOINT = localStorage.getItem('modulab_gas_endpoint') || '';
+
+  const payload = {
+    action: 'addProduct',
+    productId: data.productId,
+    productName: data.productName,
+    category: data.category,
+    saleType: data.saleType,
+    price: parseInt(data.price),
+    discountPrice: parseInt(data.discountPrice) || 0,
+    fileUrl: data.fileUrl || '',
+    fileName: data.fileName || '',
+    fileType: data.fileType || '',
+    visibility: data.visibility,
+    selectedEmoji: data.selectedEmoji,
+    createdAt: data.createdAt,
+  };
+
+  if (GAS_ENDPOINT) {
+    try {
+      showToast('Google Sheets에 등록 중...', 'success');
+      const res = await fetch(GAS_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error('GAS 응답 오류');
+    } catch(e) {
+      showToast('Sheets 연동 실패: ' + e.message, 'error');
+      return;
+    }
+  }
+
+  // 로컬 저장 (임시 상품 목록)
+  const products = JSON.parse(localStorage.getItem('modulab_products') || '[]');
+  products.push(payload);
+  localStorage.setItem('modulab_products', JSON.stringify(products));
+
+  localStorage.removeItem('modulab_product_draft');
+
+  showToast('✓ 상품이 등록되었습니다! (ID: ' + data.productId + ')');
+  setTimeout(() => {
+    if (confirm('상품 목록 페이지로 이동할까요?')) location.href = 'products.html';
+  }, 1200);
+}
+
+/* ── LOAD DRAFT ── */
+(function() {
+  const draft = localStorage.getItem('modulab_product_draft');
+  if (!draft) return;
+  try {
+    const d = JSON.parse(draft);
+    if (confirm('임시 저장된 내용이 있습니다. 불러올까요?')) {
+      if (d.productName) document.getElementById('productName').value = d.productName;
+      if (d.category) document.getElementById('category').value = d.category;
+      if (d.productDesc) document.getElementById('productDesc').value = d.productDesc;
+      if (d.productDetail) document.getElementById('productDetail').value = d.productDetail;
+      if (d.price) document.getElementById('price').value = d.price;
+      if (d.discountPrice) document.getElementById('discountPrice').value = d.discountPrice;
+      if (d.saleType) selectSaleType(d.saleType);
+      if (d.selectedEmoji) {
+        const chip = document.querySelector(`.emoji-chip[data-emoji="${d.selectedEmoji}"]`);
+        if (chip) selectEmoji(chip);
+      }
+      calcPrice();
+    }
+  } catch(e) {}
+})();
+</script>
+</body>
+</html>
