@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>주문 관리 — ModuLab 관리자</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --blue: #2563EB; --blue-dark: #1D4ED8; --blue-light: #EFF6FF; --blue-mid: #BFDBFE;
+  --navy: #0F172A; --navy2: #1E293B; --navy3: #334155;
+  --green: #16A34A; --green-light: #F0FDF4;
+  --red: #DC2626; --red-light: #FEF2F2;
+  --yellow: #F59E0B; --yellow-light: #FFFBEB;
+  --purple: #7C3AED; --purple-light: #F5F3FF;
+  --slate: #64748B; --slate-light: #F1F5F9;
+  --border: #E2E8F0; --white: #FFFFFF;
+  --text: #0F172A; --text2: #475569; --text3: #94A3B8;
+  --sidebar-w: 220px; --header-h: 64px;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { font-family: 'Noto Sans KR', sans-serif; color: var(--text); background: #F8FAFC; line-height: 1.6; }
+a { text-decoration: none; color: inherit; }
+
+/* ── MOBILE GUARD ── */
+.mobile-guard {
+  display: none; position: fixed; inset: 0; z-index: 9999;
+  background: var(--navy); flex-direction: column;
+  align-items: center; justify-content: center; gap: 16px; text-align: center; padding: 32px;
+}
+.mobile-guard-icon { font-size: 48px; }
+.mobile-guard-title { font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: white; }
+.mobile-guard-desc { font-size: 14px; color: #94A3B8; line-height: 1.7; }
+@media (max-width: 768px) { .mobile-guard { display: flex; } }
+
+/* ── LAYOUT ── */
+.admin-layout { display: flex; min-height: 100vh; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: var(--sidebar-w); flex-shrink: 0; background: var(--navy);
+  display: flex; flex-direction: column;
+  position: fixed; top: 0; left: 0; height: 100vh; overflow-y: auto; z-index: 100;
+}
+.sidebar-logo {
+  padding: 20px 20px 16px; border-bottom: 1px solid rgba(255,255,255,.08);
+  display: flex; align-items: center; gap: 10px;
+}
+.logo-mark {
+  width: 32px; height: 32px; background: var(--blue); border-radius: 7px;
+  position: relative; overflow: hidden; flex-shrink: 0;
+}
+.logo-mark::before { content:''; position:absolute; top:4px; left:4px; width:13px; height:13px; background:rgba(255,255,255,.3); border-radius:2px; }
+.logo-mark::after  { content:''; position:absolute; bottom:4px; right:4px; width:13px; height:13px; background:#16A34A; border-radius:2px; }
+.sidebar-logo-text { font-family:'Bebas Neue',sans-serif; font-size:20px; letter-spacing:.04em; color:white; }
+.sidebar-logo-text span { color:var(--blue); }
+.sidebar-admin-badge { font-size:9px; font-weight:700; letter-spacing:.08em; color:#64748B; padding:2px 6px; border:1px solid #334155; border-radius:3px; display:block; margin-top:2px; }
+.sidebar-section { padding: 20px 12px 8px; }
+.sidebar-section-label { font-size:10px; font-weight:700; letter-spacing:.1em; color:#475569; text-transform:uppercase; padding:0 8px; margin-bottom:6px; }
+.sidebar-nav { list-style:none; }
+.sidebar-nav li a { display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:8px; font-size:13px; font-weight:500; color:#94A3B8; transition:all .15s; }
+.sidebar-nav li a:hover { background:rgba(255,255,255,.06); color:white; }
+.sidebar-nav li a.active { background:rgba(37,99,235,.2); color:#93C5FD; }
+.nav-icon { font-size:15px; width:18px; text-align:center; flex-shrink:0; }
+.sidebar-sub { margin-left:28px; margin-top:2px; }
+.sidebar-sub li a { font-size:12px; padding:6px 10px; color:#64748B; border-radius:6px; }
+.sidebar-sub li a:hover { color:#94A3B8; background:rgba(255,255,255,.04); }
+.sidebar-sub li a.active { color:#93C5FD; background:rgba(37,99,235,.15); }
+.sidebar-bottom { margin-top:auto; padding:16px 12px; border-top:1px solid rgba(255,255,255,.06); }
+.sidebar-bottom a { display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:8px; font-size:13px; color:#64748B; transition:all .15s; }
+.sidebar-bottom a:hover { background:rgba(255,255,255,.06); color:#94A3B8; }
+
+/* ── MAIN ── */
+.main-wrap { margin-left: var(--sidebar-w); flex:1; display:flex; flex-direction:column; min-height:100vh; }
+
+/* ── HEADER ── */
+.admin-header {
+  position:sticky; top:0; z-index:50; height:var(--header-h);
+  background:var(--white); border-bottom:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between; padding:0 32px; gap:16px;
+}
+.header-breadcrumb { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text3); }
+.header-breadcrumb a { color:var(--text3); transition:color .15s; }
+.header-breadcrumb a:hover { color:var(--blue); }
+.header-breadcrumb .current { color:var(--text); font-weight:600; }
+.header-right { display:flex; align-items:center; gap:10px; }
+.header-noti-btn { width:36px; height:36px; border-radius:8px; border:1px solid var(--border); background:none; display:flex; align-items:center; justify-content:center; font-size:16px; cursor:pointer; position:relative; transition:background .15s; }
+.header-noti-btn:hover { background:var(--slate-light); }
+.noti-dot { position:absolute; top:6px; right:6px; width:7px; height:7px; background:var(--red); border-radius:50%; border:1.5px solid white; }
+.header-logout-btn { padding:7px 16px; border-radius:8px; border:1px solid var(--border); background:none; font-size:13px; font-weight:500; color:var(--text2); cursor:pointer; font-family:inherit; transition:all .15s; }
+.header-logout-btn:hover { background:var(--red-light); border-color:#FCA5A5; color:var(--red); }
+.header-user { display:flex; align-items:center; gap:8px; padding:6px 12px; border-radius:8px; background:var(--slate-light); border:1px solid var(--border); }
+.header-user-avatar { width:28px; height:28px; background:var(--blue); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; color:white; font-weight:700; flex-shrink:0; }
+.header-user-name { font-size:13px; font-weight:500; color:var(--text2); }
+
+/* ── PAGE CONTENT ── */
+.page-content { padding: 32px; flex:1; }
+
+.page-title-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; gap:16px; flex-wrap:wrap; }
+.page-title { font-size:22px; font-weight:700; color:var(--text); }
+.page-title-sub { font-size:13px; color:var(--text3); margin-top:2px; }
+.title-btns { display:flex; gap:8px; flex-shrink:0; }
+
+/* ── SUMMARY CARDS ── */
+.summary-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px; }
+.summary-card { background:var(--white); border:1px solid var(--border); border-radius:12px; padding:18px 20px; }
+.summary-card-label { font-size:12px; font-weight:600; color:var(--text3); margin-bottom:8px; letter-spacing:.03em; }
+.summary-card-value { font-family:'JetBrains Mono',monospace; font-size:22px; font-weight:500; color:var(--text); }
+.summary-card-sub { font-size:12px; color:var(--text3); margin-top:4px; }
+.summary-card.blue  { border-left:3px solid var(--blue); }
+.summary-card.green { border-left:3px solid var(--green); }
+.summary-card.yellow{ border-left:3px solid var(--yellow); }
+.summary-card.red   { border-left:3px solid var(--red); }
+
+/* ── FILTER BAR ── */
+.filter-bar { background:var(--white); border:1px solid var(--border); border-radius:12px; padding:16px 20px; margin-bottom:16px; }
+.filter-row { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.filter-row + .filter-row { margin-top:10px; padding-top:10px; border-top:1px solid var(--border); }
+.filter-label { font-size:12px; font-weight:600; color:var(--text3); white-space:nowrap; min-width:48px; }
+.filter-tags { display:flex; gap:6px; flex-wrap:wrap; flex:1; }
+.filter-tag {
+  padding:5px 12px; border-radius:20px; font-size:12px; font-weight:500;
+  border:1px solid var(--border); background:var(--white); color:var(--text2);
+  cursor:pointer; transition:all .15s; white-space:nowrap;
+}
+.filter-tag:hover { border-color:var(--blue); color:var(--blue); background:var(--blue-light); }
+.filter-tag.active { border-color:var(--blue); color:var(--blue); background:var(--blue-light); font-weight:700; }
+.search-wrap { display:flex; align-items:center; gap:8px; margin-left:auto; }
+.search-input-wrap { display:flex; align-items:center; gap:8px; background:var(--slate-light); border:1px solid var(--border); border-radius:8px; padding:8px 14px; min-width:260px; transition:border-color .15s; }
+.search-input-wrap:focus-within { border-color:var(--blue); }
+.search-input-wrap input { border:none; background:none; outline:none; font-size:13px; color:var(--text); font-family:inherit; width:100%; }
+.search-input-wrap input::placeholder { color:var(--text3); }
+.search-btn { padding:8px 16px; background:var(--blue); color:white; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; white-space:nowrap; transition:background .15s; }
+.search-btn:hover { background:var(--blue-dark); }
+
+/* ── TABLE ── */
+.table-wrap { background:var(--white); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+.table-header { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--border); }
+.table-count { font-size:13px; color:var(--text3); }
+.table-count strong { color:var(--text); font-weight:700; }
+.table-actions { display:flex; gap:8px; }
+table { width:100%; border-collapse:collapse; }
+thead tr { background:var(--slate-light); }
+thead th {
+  padding:11px 16px; text-align:left;
+  font-size:11px; font-weight:700; color:var(--text3);
+  letter-spacing:.05em; text-transform:uppercase;
+  border-bottom:1px solid var(--border); white-space:nowrap;
+}
+thead th.check-col { width:44px; }
+thead th.sortable { cursor:pointer; user-select:none; }
+thead th.sortable:hover { color:var(--blue); }
+tbody tr { border-bottom:1px solid var(--border); transition:background .1s; cursor:pointer; }
+tbody tr:last-child { border-bottom:none; }
+tbody tr:hover { background:#FAFBFF; }
+tbody tr.selected { background:var(--blue-light); }
+td { padding:12px 16px; font-size:13px; vertical-align:middle; }
+td.check-col { width:44px; }
+.order-id { font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:500; color:var(--blue); }
+.buyer-name { font-weight:600; color:var(--text); }
+.buyer-email { font-size:11px; color:var(--text3); margin-top:1px; }
+.product-name-cell { font-weight:500; color:var(--text); max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.price-cell { font-family:'JetBrains Mono',monospace; font-weight:500; color:var(--text); white-space:nowrap; }
+.date-cell { font-size:12px; color:var(--text3); font-family:'JetBrains Mono',monospace; white-space:nowrap; }
+.action-btns { display:flex; gap:6px; }
+
+/* ── STATUS BADGE ── */
+.badge {
+  display:inline-flex; align-items:center; gap:4px;
+  padding:3px 9px; border-radius:20px;
+  font-size:11px; font-weight:700; letter-spacing:.03em; white-space:nowrap;
+}
+.badge::before { content:''; width:5px; height:5px; border-radius:50%; flex-shrink:0; }
+.badge-paid   { background:#DCFCE7; color:#15803D; } .badge-paid::before   { background:#16A34A; }
+.badge-sent   { background:var(--blue-light); color:var(--blue-dark); } .badge-sent::before   { background:var(--blue); }
+.badge-done   { background:#F3F4F6; color:#374151; } .badge-done::before   { background:#9CA3AF; }
+.badge-refund { background:var(--red-light); color:var(--red); } .badge-refund::before { background:var(--red); }
+.badge-resend { background:var(--yellow-light); color:#B45309; } .badge-resend::before { background:var(--yellow); }
+
+/* ── PAYMENT METHOD BADGE ── */
+.pay-badge {
+  display:inline-flex; align-items:center; gap:4px;
+  padding:3px 8px; border-radius:5px;
+  font-size:11px; font-weight:600;
+}
+.pay-card    { background:#EFF6FF; color:#1D4ED8; }
+.pay-kakao   { background:#FEF9C3; color:#92400E; }
+.pay-naver   { background:#F0FDF4; color:#166534; }
+.pay-toss    { background:#EDE9FE; color:#5B21B6; }
+.pay-transfer{ background:#F0F9FF; color:#0369A1; }
+
+/* ── SMALL BUTTONS ── */
+.btn { display:inline-flex; align-items:center; gap:5px; padding:6px 12px; border-radius:7px; font-size:12px; font-weight:600; cursor:pointer; font-family:inherit; border:none; transition:all .15s; white-space:nowrap; }
+.btn-sm { padding:5px 10px; font-size:11px; }
+.btn-primary { background:var(--blue); color:white; }
+.btn-primary:hover { background:var(--blue-dark); }
+.btn-outline { background:var(--white); color:var(--text2); border:1px solid var(--border); }
+.btn-outline:hover { background:var(--slate-light); }
+.btn-green { background:var(--green-light); color:var(--green); border:1px solid #BBF7D0; }
+.btn-green:hover { background:var(--green); color:white; border-color:var(--green); }
+.btn-red { background:var(--red-light); color:var(--red); border:1px solid #FCA5A5; }
+.btn-red:hover { background:var(--red); color:white; border-color:var(--red); }
+.btn-yellow { background:var(--yellow-light); color:#B45309; border:1px solid #FDE68A; }
+.btn-yellow:hover { background:var(--yellow); color:white; border-color:var(--yellow); }
+
+/* ── PAGINATION ── */
+.pagination { display:flex; align-items:center; justify-content:center; gap:4px; padding:20px; }
+.page-btn { width:34px; height:34px; border-radius:8px; border:1px solid var(--border); background:var(--white); font-size:13px; font-weight:500; color:var(--text2); cursor:pointer; font-family:inherit; transition:all .15s; display:flex; align-items:center; justify-content:center; }
+.page-btn:hover { border-color:var(--blue); color:var(--blue); background:var(--blue-light); }
+.page-btn.active { background:var(--blue); color:white; border-color:var(--blue); font-weight:700; }
+.page-btn:disabled { opacity:.4; cursor:not-allowed; }
+
+/* ── DETAIL DRAWER ── */
+.drawer-overlay { display:none; position:fixed; inset:0; z-index:400; }
+.drawer-overlay.open { display:block; }
+.drawer-backdrop { position:absolute; inset:0; background:rgba(0,0,0,.4); }
+.drawer-panel {
+  position:absolute; top:0; right:0; width:480px; height:100%;
+  background:var(--white); overflow-y:auto;
+  transform:translateX(100%); transition:transform .25s ease;
+  display:flex; flex-direction:column;
+}
+.drawer-overlay.open .drawer-panel { transform:translateX(0); }
+.drawer-head { display:flex; align-items:center; justify-content:space-between; padding:20px 24px 16px; border-bottom:1px solid var(--border); flex-shrink:0; }
+.drawer-title { font-size:16px; font-weight:700; color:var(--text); }
+.drawer-close { width:36px; height:36px; border-radius:8px; border:1px solid var(--border); background:none; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background .15s; }
+.drawer-close:hover { background:var(--slate-light); }
+.drawer-body { padding:24px; flex:1; }
+.detail-section { margin-bottom:24px; }
+.detail-section-title { font-size:12px; font-weight:700; color:var(--text3); letter-spacing:.06em; text-transform:uppercase; margin-bottom:12px; }
+.detail-row { display:flex; align-items:flex-start; justify-content:space-between; padding:9px 0; border-bottom:1px solid var(--border); gap:12px; }
+.detail-row:last-child { border-bottom:none; }
+.detail-key { font-size:13px; color:var(--text3); flex-shrink:0; min-width:90px; }
+.detail-val { font-size:13px; font-weight:500; color:var(--text); text-align:right; word-break:break-all; }
+.detail-val.mono { font-family:'JetBrains Mono',monospace; }
+.detail-val.blue { color:var(--blue); }
+.drawer-actions { padding:16px 24px 24px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:8px; flex-shrink:0; }
+.drawer-action-row { display:flex; gap:8px; }
+.drawer-action-row .btn { flex:1; justify-content:center; }
+.status-stepper { display:flex; align-items:center; gap:0; margin:16px 0; }
+.step { flex:1; text-align:center; position:relative; }
+.step::after { content:''; position:absolute; top:14px; left:50%; width:100%; height:2px; background:var(--border); z-index:0; }
+.step:last-child::after { display:none; }
+.step-dot { width:28px; height:28px; border-radius:50%; border:2px solid var(--border); background:var(--white); display:flex; align-items:center; justify-content:center; margin:0 auto 6px; font-size:12px; position:relative; z-index:1; transition:all .2s; }
+.step-dot.done { background:var(--green); border-color:var(--green); color:white; }
+.step-dot.current { background:var(--blue); border-color:var(--blue); color:white; }
+.step-label { font-size:11px; color:var(--text3); }
+.step-label.active { color:var(--blue); font-weight:600; }
+.step-label.done { color:var(--green); }
+
+/* ── CONFIRM MODAL ── */
+.modal-overlay { display:none; position:fixed; inset:0; z-index:500; background:rgba(0,0,0,.5); align-items:center; justify-content:center; }
+.modal-overlay.open { display:flex; }
+.modal-box { background:var(--white); border-radius:16px; padding:32px; width:380px; box-shadow:0 24px 60px rgba(0,0,0,.2); }
+.modal-icon { font-size:36px; text-align:center; margin-bottom:16px; }
+.modal-title { font-size:18px; font-weight:700; color:var(--text); text-align:center; margin-bottom:8px; }
+.modal-desc { font-size:14px; color:var(--text2); text-align:center; line-height:1.6; margin-bottom:24px; }
+.modal-btns { display:flex; gap:8px; }
+.modal-btns .btn { flex:1; justify-content:center; padding:11px; font-size:14px; }
+
+/* ── TOAST ── */
+#toast { position:fixed; bottom:32px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--navy); color:white; padding:13px 24px; border-radius:10px; font-size:14px; font-weight:500; display:flex; align-items:center; gap:10px; box-shadow:0 8px 24px rgba(0,0,0,.25); transition:transform .3s ease,opacity .3s ease; opacity:0; z-index:9000; white-space:nowrap; }
+#toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
+
+/* ── EMPTY STATE ── */
+.empty-state { text-align:center; padding:60px 20px; }
+.empty-icon { font-size:40px; margin-bottom:12px; }
+.empty-title { font-size:15px; font-weight:600; color:var(--text2); margin-bottom:6px; }
+.empty-desc { font-size:13px; color:var(--text3); }
+
+input[type="checkbox"] { accent-color:var(--blue); width:15px; height:15px; cursor:pointer; }
+</style>
+</head>
+<body>
+
+<!-- MOBILE GUARD -->
+<div class="mobile-guard">
+  <div class="mobile-guard-icon">🖥️</div>
+  <div class="mobile-guard-title">PC에서 접속해주세요</div>
+  <div class="mobile-guard-desc">관리자 페이지는 PC 환경에서만<br>정상적으로 이용할 수 있습니다.</div>
+</div>
+
+<div class="admin-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark"></div>
+      <div>
+        <div class="sidebar-logo-text">Modu<span>Lab</span></div>
+        <span class="sidebar-admin-badge">ADMIN SCM</span>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">메인 메뉴</div>
+      <ul class="sidebar-nav">
+        <li><a href="dashboard.html"><span class="nav-icon">📊</span>대시보드</a></li>
+        <li>
+          <a href="products.html"><span class="nav-icon">📦</span>상품 관리</a>
+          <ul class="sidebar-sub sidebar-nav">
+            <li><a href="products.html">상품 목록</a></li>
+            <li><a href="product-add.html">상품 등록</a></li>
+          </ul>
+        </li>
+        <li><a href="orders.html" class="active"><span class="nav-icon">🛒</span>주문 관리</a></li>
+        <li><a href="cs.html"><span class="nav-icon">💬</span>CS 관리</a></li>
+        <li><a href="settlement.html"><span class="nav-icon">💰</span>정산 현황판</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">바로가기</div>
+      <ul class="sidebar-nav">
+        <li><a href="../index.html" target="_blank"><span class="nav-icon">🌐</span>쇼핑몰 보기</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-bottom">
+      <a href="index.html" onclick="logout(event)"><span class="nav-icon">🚪</span>로그아웃</a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-wrap">
+
+    <!-- HEADER -->
+    <header class="admin-header">
+      <div class="header-breadcrumb">
+        <a href="dashboard.html">홈</a>
+        <span style="color:var(--border);">›</span>
+        <span class="current">주문 관리</span>
+      </div>
+      <div class="header-right">
+        <button class="header-noti-btn">🔔<span class="noti-dot"></span></button>
+        <div class="header-user">
+          <div class="header-user-avatar">M</div>
+          <div class="header-user-name">관리자</div>
+        </div>
+        <button class="header-logout-btn" onclick="logout()">로그아웃</button>
+      </div>
+    </header>
+
+    <!-- PAGE CONTENT -->
+    <div class="page-content">
+
+      <!-- TITLE -->
+      <div class="page-title-row">
+        <div>
+          <div class="page-title">주문 관리</div>
+          <div class="page-title-sub">전체 주문 내역을 조회하고 처리합니다</div>
+        </div>
+        <div class="title-btns">
+          <button class="btn btn-outline" onclick="exportCSV()">⬇️ CSV 다운로드</button>
+          <button class="btn btn-primary" onclick="loadOrders()">🔄 새로고침</button>
+        </div>
+      </div>
+
+      <!-- SUMMARY CARDS -->
+      <div class="summary-grid" id="summaryGrid">
+        <div class="summary-card blue">
+          <div class="summary-card-label">전체 주문</div>
+          <div class="summary-card-value" id="sumTotal">—</div>
+          <div class="summary-card-sub">이번 달 누적</div>
+        </div>
+        <div class="summary-card green">
+          <div class="summary-card-label">결제 완료</div>
+          <div class="summary-card-value" id="sumPaid">—</div>
+          <div class="summary-card-sub">처리 대기 중</div>
+        </div>
+        <div class="summary-card yellow">
+          <div class="summary-card-label">재발송 필요</div>
+          <div class="summary-card-value" id="sumResend">—</div>
+          <div class="summary-card-sub">즉시 처리 필요</div>
+        </div>
+        <div class="summary-card red">
+          <div class="summary-card-label">환불 처리</div>
+          <div class="summary-card-value" id="sumRefund">—</div>
+          <div class="summary-card-sub">이번 달</div>
+        </div>
+      </div>
+
+      <!-- FILTER -->
+      <div class="filter-bar">
+        <div class="filter-row">
+          <span class="filter-label">주문 상태</span>
+          <div class="filter-tags" id="statusFilter">
+            <div class="filter-tag active" data-val="all" onclick="setFilter('status','all',this)">전체</div>
+            <div class="filter-tag" data-val="paid"   onclick="setFilter('status','paid',this)">결제완료</div>
+            <div class="filter-tag" data-val="sent"   onclick="setFilter('status','sent',this)">발송완료</div>
+            <div class="filter-tag" data-val="done"   onclick="setFilter('status','done',this)">구매확정</div>
+            <div class="filter-tag" data-val="resend" onclick="setFilter('status','resend',this)">재발송 필요</div>
+            <div class="filter-tag" data-val="refund" onclick="setFilter('status','refund',this)">환불처리</div>
+          </div>
+          <div class="search-wrap">
+            <div class="search-input-wrap">
+              <span style="color:var(--text3);font-size:13px;">🔍</span>
+              <input type="text" id="searchInput" placeholder="주문번호 또는 이메일 검색" onkeydown="if(event.key==='Enter')doSearch()">
+            </div>
+            <button class="search-btn" onclick="doSearch()">검색</button>
+          </div>
+        </div>
+        <div class="filter-row">
+          <span class="filter-label">결제수단</span>
+          <div class="filter-tags" id="payFilter">
+            <div class="filter-tag active" data-val="all"      onclick="setFilter('pay','all',this)">전체</div>
+            <div class="filter-tag" data-val="card"     onclick="setFilter('pay','card',this)">신용·체크카드</div>
+            <div class="filter-tag" data-val="kakao"    onclick="setFilter('pay','kakao',this)">카카오페이</div>
+            <div class="filter-tag" data-val="naver"    onclick="setFilter('pay','naver',this)">네이버페이</div>
+            <div class="filter-tag" data-val="toss"     onclick="setFilter('pay','toss',this)">토스페이</div>
+            <div class="filter-tag" data-val="transfer" onclick="setFilter('pay','transfer',this)">실시간 계좌이체</div>
+          </div>
+          <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
+            <label style="font-size:12px;color:var(--text3);">기간</label>
+            <input type="date" id="dateFrom" style="padding:6px 10px;border:1px solid var(--border);border-radius:7px;font-size:12px;font-family:inherit;outline:none;" onchange="renderTable()">
+            <span style="color:var(--text3);font-size:12px;">~</span>
+            <input type="date" id="dateTo"   style="padding:6px 10px;border:1px solid var(--border);border-radius:7px;font-size:12px;font-family:inherit;outline:none;" onchange="renderTable()">
+          </div>
+        </div>
+      </div>
+
+      <!-- TABLE -->
+      <div class="table-wrap">
+        <div class="table-header">
+          <div class="table-count">총 <strong id="filteredCount">0</strong>건</div>
+          <div class="table-actions">
+            <button class="btn btn-outline btn-sm" onclick="bulkResend()">선택 파일 재발송</button>
+            <button class="btn btn-sm btn-red" onclick="bulkRefund()">선택 환불 처리</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th class="check-col"><input type="checkbox" id="checkAll" onchange="toggleAllCheck(this)"></th>
+                <th class="sortable" onclick="sortBy('id')">주문번호 ↕</th>
+                <th>구매자</th>
+                <th>상품명</th>
+                <th class="sortable" onclick="sortBy('price')">결제금액 ↕</th>
+                <th>결제수단</th>
+                <th>주문 상태</th>
+                <th class="sortable" onclick="sortBy('date')">주문일시 ↕</th>
+                <th>관리</th>
+              </tr>
+            </thead>
+            <tbody id="orderTableBody"></tbody>
+          </table>
+        </div>
+        <div id="emptyState" class="empty-state" style="display:none;">
+          <div class="empty-icon">📭</div>
+          <div class="empty-title">주문 내역이 없습니다</div>
+          <div class="empty-desc">조건에 맞는 주문이 없습니다. 필터를 변경해보세요.</div>
+        </div>
+        <div class="pagination" id="pagination"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ORDER DETAIL DRAWER -->
+<div class="drawer-overlay" id="detailDrawer">
+  <div class="drawer-backdrop" onclick="closeDrawer()"></div>
+  <div class="drawer-panel">
+    <div class="drawer-head">
+      <div class="drawer-title" id="drawerTitle">주문 상세</div>
+      <button class="drawer-close" onclick="closeDrawer()">✕</button>
+    </div>
+    <div class="drawer-body" id="drawerBody"></div>
+    <div class="drawer-actions" id="drawerActions"></div>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal-box">
+    <div class="modal-icon" id="modalIcon">⚠️</div>
+    <div class="modal-title" id="modalTitle"></div>
+    <div class="modal-desc" id="modalDesc"></div>
+    <div class="modal-btns">
+      <button class="btn btn-outline" onclick="closeModal()">취소</button>
+      <button class="btn btn-primary" id="modalConfirmBtn" onclick="confirmAction()">확인</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"><span id="toastMsg"></span></div>
+
+<script>
+/* ── AUTH ── */
+(function(){ if(!sessionStorage.getItem('modulab_admin')) location.href='index.html'; })();
+function logout(e){ if(e)e.preventDefault(); sessionStorage.removeItem('modulab_admin'); location.href='index.html'; }
+
+/* ── MOCK DATA ── */
+const MOCK_ORDERS = [
+  { id:'ORD-2026060401', buyer:'김민준', email:'minjun@email.com', product:'프로젝트 관리 자동화', price:19900, pay:'card',     status:'paid',   date:'2026-06-04 14:32', fileUrl:'https://drive.google.com/file/d/abc123' },
+  { id:'ORD-2026060402', buyer:'이서연', email:'seoyeon@email.com', product:'가계부 자동화',        price:9900,  pay:'kakao',    status:'sent',   date:'2026-06-04 13:21', fileUrl:'https://drive.google.com/file/d/def456' },
+  { id:'ORD-2026060403', buyer:'박도현', email:'dohyun@email.com',  product:'급여 관리 자동화',      price:29900, pay:'toss',     status:'done',   date:'2026-06-04 11:05', fileUrl:'https://drive.google.com/file/d/ghi789' },
+  { id:'ORD-2026060404', buyer:'최지우', email:'jiwoo@email.com',   product:'마진 계산기',           price:9900,  pay:'naver',    status:'resend', date:'2026-06-04 10:44', fileUrl:'https://drive.google.com/file/d/jkl012' },
+  { id:'ORD-2026060405', buyer:'정하은', email:'haeun@email.com',   product:'구글시트 CRM 자동화',   price:29900, pay:'transfer', status:'paid',   date:'2026-06-04 09:17', fileUrl:'https://drive.google.com/file/d/mno345' },
+  { id:'ORD-2026060406', buyer:'한지수', email:'jisu@email.com',    product:'프로젝트 관리 자동화',  price:19900, pay:'card',     status:'refund', date:'2026-06-03 22:50', fileUrl:'https://drive.google.com/file/d/pqr678' },
+  { id:'ORD-2026060407', buyer:'오승민', email:'seungmin@email.com',product:'가계부 자동화',         price:9900,  pay:'kakao',    status:'sent',   date:'2026-06-03 20:13', fileUrl:'https://drive.google.com/file/d/stu901' },
+  { id:'ORD-2026060408', buyer:'강예린', email:'yerin@email.com',   product:'구글시트 프로젝트 관리',price:19900, pay:'toss',     status:'done',   date:'2026-06-03 18:07', fileUrl:'https://drive.google.com/file/d/vwx234' },
+  { id:'ORD-2026060409', buyer:'윤지호', email:'jiho@email.com',    product:'급여 관리 자동화',      price:29900, pay:'card',     status:'paid',   date:'2026-06-03 16:55', fileUrl:'https://drive.google.com/file/d/yza567' },
+  { id:'ORD-2026060410', buyer:'임수아', email:'sua@email.com',     product:'마진 계산기',           price:9900,  pay:'naver',    status:'resend', date:'2026-06-03 15:30', fileUrl:'https://drive.google.com/file/d/bcd890' },
+  { id:'ORD-2026060411', buyer:'신민서', email:'minseo@email.com',  product:'프로젝트 관리 자동화',  price:19900, pay:'card',     status:'sent',   date:'2026-06-03 13:22', fileUrl:'https://drive.google.com/file/d/efg123' },
+  { id:'ORD-2026060412', buyer:'권태양', email:'taeyang@email.com', product:'구글시트 CRM 자동화',   price:29900, pay:'transfer', status:'paid',   date:'2026-06-03 11:04', fileUrl:'https://drive.google.com/file/d/hij456' },
+];
+
+/* ── STATE ── */
+let orders = [...MOCK_ORDERS];
+let filtered = [...orders];
+let filters = { status:'all', pay:'all', search:'', dateFrom:'', dateTo:'' };
+let sortKey = 'date'; let sortDir = -1;
+let currentPage = 1; const PAGE_SIZE = 10;
+let selectedIds = new Set();
+let pendingAction = null;
+
+/* ── INIT ── */
+function loadOrders(){
+  const saved = localStorage.getItem('modulab_orders');
+  if(saved){ try{ orders = JSON.parse(saved); } catch{} }
+  else { orders = [...MOCK_ORDERS]; }
+  updateSummary();
+  renderTable();
+  showToast('주문 내역을 불러왔습니다');
+}
+
+function updateSummary(){
+  document.getElementById('sumTotal').textContent  = orders.length;
+  document.getElementById('sumPaid').textContent   = orders.filter(o=>o.status==='paid').length;
+  document.getElementById('sumResend').textContent = orders.filter(o=>o.status==='resend').length;
+  document.getElementById('sumRefund').textContent = orders.filter(o=>o.status==='refund').length;
+}
+
+/* ── FILTER ── */
+function setFilter(type, val, el){
+  filters[type] = val;
+  const group = type === 'status' ? 'statusFilter' : 'payFilter';
+  document.querySelectorAll('#'+group+' .filter-tag').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  currentPage = 1;
+  renderTable();
+}
+
+function doSearch(){
+  filters.search = document.getElementById('searchInput').value.trim().toLowerCase();
+  filters.dateFrom = document.getElementById('dateFrom').value;
+  filters.dateTo   = document.getElementById('dateTo').value;
+  currentPage = 1;
+  renderTable();
+}
+
+function applyFilters(){
+  filtered = orders.filter(o=>{
+    if(filters.status !== 'all' && o.status !== filters.status) return false;
+    if(filters.pay    !== 'all' && o.pay    !== filters.pay)    return false;
+    if(filters.search && !o.id.toLowerCase().includes(filters.search) && !o.email.toLowerCase().includes(filters.search) && !o.buyer.includes(filters.search)) return false;
+    if(filters.dateFrom && o.date.slice(0,10) < filters.dateFrom) return false;
+    if(filters.dateTo   && o.date.slice(0,10) > filters.dateTo)   return false;
+    return true;
+  });
+  filtered.sort((a,b)=>{
+    if(sortKey==='price') return sortDir*(a.price-b.price);
+    if(sortKey==='date')  return sortDir*(a.date.localeCompare(b.date));
+    if(sortKey==='id')    return sortDir*(a.id.localeCompare(b.id));
+    return 0;
+  });
+}
+
+function sortBy(key){
+  if(sortKey===key) sortDir*=-1; else { sortKey=key; sortDir=-1; }
+  renderTable();
+}
+
+/* ── RENDER TABLE ── */
+function renderTable(){
+  applyFilters();
+  document.getElementById('filteredCount').textContent = filtered.length;
+
+  const start = (currentPage-1)*PAGE_SIZE;
+  const page  = filtered.slice(start, start+PAGE_SIZE);
+  const tbody = document.getElementById('orderTableBody');
+  const empty = document.getElementById('emptyState');
+
+  if(filtered.length === 0){
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    document.getElementById('pagination').innerHTML = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  const statusInfo = {
+    paid:   { label:'결제완료', cls:'badge-paid'   },
+    sent:   { label:'발송완료', cls:'badge-sent'   },
+    done:   { label:'구매확정', cls:'badge-done'   },
+    resend: { label:'재발송필요',cls:'badge-resend' },
+    refund: { label:'환불처리', cls:'badge-refund' },
+  };
+  const payInfo = {
+    card:     { label:'카드',        cls:'pay-card'     },
+    kakao:    { label:'카카오페이',  cls:'pay-kakao'    },
+    naver:    { label:'네이버페이',  cls:'pay-naver'    },
+    toss:     { label:'토스페이',    cls:'pay-toss'     },
+    transfer: { label:'계좌이체',    cls:'pay-transfer' },
+  };
+
+  tbody.innerHTML = page.map(o=>{
+    const si = statusInfo[o.status] || {};
+    const pi = payInfo[o.pay]       || {};
+    const checked = selectedIds.has(o.id) ? 'checked' : '';
+    return `<tr onclick="openDetail('${o.id}')" class="${selectedIds.has(o.id)?'selected':''}">
+      <td class="check-col" onclick="event.stopPropagation()">
+        <input type="checkbox" ${checked} onchange="toggleCheck('${o.id}',this)">
+      </td>
+      <td><div class="order-id">${o.id}</div></td>
+      <td>
+        <div class="buyer-name">${o.buyer}</div>
+        <div class="buyer-email">${o.email}</div>
+      </td>
+      <td><div class="product-name-cell" title="${o.product}">${o.product}</div></td>
+      <td><span class="price-cell">₩${o.price.toLocaleString()}</span></td>
+      <td><span class="pay-badge ${pi.cls}">${pi.label}</span></td>
+      <td><span class="badge ${si.cls}">${si.label}</span></td>
+      <td><span class="date-cell">${o.date}</span></td>
+      <td onclick="event.stopPropagation()">
+        <div class="action-btns">
+          ${o.status==='paid'||o.status==='resend' ? `<button class="btn btn-green btn-sm" onclick="quickResend('${o.id}')">📨 재발송</button>` : ''}
+          ${o.status!=='refund'&&o.status!=='done' ? `<button class="btn btn-red btn-sm"   onclick="openRefundModal('${o.id}')">환불</button>` : ''}
+          ${o.status==='refund' ? `<span style="font-size:11px;color:var(--text3);">처리완료</span>` : ''}
+          ${o.status==='done'   ? `<span style="font-size:11px;color:var(--text3);">확정완료</span>` : ''}
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  renderPagination();
+}
+
+/* ── PAGINATION ── */
+function renderPagination(){
+  const total = Math.ceil(filtered.length / PAGE_SIZE);
+  if(total <= 1){ document.getElementById('pagination').innerHTML=''; return; }
+  let html = `<button class="page-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>‹</button>`;
+  for(let i=1;i<=total;i++){
+    html += `<button class="page-btn ${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;
+  }
+  html += `<button class="page-btn" onclick="goPage(${currentPage+1})" ${currentPage===total?'disabled':''}>›</button>`;
+  document.getElementById('pagination').innerHTML = html;
+}
+function goPage(p){ currentPage=p; renderTable(); window.scrollTo({top:0,behavior:'smooth'}); }
+
+/* ── CHECK ── */
+function toggleCheck(id, cb){
+  if(cb.checked) selectedIds.add(id); else selectedIds.delete(id);
+  renderTable();
+}
+function toggleAllCheck(cb){
+  const start=(currentPage-1)*PAGE_SIZE;
+  const page=filtered.slice(start,start+PAGE_SIZE);
+  page.forEach(o=>{ if(cb.checked) selectedIds.add(o.id); else selectedIds.delete(o.id); });
+  renderTable();
+}
+
+/* ── DETAIL DRAWER ── */
+const STATUS_STEPS = ['paid','sent','done'];
+function openDetail(id){
+  const o = orders.find(o=>o.id===id);
+  if(!o) return;
+  const payInfo = {card:'신용·체크카드',kakao:'카카오페이',naver:'네이버페이',toss:'토스페이',transfer:'실시간 계좌이체'};
+  const statusLabel = {paid:'결제완료',sent:'발송완료',done:'구매확정',resend:'재발송 필요',refund:'환불 처리됨'};
+  const statusBadge = {paid:'badge-paid',sent:'badge-sent',done:'badge-done',resend:'badge-resend',refund:'badge-refund'};
+
+  document.getElementById('drawerTitle').textContent = '주문 상세 — ' + o.id;
+
+  const stepIdx = STATUS_STEPS.indexOf(o.status);
+  const stepperHtml = `
+    <div class="status-stepper">
+      ${['결제완료','발송완료','구매확정'].map((label,i)=>`
+        <div class="step">
+          <div class="step-dot ${i<stepIdx?'done':i===stepIdx&&stepIdx>=0?'current':''}">${i<stepIdx?'✓':i+1}</div>
+          <div class="step-label ${i<stepIdx?'done':i===stepIdx&&stepIdx>=0?'active':''}">${label}</div>
+        </div>
+      `).join('')}
+    </div>`;
+
+  document.getElementById('drawerBody').innerHTML = `
+    ${['refund','resend'].includes(o.status)
+      ? `<div style="background:${o.status==='refund'?'var(--red-light)':'var(--yellow-light)'};border:1px solid ${o.status==='refund'?'#FCA5A5':'#FDE68A'};border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;font-weight:600;color:${o.status==='refund'?'var(--red)':'#B45309'};">
+          ${o.status==='refund'?'⚠️ 환불 처리된 주문입니다':'🔄 파일 재발송이 필요한 주문입니다'}
+        </div>`
+      : stepperHtml}
+    <div class="detail-section">
+      <div class="detail-section-title">구매자 정보</div>
+      <div class="detail-row"><span class="detail-key">이름</span><span class="detail-val">${o.buyer}</span></div>
+      <div class="detail-row"><span class="detail-key">이메일</span><span class="detail-val blue">${o.email}</span></div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">결제 정보</div>
+      <div class="detail-row"><span class="detail-key">주문번호</span><span class="detail-val mono">${o.id}</span></div>
+      <div class="detail-row"><span class="detail-key">상품명</span><span class="detail-val">${o.product}</span></div>
+      <div class="detail-row"><span class="detail-key">결제금액</span><span class="detail-val mono" style="color:var(--blue);font-size:15px;font-weight:700;">₩${o.price.toLocaleString()}</span></div>
+      <div class="detail-row"><span class="detail-key">결제수단</span><span class="detail-val">${payInfo[o.pay]||o.pay}</span></div>
+      <div class="detail-row"><span class="detail-key">주문일시</span><span class="detail-val mono">${o.date}</span></div>
+      <div class="detail-row"><span class="detail-key">주문 상태</span><span class="detail-val"><span class="badge ${statusBadge[o.status]}">${statusLabel[o.status]}</span></span></div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">파일 정보</div>
+      <div class="detail-row"><span class="detail-key">파일 링크</span><span class="detail-val blue" style="cursor:pointer;" onclick="window.open('${o.fileUrl}','_blank')">${o.fileUrl ? '링크 열기 ↗' : '—'}</span></div>
+    </div>
+  `;
+
+  const actions = [];
+  if(o.status==='paid'||o.status==='resend'){
+    actions.push(`<button class="btn btn-green" onclick="quickResend('${o.id}');closeDrawer()">📨 파일 재발송</button>`);
+  }
+  if(o.status==='paid'||o.status==='sent'){
+    actions.push(`<button class="btn btn-outline" onclick="updateStatus('${o.id}','sent');closeDrawer()">발송완료로 변경</button>`);
+  }
+  if(o.status!=='refund'&&o.status!=='done'){
+    actions.push(`<button class="btn btn-red" onclick="openRefundModal('${o.id}');closeDrawer()">환불 처리</button>`);
+  }
+
+  document.getElementById('drawerActions').innerHTML =
+    `<div class="drawer-action-row">${actions.join('')}</div>` +
+    `<button class="btn btn-outline" style="width:100%;justify-content:center;" onclick="closeDrawer()">닫기</button>`;
+
+  const overlay = document.getElementById('detailDrawer');
+  overlay.classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function closeDrawer(){
+  document.getElementById('detailDrawer').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+/* ── STATUS UPDATE ── */
+function updateStatus(id, newStatus){
+  const o = orders.find(o=>o.id===id);
+  if(!o) return;
+  o.status = newStatus;
+  saveOrders();
+  updateSummary();
+  renderTable();
+  showToast('주문 상태가 업데이트되었습니다');
+}
+
+/* ── RESEND ── */
+function quickResend(id){
+  const o = orders.find(o=>o.id===id);
+  if(!o) return;
+  pendingAction = { type:'resend', id };
+  document.getElementById('modalIcon').textContent  = '📨';
+  document.getElementById('modalTitle').textContent = '파일 재발송';
+  document.getElementById('modalDesc').textContent  = `${o.buyer}(${o.email}) 님에게\n${o.product} 파일을 재발송합니다.`;
+  document.getElementById('modalConfirmBtn').className = 'btn btn-green';
+  document.getElementById('modalConfirmBtn').textContent = '재발송';
+  document.getElementById('confirmModal').classList.add('open');
+}
+
+function bulkResend(){
+  if(selectedIds.size===0){ showToast('선택된 주문이 없습니다'); return; }
+  pendingAction = { type:'bulkResend', ids:[...selectedIds] };
+  document.getElementById('modalIcon').textContent  = '📨';
+  document.getElementById('modalTitle').textContent = '선택 파일 재발송';
+  document.getElementById('modalDesc').textContent  = `선택된 ${selectedIds.size}건의 주문에 파일을 재발송합니다.`;
+  document.getElementById('modalConfirmBtn').className = 'btn btn-green';
+  document.getElementById('modalConfirmBtn').textContent = '재발송';
+  document.getElementById('confirmModal').classList.add('open');
+}
+
+/* ── REFUND ── */
+function openRefundModal(id){
+  const o = orders.find(o=>o.id===id);
+  if(!o) return;
+  pendingAction = { type:'refund', id };
+  document.getElementById('modalIcon').textContent  = '⚠️';
+  document.getElementById('modalTitle').textContent = '환불 처리';
+  document.getElementById('modalDesc').textContent  = `${o.buyer} 님의 ${o.product} 주문(₩${o.price.toLocaleString()})을 환불 처리합니다.\n토스페이먼츠 API로 자동 환불이 요청됩니다.`;
+  document.getElementById('modalConfirmBtn').className = 'btn btn-red';
+  document.getElementById('modalConfirmBtn').textContent = '환불 처리';
+  document.getElementById('confirmModal').classList.add('open');
+}
+
+function bulkRefund(){
+  if(selectedIds.size===0){ showToast('선택된 주문이 없습니다'); return; }
+  pendingAction = { type:'bulkRefund', ids:[...selectedIds] };
+  document.getElementById('modalIcon').textContent  = '⚠️';
+  document.getElementById('modalTitle').textContent = '선택 환불 처리';
+  document.getElementById('modalDesc').textContent  = `선택된 ${selectedIds.size}건의 주문을 환불 처리합니다.`;
+  document.getElementById('modalConfirmBtn').className = 'btn btn-red';
+  document.getElementById('modalConfirmBtn').textContent = '환불 처리';
+  document.getElementById('confirmModal').classList.add('open');
+}
+
+function closeModal(){ document.getElementById('confirmModal').classList.remove('open'); pendingAction=null; }
+
+async function confirmAction(){
+  if(!pendingAction){ closeModal(); return; }
+  const { type, id, ids } = pendingAction;
+  closeModal();
+
+  const TOSS_ENDPOINT = localStorage.getItem('modulab_toss_endpoint') || '';
+
+  if(type==='resend'){
+    const o = orders.find(o=>o.id===id);
+    if(o){ o.status='sent'; }
+    showToast('📨 파일 재발송 완료');
+  } else if(type==='bulkResend'){
+    ids.forEach(i=>{ const o=orders.find(o=>o.id===i); if(o&&(o.status==='paid'||o.status==='resend')) o.status='sent'; });
+    showToast(`📨 ${ids.length}건 재발송 완료`);
+    selectedIds.clear();
+  } else if(type==='refund'){
+    if(TOSS_ENDPOINT){
+      try{
+        await fetch(TOSS_ENDPOINT+'/refund', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({orderId:id}) });
+      } catch(e){ showToast('토스 API 연동 실패: '+e.message); return; }
+    }
+    const o = orders.find(o=>o.id===id);
+    if(o) o.status='refund';
+    showToast('환불 처리가 완료되었습니다');
+  } else if(type==='bulkRefund'){
+    ids.forEach(i=>{ const o=orders.find(o=>o.id===i); if(o&&o.status!=='done'&&o.status!=='refund') o.status='refund'; });
+    showToast(`${ids.length}건 환불 처리 완료`);
+    selectedIds.clear();
+  }
+
+  saveOrders();
+  updateSummary();
+  renderTable();
+}
+
+/* ── CSV EXPORT ── */
+function exportCSV(){
+  const rows = [['주문번호','구매자','이메일','상품명','결제금액','결제수단','상태','주문일시']];
+  const payLabel = {card:'카드',kakao:'카카오페이',naver:'네이버페이',toss:'토스페이',transfer:'계좌이체'};
+  const statusLabel = {paid:'결제완료',sent:'발송완료',done:'구매확정',resend:'재발송필요',refund:'환불처리'};
+  filtered.forEach(o=>rows.push([o.id,o.buyer,o.email,o.product,o.price,payLabel[o.pay]||o.pay,statusLabel[o.status]||o.status,o.date]));
+  const csv = '﻿' + rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = `modulab_orders_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  showToast('CSV 파일을 다운로드했습니다');
+}
+
+/* ── SAVE / PERSIST ── */
+function saveOrders(){ localStorage.setItem('modulab_orders', JSON.stringify(orders)); }
+
+/* ── TOAST ── */
+function showToast(msg){
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 3000);
+}
+
+/* ── KEYBOARD ── */
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape'){ closeDrawer(); closeModal(); }
+});
+
+loadOrders();
+</script>
+</body>
+</html>
