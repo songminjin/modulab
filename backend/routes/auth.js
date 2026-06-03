@@ -61,10 +61,14 @@ const handleSocialLogin = async (profile, provider, done) => {
 };
 
 // ── Passport 설정 ──
+const BACKEND_URL = process.env.NODE_ENV === 'production'
+  ? 'https://modulab-production.up.railway.app'
+  : 'http://localhost:3000';
+
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID?.trim(),
   clientSecret: process.env.GOOGLE_CLIENT_SECRET?.trim(),
-  callbackURL: `${(process.env.BACKEND_URL || 'http://localhost:3000').trim()}/api/auth/google/callback`
+  callbackURL: `${BACKEND_URL}/api/auth/google/callback`
 }, (accessToken, refreshToken, profile, done) => handleSocialLogin(profile, 'google', done)));
 
 passport.use(new KakaoStrategy({
