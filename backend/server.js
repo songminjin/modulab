@@ -11,8 +11,10 @@ const app = express();
 
 // ── 보안 미들웨어 ──
 app.use(helmet());
+const _frontendUrl = process.env.FRONTEND_URL || 'http://localhost:8080';
+const _corsOrigin = (() => { try { return new URL(_frontendUrl).origin; } catch { return _frontendUrl; } })();
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:8080',
+  origin: _corsOrigin,
   credentials: true
 }));
 app.use(express.json());
