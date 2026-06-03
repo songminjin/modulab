@@ -214,7 +214,7 @@
         <button class="nav-btn nav-btn-ghost" onclick="location.href='login.html'">로그인</button>
         <button class="nav-btn nav-btn-primary" onclick="location.href='register.html'">회원가입</button>
       </div>
-      <div class="cart-btn">🛒<div class="cart-badge">0</div></div>
+      <a href="cart.html" class="cart-btn">🛒<div class="cart-badge" id="cart-badge-nav">0</div></a>
     </div>
   </div>
 </nav>
@@ -591,6 +591,9 @@ async function handleRegister(e) {
 
 function registerWithGoogle() { window.location.href = `${API_URL}/api/auth/google`; }
 function registerWithKakao() { window.location.href = `${API_URL}/api/auth/kakao`; }
+</script>
+<script>
+(function(){var c=JSON.parse(localStorage.getItem('modulab_cart')||'[]');var b=document.getElementById('cart-badge-nav');if(b)b.textContent=c.length;})();
 </script>
 </body>
 </html>

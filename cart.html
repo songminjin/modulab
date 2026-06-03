@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>장바구니 — 모듈랩</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.cart-page-wrap {
+  max-width: 1280px; margin: 0 auto;
+  padding: 40px 40px 80px;
+  display: grid; grid-template-columns: 1fr 360px;
+  gap: 32px; align-items: start;
+}
+.cart-page-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 40px; letter-spacing: .02em; color: var(--navy);
+  margin-bottom: 4px;
+}
+.cart-page-count {
+  font-size: 14px; color: var(--text3); margin-bottom: 24px;
+}
+.cart-page-count strong { color: var(--blue); font-weight: 700; }
+
+/* Table Header */
+.cart-table-header {
+  display: flex; align-items: center;
+  padding: 12px 16px;
+  background: var(--slate-light);
+  border-radius: 10px 10px 0 0;
+  border: 1px solid var(--border); border-bottom: none;
+  gap: 12px;
+}
+.cart-check-all-label {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 600; color: var(--text2);
+  cursor: pointer; flex: 1; user-select: none;
+}
+.cart-header-actions { display: flex; gap: 8px; }
+.cart-del-btn {
+  padding: 6px 14px; border-radius: 7px;
+  font-size: 12px; font-weight: 600;
+  border: 1px solid var(--border); background: var(--white);
+  color: var(--text2); cursor: pointer; font-family: inherit; transition: all .15s;
+}
+.cart-del-btn:hover { border-color: #EF4444; color: #EF4444; background: #FEF2F2; }
+
+/* Items */
+.cart-items-wrap {
+  border: 1px solid var(--border); border-radius: 0 0 10px 10px;
+}
+.cart-item {
+  display: flex; align-items: center; gap: 16px;
+  padding: 20px 16px; border-bottom: 1px solid var(--border);
+  transition: background .15s;
+}
+.cart-item:last-child { border-bottom: none; }
+.cart-item:hover { background: #FAFBFC; }
+
+.cart-checkbox {
+  width: 18px; height: 18px; accent-color: var(--blue);
+  cursor: pointer; flex-shrink: 0;
+}
+.cart-item-img {
+  width: 80px; height: 60px; border-radius: 10px;
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; flex-shrink: 0;
+}
+.cart-item-info { flex: 1; min-width: 0; }
+.cart-item-badge {
+  font-size: 10px; font-weight: 700; padding: 2px 8px;
+  border-radius: 4px; letter-spacing: .04em;
+  margin-bottom: 6px; display: inline-block;
+}
+.cart-item-name {
+  font-size: 15px; font-weight: 700; color: var(--text);
+  margin-bottom: 4px; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+}
+.cart-item-desc { font-size: 12px; color: var(--text3); }
+.cart-item-price {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px; font-weight: 700; color: var(--navy);
+  white-space: nowrap; flex-shrink: 0;
+}
+.cart-item-remove {
+  width: 32px; height: 32px; border-radius: 8px;
+  border: 1px solid var(--border); background: none;
+  color: var(--text3); font-size: 14px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all .15s; line-height: 1;
+}
+.cart-item-remove:hover { border-color: #EF4444; color: #EF4444; background: #FEF2F2; }
+
+/* Summary */
+.cart-summary-card {
+  border: 1px solid var(--border); border-radius: 16px;
+  padding: 24px; background: var(--white);
+  position: sticky; top: 96px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.06);
+}
+.cart-summary-title {
+  font-size: 16px; font-weight: 700; color: var(--text);
+  margin-bottom: 20px; padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.cart-summary-row {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 14px; color: var(--text2); margin-bottom: 12px;
+}
+.cart-summary-row.total {
+  font-size: 16px; font-weight: 700; color: var(--text);
+  padding-top: 16px; border-top: 1px solid var(--border); margin-top: 8px;
+}
+.cart-summary-price { font-family: 'JetBrains Mono', monospace; font-weight: 700; }
+.cart-summary-price.highlight { color: var(--blue); font-size: 22px; }
+
+.cart-checkout-btn {
+  display: block; width: 100%; padding: 14px;
+  background: var(--blue); color: white; border: none; border-radius: 10px;
+  font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit;
+  transition: all .2s; margin-top: 20px; text-align: center;
+}
+.cart-checkout-btn:hover { background: var(--blue-dark); }
+.cart-checkout-btn:disabled { background: var(--text3); cursor: not-allowed; }
+
+.cart-continue-btn {
+  display: block; width: 100%; padding: 12px;
+  background: var(--slate-light); color: var(--text2);
+  border: 1px solid var(--border); border-radius: 10px;
+  font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit;
+  transition: all .15s; margin-top: 10px; text-align: center; text-decoration: none;
+}
+.cart-continue-btn:hover { background: var(--border); }
+
+.cart-license-notice {
+  margin-top: 20px; padding: 12px 14px;
+  background: var(--blue-light); border: 1px solid var(--blue-mid);
+  border-radius: 10px; font-size: 12px; color: var(--blue); line-height: 1.6;
+}
+.cart-license-notice strong {
+  font-weight: 700; display: block; margin-bottom: 4px;
+}
+
+/* Empty */
+.cart-empty {
+  text-align: center; padding: 80px 20px; color: var(--text3);
+  border: 1px solid var(--border); border-radius: 10px; background: var(--white);
+}
+.cart-empty-icon { font-size: 56px; margin-bottom: 16px; }
+.cart-empty-title { font-size: 18px; font-weight: 700; color: var(--text2); margin-bottom: 8px; }
+.cart-empty-desc { font-size: 14px; color: var(--text3); margin-bottom: 24px; }
+.cart-empty-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 24px; background: var(--blue); color: white;
+  border: none; border-radius: 10px;
+  font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit;
+  transition: all .2s; text-decoration: none;
+}
+.cart-empty-btn:hover { background: var(--blue-dark); }
+
+@media (max-width: 1024px) {
+  .cart-page-wrap { grid-template-columns: 1fr; padding: 32px 24px 60px; }
+  .cart-summary-card { position: static; }
+}
+@media (max-width: 768px) {
+  .cart-page-wrap { padding: 24px 20px 48px; gap: 24px; }
+  .cart-item-img { width: 64px; height: 48px; font-size: 22px; }
+  .cart-page-title { font-size: 32px; }
+}
+@media (max-width: 480px) {
+  .cart-page-wrap { padding: 20px 16px 48px; }
+  .cart-table-header { flex-wrap: wrap; gap: 8px; }
+  .cart-item { gap: 10px; }
+  .cart-item-price { font-size: 14px; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-left">
+      <div class="hamburger" onclick="openDrawer()">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+    <div class="nav-center">
+      <a href="index.html" class="nav-logo">
+        <div class="logo-mark"></div>
+        Modu<span>Lab</span>
+      </a>
+    </div>
+    <div class="nav-right">
+      <div class="nav-search">
+        <span style="color:var(--text3);font-size:14px;">🔍</span>
+        <input type="text" placeholder="상품 검색...">
+      </div>
+      <div id="nav-auth" style="display:flex;align-items:center;gap:8px;">
+        <button class="nav-btn nav-btn-ghost" onclick="location.href='login.html'">로그인</button>
+        <button class="nav-btn nav-btn-primary" onclick="location.href='register.html'">회원가입</button>
+      </div>
+      <a href="cart.html" class="cart-btn" style="background:var(--blue-light);border-color:var(--blue-mid);">🛒<div class="cart-badge" id="cart-badge-nav">0</div></a>
+    </div>
+  </div>
+</nav>
+
+<!-- DRAWER -->
+<div class="drawer-overlay" id="drawerOverlay">
+  <div class="drawer-backdrop" onclick="closeDrawer()"></div>
+  <div class="drawer-panel">
+    <div class="drawer-header">
+      <div class="drawer-logo">
+        <div class="logo-mark" style="width:28px;height:28px;"></div>
+        Modu<span>Lab</span>
+      </div>
+      <button class="drawer-close" onclick="closeDrawer()">✕</button>
+    </div>
+    <div class="drawer-search">
+      <span style="color:var(--text3);">🔍</span>
+      <input type="text" placeholder="상품 검색...">
+    </div>
+    <div class="drawer-section-title">카테고리</div>
+    <ul class="drawer-nav">
+      <li><a href="index.html"><span class="cat-icon">🏠</span>전체 상품</a></li>
+      <li><a href="category-excel.html"><span class="cat-icon">📊</span>엑셀 프로그램</a></li>
+      <li><a href="category-sheets.html"><span class="cat-icon">🔧</span>구글시트 자동화</a></li>
+      <li><a href="category-short.html"><span class="cat-icon">🎬</span>숏폼 템플릿</a></li>
+      <li><a href="category-detail.html"><span class="cat-icon">🖼️</span>상세페이지 제작</a></li>
+      <li><a href="category-web.html"><span class="cat-icon">🌐</span>홈페이지 제작</a></li>
+      <li><a href="category-program.html"><span class="cat-icon">⚙️</span>프로그램 제작</a></li>
+      <li><a href="event.html" class="hot"><span class="cat-icon">🎁</span>이벤트</a></li>
+    </ul>
+    <div class="drawer-divider"></div>
+    <div class="drawer-section-title">내 계정</div>
+    <ul class="drawer-nav">
+      <li><a href="#"><span class="cat-icon">👤</span>마이페이지</a></li>
+      <li><a href="cart.html" class="active-cat"><span class="cat-icon">🛒</span>장바구니</a></li>
+      <li><a href="category-program.html"><span class="cat-icon">💬</span>문의하기</a></li>
+    </ul>
+    <div class="drawer-btns" id="drawer-auth">
+      <button class="nav-btn nav-btn-ghost" onclick="location.href='login.html'">로그인</button>
+      <button class="nav-btn nav-btn-primary" onclick="location.href='register.html'">회원가입</button>
+    </div>
+  </div>
+</div>
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb">
+  <a href="index.html">홈</a>
+  <span style="color:var(--border);">/</span>
+  <span>장바구니</span>
+</div>
+
+<!-- CART PAGE -->
+<div class="cart-page-wrap">
+
+  <!-- LEFT: Cart Items -->
+  <div class="cart-main">
+    <h1 class="cart-page-title">장바구니</h1>
+    <div class="cart-page-count">
+      총 <strong id="cart-total-count">0</strong>개 상품
+    </div>
+
+    <!-- Empty State -->
+    <div class="cart-empty" id="cart-empty" style="display:none;">
+      <div class="cart-empty-icon">🛒</div>
+      <div class="cart-empty-title">장바구니가 비어 있어요</div>
+      <div class="cart-empty-desc">마음에 드는 상품을 담아보세요!</div>
+      <a href="index.html" class="cart-empty-btn">쇼핑 계속하기 →</a>
+    </div>
+
+    <!-- Cart Table -->
+    <div id="cart-table-area">
+      <div class="cart-table-header">
+        <label class="cart-check-all-label">
+          <input type="checkbox" class="cart-checkbox" id="check-all" onchange="toggleAll(this)">
+          전체 선택
+        </label>
+        <div class="cart-header-actions">
+          <button class="cart-del-btn" onclick="deleteSelected()">선택 삭제</button>
+          <button class="cart-del-btn" onclick="deleteAll()">전체 삭제</button>
+        </div>
+      </div>
+      <div class="cart-items-wrap" id="cart-items-list"></div>
+    </div>
+
+    <!-- Recommend Section -->
+    <div style="margin-top:48px;">
+      <div class="section-header" style="margin-bottom:20px;">
+        <div class="section-title" style="font-size:18px;">이런 상품은 어떠세요?</div>
+      </div>
+      <div class="product-grid">
+        <a href="product.html?id=excel-pm&cat=excel&name=프로젝트+관리+자동화&price=19900&emoji=📊" class="product-card">
+          <div class="product-img" style="background:#EFF6FF;"><div class="product-img-inner" style="background:#DBEAFE;">📊</div><div class="product-cat-badge badge-excel">EXCEL</div></div>
+          <div class="product-body"><div class="product-name">프로젝트 관리 자동화</div><div class="product-creator">by 모듈랩 · 엑셀</div><div class="product-footer"><div class="product-price"><span class="won">₩</span>19,900</div><button class="add-btn" onclick="quickAdd(event,'excel-pm','프로젝트 관리 자동화',19900,'📊','excel')">담기</button></div></div>
+        </a>
+        <a href="product.html?id=excel-hh&cat=excel&name=가계부+자동화&price=9900&emoji=💰" class="product-card">
+          <div class="product-img" style="background:#F0FDF4;"><div class="product-img-inner" style="background:#DCFCE7;">💰</div><div class="product-cat-badge badge-excel">EXCEL</div></div>
+          <div class="product-body"><div class="product-name">가계부 자동화</div><div class="product-creator">by 모듈랩 · 엑셀</div><div class="product-footer"><div class="product-price"><span class="won">₩</span>9,900</div><button class="add-btn" onclick="quickAdd(event,'excel-hh','가계부 자동화',9900,'💰','excel')">담기</button></div></div>
+        </a>
+        <a href="product.html?id=sheets-pm&cat=sheets&name=구글시트+프로젝트+관리&price=19900&emoji=🔧" class="product-card">
+          <div class="product-img" style="background:#FEFCE8;"><div class="product-img-inner" style="background:#FEF9C3;">🔧</div><div class="product-cat-badge badge-sheets">SHEETS</div></div>
+          <div class="product-body"><div class="product-name">구글시트 프로젝트 관리</div><div class="product-creator">by 모듈랩 · 구글시트</div><div class="product-footer"><div class="product-price"><span class="won">₩</span>19,900</div><button class="add-btn" onclick="quickAdd(event,'sheets-pm','구글시트 프로젝트 관리',19900,'🔧','sheets')">담기</button></div></div>
+        </a>
+        <a href="product.html?id=sheets-crm&cat=sheets&name=구글시트+CRM+자동화&price=29900&emoji=⚙️" class="product-card">
+          <div class="product-img" style="background:#F0F9FF;"><div class="product-img-inner" style="background:#E0F2FE;">⚙️</div><div class="product-cat-badge badge-sheets">SHEETS</div></div>
+          <div class="product-body"><div class="product-name">구글시트 CRM 자동화</div><div class="product-creator">by 모듈랩 · 구글시트</div><div class="product-footer"><div class="product-price"><span class="won">₩</span>29,900</div><button class="add-btn" onclick="quickAdd(event,'sheets-crm','구글시트 CRM 자동화',29900,'⚙️','sheets')">담기</button></div></div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Order Summary -->
+  <div>
+    <div class="cart-summary-card">
+      <div class="cart-summary-title">주문 요약</div>
+      <div class="cart-summary-row">
+        <span>선택 상품 수</span>
+        <span class="cart-summary-price" id="summary-count">0개</span>
+      </div>
+      <div class="cart-summary-row">
+        <span>상품 금액</span>
+        <span class="cart-summary-price" id="summary-subtotal">₩0</span>
+      </div>
+      <div class="cart-summary-row">
+        <span>다운로드</span>
+        <span style="color:var(--green);font-weight:700;font-size:13px;">즉시 무료</span>
+      </div>
+      <div class="cart-summary-row total">
+        <span>총 결제 금액</span>
+        <span class="cart-summary-price highlight" id="summary-total">₩0</span>
+      </div>
+      <button class="cart-checkout-btn" id="checkout-btn" onclick="goCheckout()" disabled>결제하기</button>
+      <a href="index.html" class="cart-continue-btn">쇼핑 계속하기</a>
+      <div class="cart-license-notice">
+        <strong>📋 라이선스 안내</strong>
+        구매자 개인 사용 한정 · 개인 수정 허용 · 수정본 배포 불가
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="logo-wrap"><div class="logo-mark"></div><div class="brand-name">Modu<span>Lab</span></div></div>
+      <p>혼자 일해도 팀처럼 돌아가는<br>업무 시스템을 만듭니다.</p>
+    </div>
+    <div class="footer-col">
+      <h4>카테고리</h4>
+      <ul>
+        <li><a href="category-excel.html">엑셀 프로그램</a></li>
+        <li><a href="category-sheets.html">구글시트 자동화</a></li>
+        <li><a href="category-short.html">숏폼 템플릿</a></li>
+        <li><a href="category-detail.html">상세페이지 제작</a></li>
+        <li><a href="category-web.html">홈페이지 제작</a></li>
+        <li><a href="category-program.html">프로그램 제작</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>빠른 링크</h4>
+      <ul>
+        <li><a href="index.html">홈</a></li>
+        <li><a href="#">판매자 소개</a></li>
+        <li><a href="event.html">할인 상품</a></li>
+        <li><a href="category-program.html">문의하기</a></li>
+        <li><a href="#">마이페이지</a></li>
+        <li><a href="cart.html">장바구니</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>정책 안내</h4>
+      <ul>
+        <li><a href="#">이용약관</a></li>
+        <li><a href="#">개인정보처리방침</a></li>
+        <li><a href="#">라이선스 정책</a></li>
+        <li><a href="#">환불 정책</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 ModuLab. All rights reserved.</p>
+    <div class="footer-biz">사업자등록번호: 000-00-00000 · 통신판매업: 제0000-서울-0000호</div>
+  </div>
+</footer>
+
+<script src="auth.js"></script>
+<script>
+let cart = JSON.parse(localStorage.getItem('modulab_cart') || '[]');
+
+function saveCart() { localStorage.setItem('modulab_cart', JSON.stringify(cart)); }
+
+function updateBadge() {
+  const b = document.getElementById('cart-badge-nav');
+  if (b) b.textContent = cart.length;
+}
+
+function removeItem(id) {
+  cart = cart.filter(i => i.id !== id);
+  saveCart(); renderCart(); updateBadge();
+}
+
+function deleteSelected() {
+  const checked = cart.filter(i => i.checked);
+  if (!checked.length) { alert('선택된 상품이 없어요.'); return; }
+  cart = cart.filter(i => !i.checked);
+  saveCart(); renderCart(); updateBadge();
+}
+
+function deleteAll() {
+  if (!cart.length) return;
+  if (!confirm('장바구니를 전부 비울까요?')) return;
+  cart = [];
+  saveCart(); renderCart(); updateBadge();
+}
+
+function toggleAll(checkbox) {
+  cart.forEach(i => i.checked = checkbox.checked);
+  saveCart(); renderCart();
+}
+
+function toggleItem(id, checked) {
+  const item = cart.find(i => i.id === id);
+  if (item) item.checked = checked;
+  saveCart(); updateSummary(); syncAllCheckbox();
+}
+
+function syncAllCheckbox() {
+  const el = document.getElementById('check-all');
+  if (!el) return;
+  el.checked = cart.length > 0 && cart.every(i => i.checked);
+  el.indeterminate = cart.some(i => i.checked) && !cart.every(i => i.checked);
+}
+
+function updateSummary() {
+  const sel = cart.filter(i => i.checked);
+  const total = sel.reduce((s, i) => s + i.price, 0);
+  document.getElementById('summary-count').textContent = sel.length + '개';
+  document.getElementById('summary-subtotal').textContent = '₩' + total.toLocaleString();
+  document.getElementById('summary-total').textContent = '₩' + total.toLocaleString();
+  const btn = document.getElementById('checkout-btn');
+  btn.disabled = sel.length === 0;
+  btn.textContent = sel.length > 0 ? `결제하기 (₩${total.toLocaleString()})` : '결제하기';
+}
+
+function catBadgeClass(cat) {
+  return { excel: 'badge-excel', sheets: 'badge-sheets', short: 'badge-short' }[cat] || '';
+}
+function catLabel(cat) {
+  return { excel: 'EXCEL', sheets: 'SHEETS', short: 'TEMPLATE' }[cat] || cat.toUpperCase();
+}
+function catBg(cat) {
+  return { excel: '#EFF6FF', sheets: '#FEFCE8', short: '#F5F3FF' }[cat] || '#F1F5F9';
+}
+
+function renderCart() {
+  const emptyEl = document.getElementById('cart-empty');
+  const tableArea = document.getElementById('cart-table-area');
+  const listEl = document.getElementById('cart-items-list');
+  document.getElementById('cart-total-count').textContent = cart.length;
+
+  if (cart.length === 0) {
+    emptyEl.style.display = 'block';
+    tableArea.style.display = 'none';
+  } else {
+    emptyEl.style.display = 'none';
+    tableArea.style.display = 'block';
+    listEl.innerHTML = cart.map(item => `
+      <div class="cart-item">
+        <input type="checkbox" class="cart-checkbox" ${item.checked ? 'checked' : ''}
+          onchange="toggleItem('${item.id}', this.checked)">
+        <div class="cart-item-img" style="background:${catBg(item.cat)};">${item.emoji}</div>
+        <div class="cart-item-info">
+          <div class="cart-item-badge ${catBadgeClass(item.cat)}">${catLabel(item.cat)}</div>
+          <div class="cart-item-name">${item.name}</div>
+          <div class="cart-item-desc">by 모듈랩 · 결제 즉시 이메일 발송</div>
+        </div>
+        <div class="cart-item-price">₩${item.price.toLocaleString()}</div>
+        <button class="cart-item-remove" onclick="removeItem('${item.id}')" title="삭제">✕</button>
+      </div>
+    `).join('');
+  }
+  updateSummary();
+  syncAllCheckbox();
+}
+
+function goCheckout() {
+  const sel = cart.filter(i => i.checked);
+  if (!sel.length) return;
+  localStorage.setItem('modulab_checkout', JSON.stringify(sel));
+  location.href = 'checkout.html';
+}
+
+function quickAdd(e, id, name, price, emoji, cat) {
+  e.preventDefault(); e.stopPropagation();
+  if (cart.find(i => i.id === id)) { alert('이미 장바구니에 담겨 있어요!'); return; }
+  cart.push({ id, name, price, emoji, cat, checked: true });
+  saveCart(); renderCart(); updateBadge();
+  const btn = e.target;
+  const orig = btn.textContent;
+  btn.textContent = '✓ 담김';
+  btn.style.background = 'var(--green)';
+  setTimeout(() => { btn.textContent = orig; btn.style.background = ''; }, 1200);
+}
+
+function openDrawer() {
+  const d = document.getElementById('drawerOverlay');
+  d.style.display = 'block';
+  setTimeout(() => d.classList.add('open'), 10);
+  document.body.style.overflow = 'hidden';
+}
+function closeDrawer() {
+  const d = document.getElementById('drawerOverlay');
+  d.classList.remove('open');
+  setTimeout(() => { d.style.display = 'none'; }, 260);
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+
+renderCart();
+updateBadge();
+</script>
+</body>
+</html>
