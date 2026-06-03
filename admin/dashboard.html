@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>대시보드 — 모듈랩 관리자</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ── Reset ── */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; overflow: hidden; }
+body { font-family: 'Noto Sans KR', sans-serif; color: #0F172A; background: #F1F5F9; line-height: 1.5; }
+a { text-decoration: none; color: inherit; }
+
+/* ── Mobile block ── */
+.mobile-block {
+  display: none; height: 100vh;
+  flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 40px; background: #F1F5F9; gap: 12px;
+}
+.mobile-block h2 { font-size: 20px; font-weight: 700; }
+.mobile-block p { font-size: 14px; color: #64748B; max-width: 320px; }
+.mobile-back {
+  display: inline-block; margin-top: 8px; padding: 10px 22px;
+  background: #2563EB; color: white; border-radius: 8px;
+  font-size: 14px; font-weight: 600;
+}
+@media (max-width: 767px) {
+  .mobile-block { display: flex; }
+  .admin-wrap { display: none !important; }
+}
+
+/* ── Admin Wrapper ── */
+.admin-wrap { display: flex; height: 100vh; }
+
+/* ══════════ SIDEBAR ══════════ */
+.sidebar {
+  width: 220px; min-width: 220px; height: 100vh;
+  background: #0F172A;
+  display: flex; flex-direction: column;
+  flex-shrink: 0; overflow-y: auto;
+}
+.sidebar-logo {
+  display: flex; align-items: center; gap: 8px;
+  padding: 20px 16px 16px;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+  flex-shrink: 0;
+}
+.logo-mark {
+  width: 32px; height: 32px; background: #2563EB;
+  border-radius: 7px; position: relative; overflow: hidden; flex-shrink: 0;
+}
+.logo-mark::before {
+  content: ''; position: absolute; top: 3px; left: 3px;
+  width: 13px; height: 13px; background: rgba(255,255,255,.3); border-radius: 3px;
+}
+.logo-mark::after {
+  content: ''; position: absolute; bottom: 3px; right: 3px;
+  width: 13px; height: 13px; background: #16A34A; border-radius: 3px;
+}
+.logo-text {
+  font-family: 'Bebas Neue', sans-serif; font-size: 19px;
+  color: white; letter-spacing: .04em; line-height: 1;
+}
+.logo-text em { color: #60A5FA; font-style: normal; }
+.admin-badge {
+  font-family: 'JetBrains Mono', monospace; font-size: 8px; font-weight: 700;
+  letter-spacing: .12em; text-transform: uppercase;
+  background: rgba(37,99,235,.35); color: #93C5FD;
+  padding: 2px 5px; border-radius: 3px; margin-left: auto; flex-shrink: 0;
+}
+
+.sidebar-nav { flex: 1; padding: 8px 0; }
+.nav-section-label {
+  font-size: 9px; font-weight: 700; letter-spacing: .12em;
+  color: #334155; text-transform: uppercase;
+  padding: 10px 18px 5px;
+}
+.sidebar-nav ul { list-style: none; padding: 0 7px; }
+.sidebar-nav li a {
+  display: flex; align-items: center; gap: 9px;
+  padding: 9px 11px; border-radius: 8px;
+  font-size: 13px; font-weight: 500; color: #94A3B8;
+  transition: all .15s; margin-bottom: 1px;
+}
+.sidebar-nav li a:hover { background: rgba(255,255,255,.06); color: #CBD5E1; }
+.sidebar-nav li a.active { background: rgba(37,99,235,.2); color: #60A5FA; font-weight: 700; }
+.nav-icon { font-size: 15px; width: 18px; text-align: center; flex-shrink: 0; }
+.nav-soon {
+  font-family: 'JetBrains Mono', monospace; font-size: 8px;
+  background: rgba(255,255,255,.05); color: #334155;
+  padding: 1px 5px; border-radius: 3px; margin-left: auto;
+}
+
+.sidebar-divider { height: 1px; background: rgba(255,255,255,.06); margin: 6px 16px; }
+.sidebar-footer { padding: 8px 7px 20px; flex-shrink: 0; }
+.back-to-store {
+  display: flex; align-items: center; gap: 9px;
+  padding: 9px 11px; border-radius: 8px;
+  font-size: 13px; color: #475569; transition: all .15s;
+}
+.back-to-store:hover { background: rgba(255,255,255,.05); color: #64748B; }
+
+/* ══════════ ADMIN MAIN ══════════ */
+.admin-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+
+/* Header */
+.admin-header {
+  background: white; border-bottom: 1px solid #E2E8F0;
+  padding: 0 28px; height: 58px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0; gap: 16px;
+}
+.hdr-breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+.bc-home { color: #94A3B8; }
+.bc-sep { color: #CBD5E1; font-size: 11px; }
+.bc-cur { font-weight: 700; color: #0F172A; }
+.hdr-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.notif-btn {
+  position: relative; width: 34px; height: 34px;
+  background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px;
+  cursor: pointer; font-size: 15px;
+  display: flex; align-items: center; justify-content: center;
+}
+.notif-dot {
+  position: absolute; top: 6px; right: 6px;
+  width: 7px; height: 7px; background: #DC2626; border-radius: 50%;
+  display: none; border: 1.5px solid white;
+}
+.user-chip { display: flex; align-items: center; gap: 7px; }
+.user-avatar {
+  width: 30px; height: 30px; background: #2563EB; color: white;
+  border-radius: 50%; font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.user-name-hdr { font-size: 13px; font-weight: 600; color: #0F172A; }
+.logout-btn {
+  padding: 6px 13px; background: none; border: 1px solid #E2E8F0;
+  border-radius: 7px; font-size: 12px; font-weight: 500; color: #64748B;
+  cursor: pointer; font-family: inherit; transition: all .15s;
+}
+.logout-btn:hover { background: #FEF2F2; color: #DC2626; border-color: #FECACA; }
+
+/* Content */
+.admin-content { flex: 1; overflow-y: auto; padding: 22px 28px 32px; }
+
+.page-title-row {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 18px;
+}
+.page-title { font-size: 20px; font-weight: 700; color: #0F172A; }
+.page-date { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #94A3B8; }
+
+/* ── Stat Cards ── */
+.stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 16px; }
+.stat-card {
+  background: white; border: 1px solid #E2E8F0; border-radius: 12px;
+  padding: 16px 18px; display: flex; align-items: center; gap: 14px;
+}
+.stat-icon {
+  width: 42px; height: 42px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.stat-label { font-size: 11px; color: #64748B; margin-bottom: 3px; }
+.stat-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 18px; font-weight: 500; color: #0F172A; line-height: 1;
+}
+.stat-sub { font-size: 11px; color: #94A3B8; margin-top: 3px; }
+
+/* ── Mid section ── */
+.mid-grid { display: grid; grid-template-columns: 3fr 2fr; gap: 12px; margin-bottom: 16px; }
+
+/* ── Bottom section ── */
+.bottom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* ── Cards ── */
+.card { background: white; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 20px; }
+.card-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.card-title { font-size: 14px; font-weight: 700; color: #0F172A; }
+.card-badge {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  background: #EFF6FF; color: #2563EB; padding: 2px 7px; border-radius: 4px;
+}
+.card-link { font-size: 12px; color: #2563EB; }
+.card-link:hover { text-decoration: underline; }
+
+/* ── Chart ── */
+.chart-wrap { display: flex; gap: 5px; height: 140px; }
+.chart-col {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  min-width: 0; cursor: default;
+}
+.chart-col:hover .chart-bar { filter: brightness(.85); }
+.chart-val {
+  font-family: 'JetBrains Mono', monospace; font-size: 9px; color: #94A3B8;
+  height: 13px; display: flex; align-items: flex-end;
+  white-space: nowrap; overflow: hidden; text-overflow: clip;
+}
+.chart-bar-area { flex: 1; width: 100%; display: flex; flex-direction: column; justify-content: flex-end; }
+.chart-bar {
+  width: 100%; border-radius: 3px 3px 0 0;
+  background: #DBEAFE; transition: filter .15s;
+}
+.chart-bar.filled { background: #3B82F6; }
+.chart-bar.today { background: #2563EB; }
+.chart-date { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #94A3B8; height: 14px; }
+.chart-date.today { color: #2563EB; font-weight: 700; }
+
+/* ── Order list ── */
+.order-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 0; border-bottom: 1px solid #F8FAFC; gap: 10px;
+}
+.order-item:last-child { border-bottom: none; }
+.order-left { flex: 1; min-width: 0; }
+.order-num {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #94A3B8;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.order-buyer { font-size: 12px; font-weight: 600; color: #0F172A; margin-top: 1px; }
+.order-product { font-size: 11px; color: #94A3B8; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.order-right { text-align: right; flex-shrink: 0; }
+.order-amount { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 500; color: #0F172A; }
+.order-status {
+  display: inline-block; font-size: 10px; font-weight: 700;
+  padding: 2px 6px; border-radius: 4px; margin-top: 2px; letter-spacing: .02em;
+}
+.s-paid { background: #DCFCE7; color: #16A34A; }
+.s-pending { background: #FEE2E2; color: #DC2626; }
+.s-cancelled { background: #F1F5F9; color: #64748B; }
+.s-refunded { background: #FEF3C7; color: #D97706; }
+
+/* ── Top products ── */
+.top-item {
+  display: flex; align-items: center; gap: 11px;
+  padding: 10px 0; border-bottom: 1px solid #F8FAFC;
+}
+.top-item:last-child { border-bottom: none; }
+.rank-badge {
+  width: 24px; height: 24px; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700;
+  flex-shrink: 0;
+}
+.r1 { background: #FEF3C7; color: #D97706; }
+.r2 { background: #F1F5F9; color: #64748B; }
+.r3 { background: #FFF7ED; color: #C2410C; }
+.top-info { flex: 1; min-width: 0; }
+.top-name { font-size: 13px; font-weight: 600; color: #0F172A; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.top-sales { font-size: 11px; color: #94A3B8; margin-top: 1px; }
+.top-rev { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #475569; flex-shrink: 0; }
+
+/* ── Alerts ── */
+.alert-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 0; border-bottom: 1px solid #F8FAFC;
+}
+.alert-item:last-child { border-bottom: none; }
+.alert-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+.dot-red { background: #DC2626; }
+.dot-orange { background: #F59E0B; }
+.dot-blue { background: #2563EB; }
+.alert-body { flex: 1; min-width: 0; }
+.alert-title { font-size: 13px; font-weight: 600; color: #0F172A; }
+.alert-desc { font-size: 11px; color: #64748B; margin-top: 2px; }
+.alert-link { font-size: 12px; color: #2563EB; flex-shrink: 0; white-space: nowrap; align-self: center; }
+.alert-link:hover { text-decoration: underline; }
+.alert-count-badge {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700;
+  background: #FEE2E2; color: #DC2626;
+  padding: 2px 7px; border-radius: 10px; min-width: 22px; text-align: center;
+}
+
+/* ── Empty ── */
+.empty-state { text-align: center; padding: 24px 16px; color: #CBD5E1; font-size: 13px; }
+.empty-icon { font-size: 26px; margin-bottom: 6px; }
+
+/* ── Loading skeleton ── */
+.skeleton { background: linear-gradient(90deg,#f1f5f9 25%,#e2e8f0 50%,#f1f5f9 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 6px; }
+@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+.skel-line { height: 12px; margin-bottom: 6px; }
+.skel-val { height: 20px; width: 80px; margin-bottom: 4px; }
+</style>
+</head>
+<body>
+
+<!-- Auth guard — 두 경로 모두 허용:
+     1) 메인 사이트 로그인 (localStorage user, email=songminjin123@gmail.com)
+     2) admin/index.html 비밀번호 로그인 (sessionStorage modulab_admin) -->
+<script>
+(function(){
+  var ADMIN_EMAIL = 'songminjin123@gmail.com';
+  var hasSession = sessionStorage.getItem('modulab_admin') === 'true';
+  var hasMainAuth = false;
+  try {
+    var u = JSON.parse(localStorage.getItem('user'));
+    hasMainAuth = !!(u && (u.email === ADMIN_EMAIL || u.role === 'admin'));
+  } catch(e) {}
+  if (!hasSession && !hasMainAuth) location.replace('index.html');
+})();
+</script>
+
+<!-- Mobile block -->
+<div class="mobile-block">
+  <div style="font-size:52px;">🖥️</div>
+  <h2>PC에서 접속해주세요</h2>
+  <p>관리자 페이지는 768px 이상의 화면에서만 사용할 수 있습니다.</p>
+  <a href="../index.html" class="mobile-back">쇼핑몰로 돌아가기</a>
+</div>
+
+<!-- ════ ADMIN LAYOUT ════ -->
+<div class="admin-wrap">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark"></div>
+      <span class="logo-text">Modu<em>Lab</em></span>
+      <span class="admin-badge">ADMIN</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">메뉴</div>
+      <ul>
+        <li>
+          <a href="dashboard.html" class="active">
+            <span class="nav-icon">📊</span>대시보드
+          </a>
+        </li>
+        <li>
+          <a href="products.html">
+            <span class="nav-icon">📦</span>상품 관리
+            <span class="nav-soon">준비중</span>
+          </a>
+        </li>
+        <li>
+          <a href="orders.html">
+            <span class="nav-icon">🧾</span>주문 관리
+            <span class="nav-soon">준비중</span>
+          </a>
+        </li>
+        <li>
+          <a href="cs.html">
+            <span class="nav-icon">💬</span>문의 / CS
+            <span class="nav-soon">준비중</span>
+          </a>
+        </li>
+        <li>
+          <a href="settlement.html">
+            <span class="nav-icon">💰</span>정산 현황
+            <span class="nav-soon">준비중</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="sidebar-divider"></div>
+
+    <div class="sidebar-footer">
+      <a href="../index.html" class="back-to-store">
+        <span class="nav-icon">↗</span>쇼핑몰로 이동
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="admin-main">
+
+    <!-- Header -->
+    <header class="admin-header">
+      <div class="hdr-breadcrumb">
+        <span class="bc-home">모듈랩 관리자</span>
+        <span class="bc-sep">›</span>
+        <span class="bc-cur">대시보드</span>
+      </div>
+      <div class="hdr-actions">
+        <div class="notif-btn" title="알림">
+          🔔
+          <div class="notif-dot" id="notifDot"></div>
+        </div>
+        <div class="user-chip">
+          <div class="user-avatar" id="userAvatar">S</div>
+          <span class="user-name-hdr" id="userName">관리자</span>
+        </div>
+        <button class="logout-btn" onclick="adminLogout()">로그아웃</button>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="admin-content">
+      <div class="page-title-row">
+        <h1 class="page-title">대시보드</h1>
+        <span class="page-date" id="pageDate"></span>
+      </div>
+
+      <!-- Stat cards -->
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#EFF6FF;color:#2563EB;">₩</div>
+          <div>
+            <div class="stat-label">오늘 매출</div>
+            <div class="stat-value" id="statTodayAmt">₩0</div>
+            <div class="stat-sub" id="statTodayCnt">오늘 0건</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#F0FDF4;color:#16A34A;">📈</div>
+          <div>
+            <div class="stat-label">이번달 매출</div>
+            <div class="stat-value" id="statMonthAmt">₩0</div>
+            <div class="stat-sub" id="statMonthCnt">이번달 0건</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#FFF7ED;color:#EA580C;">🧾</div>
+          <div>
+            <div class="stat-label">미처리 주문</div>
+            <div class="stat-value" id="statPending">0건</div>
+            <div class="stat-sub">처리 필요</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#FEF2F2;color:#DC2626;">💬</div>
+          <div>
+            <div class="stat-label">미답변 문의</div>
+            <div class="stat-value" id="statUnanswered">0건</div>
+            <div class="stat-sub">답변 필요</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chart + Recent orders -->
+      <div class="mid-grid">
+        <div class="card">
+          <div class="card-hdr">
+            <span class="card-title">최근 7일 매출</span>
+            <span class="card-badge">일별</span>
+          </div>
+          <div class="chart-wrap" id="salesChart">
+            <!-- rendered by JS -->
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-hdr">
+            <span class="card-title">최근 주문</span>
+            <a href="orders.html" class="card-link">전체 보기 →</a>
+          </div>
+          <div id="recentOrders">
+            <div class="empty-state">
+              <div class="empty-icon">🧾</div>
+              주문 내역이 없습니다
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top products + Alerts -->
+      <div class="bottom-grid">
+        <div class="card">
+          <div class="card-hdr">
+            <span class="card-title">최다 판매 상품 TOP 3</span>
+          </div>
+          <div id="topProducts">
+            <div class="empty-state">
+              <div class="empty-icon">📦</div>
+              판매 데이터가 없습니다
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-hdr">
+            <span class="card-title">처리 필요 알림</span>
+            <span class="alert-count-badge" id="alertCount">0</span>
+          </div>
+          <div id="alertsList">
+            <div class="empty-state">
+              <div class="empty-icon">✅</div>
+              처리할 항목이 없습니다
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+  </div><!-- /admin-main -->
+</div><!-- /admin-wrap -->
+
+<script>
+const API_URL = 'https://modulab-production.up.railway.app';
+const ADMIN_EMAIL = 'songminjin123@gmail.com';
+
+/* ── Init user info ── */
+(function initUser() {
+  try {
+    const u = JSON.parse(localStorage.getItem('user'));
+    if (!u) return;
+    const nameEl = document.getElementById('userName');
+    const avatarEl = document.getElementById('userAvatar');
+    if (nameEl) nameEl.textContent = u.name || '관리자';
+    if (avatarEl && u.name) avatarEl.textContent = u.name.charAt(0).toUpperCase();
+  } catch(e) {}
+})();
+
+/* ── Date display ── */
+(function setDate() {
+  const el = document.getElementById('pageDate');
+  if (!el) return;
+  const now = new Date();
+  el.textContent = now.toLocaleDateString('ko-KR', {
+    year: 'numeric', month: 'long', day: 'numeric', weekday: 'long'
+  });
+})();
+
+/* ── Logout ── */
+function adminLogout() {
+  sessionStorage.removeItem('modulab_admin');
+  // 메인 사이트 세션도 함께 로그아웃
+  fetch(API_URL + '/api/auth/logout', { method: 'POST', credentials: 'include' }).catch(() => {});
+  localStorage.removeItem('user');
+  location.href = 'index.html';
+}
+
+/* ── Helpers ── */
+function fmtWon(n) {
+  return '₩' + Number(n || 0).toLocaleString('ko-KR');
+}
+function statusLabel(s) {
+  const map = { paid: '결제완료', pending: '대기중', cancelled: '취소됨', refunded: '환불됨' };
+  return map[s] || s;
+}
+function statusClass(s) {
+  const map = { paid: 's-paid', pending: 's-pending', cancelled: 's-cancelled', refunded: 's-refunded' };
+  return map[s] || '';
+}
+function truncateId(id) {
+  return id ? '#' + id.slice(0, 8).toUpperCase() : '#-';
+}
+
+/* ── Render chart ── */
+function renderChart(chartData) {
+  const wrap = document.getElementById('salesChart');
+  if (!wrap) return;
+
+  const today = new Date();
+  const days = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    days.push(d);
+  }
+
+  const todayStr = today.toISOString().split('T')[0];
+  const byDate = {};
+  (chartData || []).forEach(r => { byDate[r.date] = r; });
+
+  const maxAmt = Math.max(...Object.values(byDate).map(v => v.amount), 1);
+  const BAR_MAX = 100; // px
+
+  wrap.innerHTML = days.map(d => {
+    const ds = d.toISOString().split('T')[0];
+    const row = byDate[ds] || { count: 0, amount: 0 };
+    const barPx = row.amount > 0 ? Math.max(Math.round((row.amount / maxAmt) * BAR_MAX), 4) : 0;
+    const isToday = ds === todayStr;
+    const label = `${d.getMonth() + 1}/${d.getDate()}`;
+    const valStr = row.amount >= 10000
+      ? Math.round(row.amount / 1000) + 'K'
+      : row.amount > 0 ? String(row.amount) : '';
+    const barClass = ['chart-bar', row.amount > 0 ? 'filled' : '', isToday && row.amount > 0 ? 'today' : ''].filter(Boolean).join(' ');
+
+    return `<div class="chart-col" title="${label}: ${fmtWon(row.amount)} (${row.count}건)">
+      <div class="chart-val">${valStr}</div>
+      <div class="chart-bar-area">
+        <div class="${barClass}" style="height:${barPx}px"></div>
+      </div>
+      <div class="chart-date ${isToday ? 'today' : ''}">${label}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ── Render recent orders ── */
+function renderRecentOrders(orders) {
+  const el = document.getElementById('recentOrders');
+  if (!el) return;
+  if (!orders || orders.length === 0) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">🧾</div>주문 내역이 없습니다</div>';
+    return;
+  }
+  el.innerHTML = orders.map(o => `
+    <div class="order-item">
+      <div class="order-left">
+        <div class="order-num">${truncateId(o.id)}</div>
+        <div class="order-buyer">${o.buyer_name || o.buyer_email || '-'}</div>
+        <div class="order-product">${o.first_product || '-'}</div>
+      </div>
+      <div class="order-right">
+        <div class="order-amount">${fmtWon(o.final_amount)}</div>
+        <span class="order-status ${statusClass(o.status)}">${statusLabel(o.status)}</span>
+      </div>
+    </div>`).join('');
+}
+
+/* ── Render top products ── */
+function renderTopProducts(products) {
+  const el = document.getElementById('topProducts');
+  if (!el) return;
+  if (!products || products.length === 0) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div>판매 데이터가 없습니다</div>';
+    return;
+  }
+  const rankClass = ['r1','r2','r3'];
+  el.innerHTML = products.map((p, i) => `
+    <div class="top-item">
+      <div class="rank-badge ${rankClass[i]}">${i + 1}</div>
+      <div class="top-info">
+        <div class="top-name">${p.emoji ? p.emoji + ' ' : ''}${p.name}</div>
+        <div class="top-sales">${p.sales}건 판매</div>
+      </div>
+      <div class="top-rev">${fmtWon(p.revenue)}</div>
+    </div>`).join('');
+}
+
+/* ── Render alerts ── */
+function renderAlerts(pending, unanswered) {
+  const el = document.getElementById('alertsList');
+  const countEl = document.getElementById('alertCount');
+  const notifDot = document.getElementById('notifDot');
+  if (!el) return;
+
+  const alerts = [];
+  if (pending > 0) alerts.push({
+    dot: 'dot-red', title: `미처리 주문 ${pending}건`, desc: '결제됐지만 파일이 발송되지 않은 주문이 있습니다.', link: 'orders.html', linkText: '처리하기 →'
+  });
+  if (unanswered > 0) alerts.push({
+    dot: 'dot-orange', title: `미답변 문의 ${unanswered}건`, desc: '고객 문의 중 아직 답변하지 않은 항목이 있습니다.', link: 'cs.html', linkText: '답변하기 →'
+  });
+
+  if (countEl) countEl.textContent = alerts.length;
+  if (notifDot) notifDot.style.display = alerts.length > 0 ? 'block' : 'none';
+
+  if (alerts.length === 0) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">✅</div>처리할 항목이 없습니다</div>';
+    return;
+  }
+  el.innerHTML = alerts.map(a => `
+    <div class="alert-item">
+      <div class="alert-dot ${a.dot}"></div>
+      <div class="alert-body">
+        <div class="alert-title">${a.title}</div>
+        <div class="alert-desc">${a.desc}</div>
+      </div>
+      <a href="${a.link}" class="alert-link">${a.linkText}</a>
+    </div>`).join('');
+}
+
+/* ── Update stat cards ── */
+function updateStats(data) {
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  set('statTodayAmt', fmtWon(data.today.amount));
+  set('statTodayCnt', `오늘 ${data.today.count}건`);
+  set('statMonthAmt', fmtWon(data.month.amount));
+  set('statMonthCnt', `이번달 ${data.month.count}건`);
+  set('statPending', `${data.pending}건`);
+  set('statUnanswered', `${data.unanswered}건`);
+}
+
+/* ── Load all dashboard data ── */
+async function loadDashboard() {
+  try {
+    const res = await fetch(API_URL + '/api/admin/dashboard', { credentials: 'include' });
+    if (!res.ok) throw new Error('API ' + res.status);
+    const data = await res.json();
+
+    updateStats(data);
+    renderChart(data.chart);
+    renderRecentOrders(data.recent_orders);
+    renderTopProducts(data.top_products);
+    renderAlerts(data.pending, data.unanswered);
+  } catch (e) {
+    // Fallback: show empty states with chart skeleton
+    renderChart([]);
+    renderAlerts(0, 0);
+    console.warn('[dashboard] API error:', e.message);
+  }
+}
+
+/* ── Init chart skeleton while loading ── */
+renderChart([]); // show empty chart immediately
+loadDashboard();
+</script>
+</body>
+</html>
