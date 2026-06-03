@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>반품 · 교환 관리 — ModuLab 관리자</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --blue:#2563EB; --blue-dark:#1D4ED8; --blue-light:#EFF6FF; --blue-mid:#BFDBFE;
+  --navy:#0F172A; --green:#16A34A; --green-light:#F0FDF4;
+  --red:#DC2626; --red-light:#FEF2F2;
+  --yellow:#F59E0B; --yellow-light:#FFFBEB;
+  --purple:#7C3AED; --purple-light:#F5F3FF;
+  --slate-light:#F1F5F9; --border:#E2E8F0; --white:#FFFFFF;
+  --text:#0F172A; --text2:#475569; --text3:#94A3B8;
+  --sidebar-w:220px; --header-h:64px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Noto Sans KR',sans-serif;color:var(--text);background:#F8FAFC;line-height:1.6;}
+a{text-decoration:none;color:inherit;}
+
+.mobile-guard{display:none;position:fixed;inset:0;z-index:9999;background:var(--navy);flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:32px;}
+.mobile-guard-icon{font-size:48px;}.mobile-guard-title{font-family:'Bebas Neue',sans-serif;font-size:32px;color:white;}.mobile-guard-desc{font-size:14px;color:#94A3B8;line-height:1.7;}
+@media(max-width:768px){.mobile-guard{display:flex;}}
+
+.admin-layout{display:flex;min-height:100vh;}
+
+/* ── SIDEBAR ── */
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--navy);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100;}
+.sidebar-logo{padding:20px 20px 16px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px;}
+.logo-mark{width:32px;height:32px;background:var(--blue);border-radius:7px;position:relative;overflow:hidden;flex-shrink:0;}
+.logo-mark::before{content:'';position:absolute;top:4px;left:4px;width:13px;height:13px;background:rgba(255,255,255,.3);border-radius:2px;}
+.logo-mark::after{content:'';position:absolute;bottom:4px;right:4px;width:13px;height:13px;background:#16A34A;border-radius:2px;}
+.sidebar-logo-text{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.04em;color:white;}.sidebar-logo-text span{color:var(--blue);}
+.sidebar-admin-badge{font-size:9px;font-weight:700;letter-spacing:.08em;color:#64748B;padding:2px 6px;border:1px solid #334155;border-radius:3px;display:block;margin-top:2px;}
+.sidebar-section{padding:20px 12px 8px;}.sidebar-section-label{font-size:10px;font-weight:700;letter-spacing:.1em;color:#475569;text-transform:uppercase;padding:0 8px;margin-bottom:6px;}
+.sidebar-nav{list-style:none;}.sidebar-nav li a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;font-size:13px;font-weight:500;color:#94A3B8;transition:all .15s;}
+.sidebar-nav li a:hover{background:rgba(255,255,255,.06);color:white;}.sidebar-nav li a.active{background:rgba(37,99,235,.2);color:#93C5FD;}
+.nav-icon{font-size:15px;width:18px;text-align:center;flex-shrink:0;}
+.sidebar-sub{margin-left:28px;margin-top:2px;}.sidebar-sub li a{font-size:12px;padding:6px 10px;color:#64748B;border-radius:6px;}
+.sidebar-sub li a:hover{color:#94A3B8;background:rgba(255,255,255,.04);}.sidebar-sub li a.active{color:#93C5FD;background:rgba(37,99,235,.15);}
+.sidebar-bottom{margin-top:auto;padding:16px 12px;border-top:1px solid rgba(255,255,255,.06);}
+.sidebar-bottom a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;font-size:13px;color:#64748B;transition:all .15s;}
+.sidebar-bottom a:hover{background:rgba(255,255,255,.06);color:#94A3B8;}
+
+/* ── MAIN ── */
+.main-wrap{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh;}
+.admin-header{position:sticky;top:0;z-index:50;height:var(--header-h);background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 32px;gap:16px;}
+.header-breadcrumb{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text3);}
+.header-breadcrumb a{color:var(--text3);transition:color .15s;}.header-breadcrumb a:hover{color:var(--blue);}.header-breadcrumb .current{color:var(--text);font-weight:600;}
+.header-right{display:flex;align-items:center;gap:10px;}
+.header-noti-btn{width:36px;height:36px;border-radius:8px;border:1px solid var(--border);background:none;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;position:relative;transition:background .15s;}.header-noti-btn:hover{background:var(--slate-light);}
+.noti-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;background:var(--red);border-radius:50%;border:1.5px solid white;}
+.header-logout-btn{padding:7px 16px;border-radius:8px;border:1px solid var(--border);background:none;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;font-family:inherit;transition:all .15s;}.header-logout-btn:hover{background:var(--red-light);border-color:#FCA5A5;color:var(--red);}
+.header-user{display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:8px;background:var(--slate-light);border:1px solid var(--border);}
+.header-user-avatar{width:28px;height:28px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;color:white;font-weight:700;flex-shrink:0;}
+.header-user-name{font-size:13px;font-weight:500;color:var(--text2);}
+
+/* ── CONTENT ── */
+.page-content{padding:32px;flex:1;}
+.page-title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;gap:16px;flex-wrap:wrap;}
+.page-title{font-size:22px;font-weight:700;color:var(--text);}
+.page-title-sub{font-size:13px;color:var(--text3);margin-top:2px;}
+.title-btns{display:flex;gap:8px;}
+
+/* ── SUMMARY ── */
+.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+.sc{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:20px;}
+.sc.red{border-left:3px solid var(--red);}.sc.yellow{border-left:3px solid var(--yellow);}
+.sc.green{border-left:3px solid var(--green);}.sc.blue{border-left:3px solid var(--blue);}
+.sc-label{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.04em;text-transform:uppercase;margin-bottom:8px;}
+.sc-value{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:500;color:var(--text);}
+.sc-sub{font-size:11px;color:var(--text3);margin-top:5px;}
+
+/* ── NOTICE ── */
+.notice{display:flex;align-items:flex-start;gap:10px;padding:12px 16px;background:var(--blue-light);border:1px solid var(--blue-mid);border-radius:10px;margin-bottom:20px;font-size:13px;color:#1e3a8a;line-height:1.6;}
+
+/* ── FILTER ── */
+.filter-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:14px 20px;margin-bottom:16px;}
+.filter-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.filter-row+.filter-row{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
+.filter-label{font-size:12px;font-weight:600;color:var(--text3);white-space:nowrap;min-width:60px;}
+.filter-tags{display:flex;gap:6px;flex-wrap:wrap;flex:1;}
+.filter-tag{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:500;border:1px solid var(--border);background:var(--white);color:var(--text2);cursor:pointer;transition:all .15s;white-space:nowrap;}
+.filter-tag:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-light);}
+.filter-tag.active{border-color:var(--blue);color:var(--blue);background:var(--blue-light);font-weight:700;}
+.search-wrap{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.search-box{display:flex;align-items:center;gap:8px;background:var(--slate-light);border:1px solid var(--border);border-radius:8px;padding:7px 14px;min-width:240px;transition:border-color .15s;}
+.search-box:focus-within{border-color:var(--blue);}
+.search-box input{border:none;background:none;outline:none;font-size:13px;color:var(--text);font-family:inherit;width:100%;}
+.search-box input::placeholder{color:var(--text3);}
+
+/* ── TAB SWITCHER ── */
+.type-tabs{display:flex;gap:0;margin-bottom:16px;background:var(--white);border:1px solid var(--border);border-radius:10px;padding:4px;width:fit-content;}
+.type-tab{padding:7px 20px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:none;font-family:inherit;color:var(--text3);transition:all .15s;}
+.type-tab.active{background:var(--blue);color:white;}
+.type-tab:hover:not(.active){background:var(--slate-light);color:var(--text2);}
+
+/* ── TABLE ── */
+.table-wrap{background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.table-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px;}
+.table-count{font-size:13px;color:var(--text3);}.table-count strong{color:var(--text);font-weight:700;}
+.table-actions{display:flex;gap:8px;}
+table{width:100%;border-collapse:collapse;}
+thead tr{background:var(--slate-light);}
+thead th{padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.05em;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap;}
+thead th.w-check{width:44px;}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s;cursor:pointer;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:#FAFBFF;}
+td{padding:11px 14px;font-size:13px;vertical-align:middle;}
+.req-id{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;color:var(--blue);}
+.buyer-name{font-weight:600;color:var(--text);}
+.buyer-email{font-size:11px;color:var(--text3);margin-top:1px;}
+.product-name-cell{font-weight:500;color:var(--text);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.order-ref{font-size:11px;color:var(--text3);margin-top:1px;font-family:'JetBrains Mono',monospace;}
+.price-cell{font-family:'JetBrains Mono',monospace;font-weight:500;color:var(--text);white-space:nowrap;}
+.date-cell{font-size:12px;color:var(--text3);font-family:'JetBrains Mono',monospace;white-space:nowrap;}
+.action-btns{display:flex;gap:5px;flex-wrap:wrap;}
+input[type="checkbox"]{accent-color:var(--blue);width:15px;height:15px;cursor:pointer;}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap;}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.badge-return {background:#FEF2F2;color:#B91C1C;}.badge-return::before{background:#DC2626;}
+.badge-exchange{background:var(--purple-light);color:var(--purple);}.badge-exchange::before{background:var(--purple);}
+.badge-pending {background:var(--yellow-light);color:#B45309;}.badge-pending::before{background:var(--yellow);}
+.badge-approved{background:var(--green-light);color:var(--green);}.badge-approved::before{background:var(--green);}
+.badge-rejected{background:var(--slate-light);color:var(--text3);}.badge-rejected::before{background:#CBD5E1;}
+.badge-processing{background:var(--blue-light);color:var(--blue);}.badge-processing::before{background:var(--blue);}
+
+.reason-tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;background:var(--slate-light);color:var(--text2);}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;border:none;transition:all .15s;white-space:nowrap;}
+.btn-sm{padding:5px 10px;font-size:11px;}
+.btn-primary{background:var(--blue);color:white;}.btn-primary:hover{background:var(--blue-dark);}
+.btn-outline{background:var(--white);color:var(--text2);border:1px solid var(--border);}.btn-outline:hover{background:var(--slate-light);}
+.btn-green{background:var(--green-light);color:var(--green);border:1px solid #BBF7D0;}.btn-green:hover{background:var(--green);color:white;border-color:var(--green);}
+.btn-red{background:var(--red-light);color:var(--red);border:1px solid #FCA5A5;}.btn-red:hover{background:var(--red);color:white;border-color:var(--red);}
+.btn-purple{background:var(--purple-light);color:var(--purple);border:1px solid #DDD6FE;}.btn-purple:hover{background:var(--purple);color:white;border-color:var(--purple);}
+
+/* ── DRAWER ── */
+.drawer-overlay{display:none;position:fixed;inset:0;z-index:400;}
+.drawer-overlay.open{display:block;}
+.drawer-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.4);}
+.drawer-panel{position:absolute;top:0;right:0;width:500px;height:100%;background:var(--white);overflow-y:auto;transform:translateX(100%);transition:transform .25s ease;display:flex;flex-direction:column;}
+.drawer-overlay.open .drawer-panel{transform:translateX(0);}
+.drawer-head{display:flex;align-items:center;justify-content:space-between;padding:20px 24px 16px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.drawer-title{font-size:16px;font-weight:700;color:var(--text);}
+.drawer-close{width:36px;height:36px;border-radius:8px;border:1px solid var(--border);background:none;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;}.drawer-close:hover{background:var(--slate-light);}
+.drawer-body{padding:24px;flex:1;}
+.drawer-section{margin-bottom:22px;}
+.drawer-section-title{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.07em;text-transform:uppercase;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+.detail-row{display:flex;align-items:flex-start;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);gap:16px;}
+.detail-row:last-child{border-bottom:none;}
+.detail-key{font-size:13px;color:var(--text3);flex-shrink:0;min-width:88px;}
+.detail-val{font-size:13px;font-weight:500;color:var(--text);text-align:right;word-break:break-all;}
+.detail-val.mono{font-family:'JetBrains Mono',monospace;}
+.detail-val.blue{color:var(--blue);}
+.reason-box{background:var(--slate-light);border-radius:8px;padding:14px;font-size:13px;color:var(--text2);line-height:1.7;margin-top:4px;}
+.drawer-actions{padding:16px 24px 24px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px;flex-shrink:0;}
+.drawer-action-row{display:flex;gap:8px;}
+.drawer-action-row .btn{flex:1;justify-content:center;padding:11px;}
+
+/* ── CONFIRM MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.5);align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal-box{background:var(--white);border-radius:16px;padding:32px;width:400px;box-shadow:0 24px 60px rgba(0,0,0,.2);}
+.modal-icon{font-size:36px;text-align:center;margin-bottom:16px;}
+.modal-title{font-size:17px;font-weight:700;color:var(--text);text-align:center;margin-bottom:8px;}
+.modal-desc{font-size:13px;color:var(--text2);text-align:center;line-height:1.7;margin-bottom:8px;white-space:pre-line;}
+.reject-reason-wrap{margin:12px 0;}
+.reject-reason-label{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;}
+.reject-reason-select{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none;color:var(--text);}
+.reject-reason-select:focus{border-color:var(--blue);}
+.reject-reason-textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none;color:var(--text);resize:vertical;min-height:80px;margin-top:8px;line-height:1.6;}
+.reject-reason-textarea:focus{border-color:var(--blue);}
+.modal-btns{display:flex;gap:8px;margin-top:16px;}
+.modal-btns .btn{flex:1;justify-content:center;padding:11px;font-size:14px;}
+
+/* ── EMPTY ── */
+.empty-state{text-align:center;padding:60px 20px;}
+.empty-icon{font-size:40px;margin-bottom:12px;}
+.empty-title{font-size:15px;font-weight:600;color:var(--text2);margin-bottom:6px;}
+.empty-desc{font-size:13px;color:var(--text3);}
+
+/* ── PAGINATION ── */
+.pagination{display:flex;align-items:center;justify-content:center;gap:4px;padding:20px;}
+.page-btn{width:34px;height:34px;border-radius:8px;border:1px solid var(--border);background:var(--white);font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;font-family:inherit;transition:all .15s;display:flex;align-items:center;justify-content:center;}
+.page-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-light);}
+.page-btn.active{background:var(--blue);color:white;border-color:var(--blue);font-weight:700;}
+.page-btn:disabled{opacity:.4;cursor:not-allowed;}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--navy);color:white;padding:13px 24px;border-radius:10px;font-size:14px;font-weight:500;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);transition:transform .3s,opacity .3s;opacity:0;z-index:9000;white-space:nowrap;}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+</style>
+</head>
+<body>
+
+<div class="mobile-guard">
+  <div class="mobile-guard-icon">🖥️</div>
+  <div class="mobile-guard-title">PC에서 접속해주세요</div>
+  <div class="mobile-guard-desc">관리자 페이지는 PC 환경에서만<br>정상적으로 이용할 수 있습니다.</div>
+</div>
+
+<div class="admin-layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark"></div>
+      <div><div class="sidebar-logo-text">Modu<span>Lab</span></div><span class="sidebar-admin-badge">ADMIN SCM</span></div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">메인 메뉴</div>
+      <ul class="sidebar-nav">
+        <li><a href="dashboard.html"><span class="nav-icon">📊</span>대시보드</a></li>
+        <li>
+          <a href="products.html"><span class="nav-icon">📦</span>상품 관리</a>
+          <ul class="sidebar-sub sidebar-nav">
+            <li><a href="products.html">상품 목록</a></li>
+            <li><a href="product-add.html">상품 등록</a></li>
+          </ul>
+        </li>
+        <li><a href="orders.html"><span class="nav-icon">🛒</span>주문 관리</a></li>
+        <li><a href="returns.html" class="active"><span class="nav-icon">🔄</span>반품 · 교환</a></li>
+        <li><a href="cs.html"><span class="nav-icon">💬</span>CS 관리</a></li>
+        <li><a href="settlement.html"><span class="nav-icon">💰</span>정산 현황판</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">바로가기</div>
+      <ul class="sidebar-nav"><li><a href="../index.html" target="_blank"><span class="nav-icon">🌐</span>쇼핑몰 보기</a></li></ul>
+    </div>
+    <div class="sidebar-bottom"><a href="index.html" onclick="logout(event)"><span class="nav-icon">🚪</span>로그아웃</a></div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-wrap">
+    <header class="admin-header">
+      <div class="header-breadcrumb">
+        <a href="dashboard.html">홈</a><span style="color:var(--border);">›</span>
+        <span class="current">반품 · 교환 관리</span>
+      </div>
+      <div class="header-right">
+        <button class="header-noti-btn">🔔<span class="noti-dot"></span></button>
+        <div class="header-user"><div class="header-user-avatar">M</div><div class="header-user-name">관리자</div></div>
+        <button class="header-logout-btn" onclick="logout()">로그아웃</button>
+      </div>
+    </header>
+
+    <div class="page-content">
+      <!-- TITLE -->
+      <div class="page-title-row">
+        <div>
+          <div class="page-title">반품 · 교환 관리</div>
+          <div class="page-title-sub">고객의 반품 및 교환 요청을 조회하고 처리합니다</div>
+        </div>
+        <div class="title-btns">
+          <button class="btn btn-outline" onclick="exportCSV()">⬇️ CSV 다운로드</button>
+          <button class="btn btn-primary" onclick="loadData()">🔄 새로고침</button>
+        </div>
+      </div>
+
+      <!-- NOTICE: 디지털 상품 특성 -->
+      <div class="notice">
+        <span style="flex-shrink:0;">ℹ️</span>
+        <span>ModuLab은 디지털 파일 판매 쇼핑몰입니다. <strong>반품</strong>은 환불 처리로 진행되며, <strong>교환</strong>은 동일 상품의 최신 버전 파일 재발송 또는 다른 상품으로 교체 발송으로 처리됩니다. 환불은 토스페이먼츠 API로 자동 요청됩니다.</span>
+      </div>
+
+      <!-- SUMMARY -->
+      <div class="summary-grid">
+        <div class="sc red"><div class="sc-label">신규 요청</div><div class="sc-value" id="sumNew">—</div><div class="sc-sub">즉시 처리 필요</div></div>
+        <div class="sc yellow"><div class="sc-label">처리 중</div><div class="sc-value" id="sumProcessing">—</div><div class="sc-sub">진행 중인 건</div></div>
+        <div class="sc green"><div class="sc-label">처리 완료</div><div class="sc-value" id="sumDone">—</div><div class="sc-sub">이번 달</div></div>
+        <div class="sc blue"><div class="sc-label">이번달 반품액</div><div class="sc-value" id="sumAmount">—</div><div class="sc-sub">환불 승인 기준</div></div>
+      </div>
+
+      <!-- TYPE TABS -->
+      <div class="type-tabs">
+        <button class="type-tab active" onclick="setTypeTab('all',this)">전체</button>
+        <button class="type-tab" onclick="setTypeTab('return',this)">반품</button>
+        <button class="type-tab" onclick="setTypeTab('exchange',this)">교환</button>
+      </div>
+
+      <!-- FILTER -->
+      <div class="filter-card">
+        <div class="filter-row">
+          <span class="filter-label">처리 상태</span>
+          <div class="filter-tags" id="statusFilter">
+            <div class="filter-tag active" data-val="all"        onclick="setFilter('status','all',this)">전체</div>
+            <div class="filter-tag" data-val="pending"           onclick="setFilter('status','pending',this)">🟡 접수대기</div>
+            <div class="filter-tag" data-val="processing"        onclick="setFilter('status','processing',this)">🔵 처리중</div>
+            <div class="filter-tag" data-val="approved"          onclick="setFilter('status','approved',this)">🟢 처리완료</div>
+            <div class="filter-tag" data-val="rejected"          onclick="setFilter('status','rejected',this)">⚫ 거부됨</div>
+          </div>
+          <div class="search-wrap">
+            <div class="search-box">
+              <span style="color:var(--text3);font-size:13px;">🔍</span>
+              <input type="text" id="searchInput" placeholder="요청번호 또는 이메일 검색" onkeydown="if(event.key==='Enter')render()">
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="render()">검색</button>
+          </div>
+        </div>
+        <div class="filter-row">
+          <span class="filter-label">요청 사유</span>
+          <div class="filter-tags" id="reasonFilter">
+            <div class="filter-tag active" data-val="all"         onclick="setFilter('reason','all',this)">전체</div>
+            <div class="filter-tag" data-val="change_of_mind"     onclick="setFilter('reason','change_of_mind',this)">단순변심</div>
+            <div class="filter-tag" data-val="file_error"         onclick="setFilter('reason','file_error',this)">파일 오류</div>
+            <div class="filter-tag" data-val="compatibility"      onclick="setFilter('reason','compatibility',this)">호환성 문제</div>
+            <div class="filter-tag" data-val="duplicate_purchase" onclick="setFilter('reason','duplicate_purchase',this)">중복 구매</div>
+            <div class="filter-tag" data-val="different_from_desc"onclick="setFilter('reason','different_from_desc',this)">설명과 다름</div>
+            <div class="filter-tag" data-val="etc"                onclick="setFilter('reason','etc',this)">기타</div>
+          </div>
+          <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+            <label style="font-size:12px;color:var(--text3);">기간</label>
+            <input type="date" id="dateFrom" style="padding:6px 10px;border:1px solid var(--border);border-radius:7px;font-size:12px;font-family:inherit;outline:none;" onchange="render()">
+            <span style="color:var(--text3);font-size:12px;">~</span>
+            <input type="date" id="dateTo" style="padding:6px 10px;border:1px solid var(--border);border-radius:7px;font-size:12px;font-family:inherit;outline:none;" onchange="render()">
+          </div>
+        </div>
+      </div>
+
+      <!-- TABLE -->
+      <div class="table-wrap">
+        <div class="table-header">
+          <div class="table-count">총 <strong id="filteredCount">0</strong>건</div>
+          <div class="table-actions">
+            <button class="btn btn-green btn-sm" onclick="bulkApprove()">선택 일괄 승인</button>
+            <button class="btn btn-red btn-sm" onclick="bulkReject()">선택 일괄 거부</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th class="w-check"><input type="checkbox" id="checkAll" onchange="toggleAll(this)"></th>
+                <th>요청번호</th>
+                <th>구매자</th>
+                <th>상품명</th>
+                <th>요청유형</th>
+                <th>요청사유</th>
+                <th>환불금액</th>
+                <th>처리상태</th>
+                <th>요청일시</th>
+                <th>처리</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+        <div id="emptyState" class="empty-state" style="display:none;">
+          <div class="empty-icon">🔄</div>
+          <div class="empty-title">반품 · 교환 요청이 없습니다</div>
+          <div class="empty-desc">조건에 맞는 요청이 없습니다. 필터를 변경해보세요.</div>
+        </div>
+        <div class="pagination" id="pagination"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL DRAWER -->
+<div class="drawer-overlay" id="detailDrawer">
+  <div class="drawer-backdrop" onclick="closeDrawer()"></div>
+  <div class="drawer-panel">
+    <div class="drawer-head">
+      <div class="drawer-title" id="drawerTitle">요청 상세</div>
+      <button class="drawer-close" onclick="closeDrawer()">✕</button>
+    </div>
+    <div class="drawer-body" id="drawerBody"></div>
+    <div class="drawer-actions" id="drawerActions"></div>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal-box">
+    <div class="modal-icon" id="modalIcon">⚠️</div>
+    <div class="modal-title" id="modalTitle"></div>
+    <div class="modal-desc" id="modalDesc"></div>
+    <div id="modalExtra"></div>
+    <div class="modal-btns">
+      <button class="btn btn-outline" onclick="closeModal()">취소</button>
+      <button class="btn btn-primary" id="modalConfirmBtn" onclick="confirmAction()">확인</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"><span id="toastMsg"></span></div>
+
+<script>
+/* ── AUTH ── */
+(function(){ if(!sessionStorage.getItem('modulab_admin')) location.href='index.html'; })();
+function logout(e){ if(e)e.preventDefault(); sessionStorage.removeItem('modulab_admin'); location.href='index.html'; }
+
+/* ── MOCK DATA ── */
+const MOCK = [
+  { id:'RET-20260604-001', type:'return',   buyer:'김민준', email:'minjun@email.com',   product:'프로젝트 관리 자동화', orderId:'ORD-2026060401', price:19900, reason:'file_error',          reasonDetail:'파일을 열면 매크로 오류가 발생합니다. 엑셀 2019 사용 중인데 호환이 안 되는 것 같아요.', status:'pending',    date:'2026-06-04 15:10' },
+  { id:'RET-20260604-002', type:'exchange', buyer:'이서연', email:'seoyeon@email.com',  product:'가계부 자동화',         orderId:'ORD-2026060402', price:9900,  reason:'different_from_desc',  reasonDetail:'설명에는 월별 자동 요약이 된다고 했는데 구매 후 보니 해당 기능이 없습니다. 다른 버전으로 교환 가능한가요?', status:'processing', date:'2026-06-04 13:45' },
+  { id:'RET-20260603-003', type:'return',   buyer:'박도현', email:'dohyun@email.com',   product:'급여 관리 자동화',      orderId:'ORD-2026060403', price:29900, reason:'compatibility',        reasonDetail:'Mac OS에서 사용하려 했는데 윈도우 전용이라 사용이 불가합니다.', status:'approved',   date:'2026-06-03 22:30' },
+  { id:'RET-20260603-004', type:'return',   buyer:'최지우', email:'jiwoo@email.com',    product:'마진 계산기',           orderId:'ORD-2026060404', price:9900,  reason:'change_of_mind',       reasonDetail:'단순 변심입니다. 구매 후 24시간이 지나지 않았습니다.', status:'rejected',   date:'2026-06-03 20:05' },
+  { id:'RET-20260603-005', type:'exchange', buyer:'정하은', email:'haeun@email.com',    product:'구글시트 CRM 자동화',   orderId:'ORD-2026060405', price:29900, reason:'file_error',          reasonDetail:'구글시트 파일 링크가 연결이 안 됩니다. 접근 권한이 없다고 뜹니다.', status:'approved',   date:'2026-06-03 18:20' },
+  { id:'RET-20260603-006', type:'return',   buyer:'한지수', email:'jisu@email.com',     product:'프로젝트 관리 자동화',  orderId:'ORD-2026060406', price:19900, reason:'duplicate_purchase',   reasonDetail:'실수로 같은 상품을 두 번 구매했습니다.', status:'approved',   date:'2026-06-03 16:00' },
+  { id:'RET-20260602-007', type:'exchange', buyer:'오승민', email:'seungmin@email.com', product:'가계부 자동화',         orderId:'ORD-2026060407', price:9900,  reason:'etc',                  reasonDetail:'다른 상품(마진 계산기)으로 교환하고 싶습니다.', status:'pending',    date:'2026-06-02 11:30' },
+  { id:'RET-20260602-008', type:'return',   buyer:'강예린', email:'yerin@email.com',    product:'구글시트 프로젝트 관리',orderId:'ORD-2026060408', price:19900, reason:'change_of_mind',       reasonDetail:'제가 기대하던 기능이 아닙니다.', status:'rejected',   date:'2026-06-02 09:15' },
+];
+
+const STATUS_LABEL = { pending:'접수대기', processing:'처리중', approved:'처리완료', rejected:'거부됨' };
+const STATUS_CLS   = { pending:'badge-pending', processing:'badge-processing', approved:'badge-approved', rejected:'badge-rejected' };
+const REASON_LABEL = { change_of_mind:'단순변심', file_error:'파일 오류', compatibility:'호환성 문제', duplicate_purchase:'중복 구매', different_from_desc:'설명과 다름', etc:'기타' };
+
+let requests = [];
+let filters = { type:'all', status:'all', reason:'all', search:'', dateFrom:'', dateTo:'' };
+let filtered = [];
+let currentPage = 1; const PAGE_SIZE = 10;
+let selected = new Set();
+let pendingAction = null;
+
+/* ── LOAD ── */
+function loadData(){
+  const saved = localStorage.getItem('modulab_returns');
+  if(saved){ try{ requests=JSON.parse(saved); }catch{ requests=[...MOCK]; } }
+  else requests=[...MOCK];
+  updateSummary(); render();
+  showToast('데이터를 불러왔습니다');
+}
+
+function updateSummary(){
+  const approved = requests.filter(r=>r.status==='approved');
+  document.getElementById('sumNew').textContent        = requests.filter(r=>r.status==='pending').length;
+  document.getElementById('sumProcessing').textContent = requests.filter(r=>r.status==='processing').length;
+  document.getElementById('sumDone').textContent       = approved.length;
+  const amount = requests.filter(r=>r.type==='return'&&r.status==='approved').reduce((s,r)=>s+r.price,0);
+  document.getElementById('sumAmount').textContent     = amount ? '₩'+amount.toLocaleString() : '₩0';
+}
+
+/* ── FILTERS ── */
+function setTypeTab(val, el){
+  filters.type = val;
+  document.querySelectorAll('.type-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  currentPage=1; render();
+}
+function setFilter(key, val, el){
+  filters[key] = val;
+  const groupId = key==='status' ? 'statusFilter' : 'reasonFilter';
+  document.querySelectorAll('#'+groupId+' .filter-tag').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  currentPage=1; render();
+}
+
+function applyFilters(){
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  const df = document.getElementById('dateFrom').value;
+  const dt = document.getElementById('dateTo').value;
+  filtered = requests.filter(r=>{
+    if(filters.type   !=='all' && r.type   !==filters.type)   return false;
+    if(filters.status !=='all' && r.status !==filters.status) return false;
+    if(filters.reason !=='all' && r.reason !==filters.reason) return false;
+    if(q && !r.id.toLowerCase().includes(q) && !r.email.toLowerCase().includes(q) && !r.buyer.includes(q)) return false;
+    if(df && r.date.slice(0,10)<df) return false;
+    if(dt && r.date.slice(0,10)>dt) return false;
+    return true;
+  });
+}
+
+/* ── RENDER ── */
+function render(){
+  applyFilters();
+  document.getElementById('filteredCount').textContent = filtered.length;
+  const start = (currentPage-1)*PAGE_SIZE;
+  const page  = filtered.slice(start, start+PAGE_SIZE);
+  const tbody = document.getElementById('tableBody');
+  const empty = document.getElementById('emptyState');
+
+  if(!filtered.length){ tbody.innerHTML=''; empty.style.display='block'; document.getElementById('pagination').innerHTML=''; return; }
+  empty.style.display='none';
+
+  tbody.innerHTML = page.map(r=>`
+    <tr onclick="openDetail('${r.id}')">
+      <td onclick="event.stopPropagation()"><input type="checkbox" ${selected.has(r.id)?'checked':''} onchange="toggleSel('${r.id}',this)"></td>
+      <td><div class="req-id">${r.id}</div></td>
+      <td>
+        <div class="buyer-name">${r.buyer}</div>
+        <div class="buyer-email">${r.email}</div>
+      </td>
+      <td>
+        <div class="product-name-cell" title="${r.product}">${r.product}</div>
+        <div class="order-ref">${r.orderId}</div>
+      </td>
+      <td><span class="badge ${r.type==='return'?'badge-return':'badge-exchange'}">${r.type==='return'?'반품':'교환'}</span></td>
+      <td><span class="reason-tag">${REASON_LABEL[r.reason]||r.reason}</span></td>
+      <td><span class="price-cell" style="color:${r.type==='return'?'var(--red)':'var(--purple)'};">${r.type==='return'?'₩'+r.price.toLocaleString():'교환'}</span></td>
+      <td><span class="badge ${STATUS_CLS[r.status]||''}">${STATUS_LABEL[r.status]||r.status}</span></td>
+      <td><span class="date-cell">${r.date.slice(5)}</span></td>
+      <td onclick="event.stopPropagation()">
+        <div class="action-btns">
+          ${r.status==='pending'||r.status==='processing' ? `
+            <button class="btn btn-green btn-sm" onclick="quickApprove('${r.id}')">✓ 승인</button>
+            <button class="btn btn-red btn-sm"   onclick="openRejectModal('${r.id}')">거부</button>
+          `:''}
+          ${r.status==='approved'&&r.type==='exchange' ? `<span style="font-size:11px;color:var(--green);">교환발송완료</span>` : ''}
+          ${r.status==='approved'&&r.type==='return'   ? `<span style="font-size:11px;color:var(--green);">환불완료</span>` : ''}
+          ${r.status==='rejected' ? `<span style="font-size:11px;color:var(--text3);">거부됨</span>` : ''}
+        </div>
+      </td>
+    </tr>`).join('');
+
+  renderPagination();
+}
+
+function renderPagination(){
+  const total = Math.ceil(filtered.length/PAGE_SIZE);
+  if(total<=1){ document.getElementById('pagination').innerHTML=''; return; }
+  let html=`<button class="page-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>‹</button>`;
+  for(let i=1;i<=total;i++) html+=`<button class="page-btn ${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;
+  html+=`<button class="page-btn" onclick="goPage(${currentPage+1})" ${currentPage===total?'disabled':''}>›</button>`;
+  document.getElementById('pagination').innerHTML=html;
+}
+function goPage(p){ currentPage=p; render(); window.scrollTo({top:0,behavior:'smooth'}); }
+
+/* ── CHECK ── */
+function toggleSel(id,cb){ if(cb.checked)selected.add(id);else selected.delete(id); }
+function toggleAll(cb){ const s=(currentPage-1)*PAGE_SIZE; filtered.slice(s,s+PAGE_SIZE).forEach(r=>{ if(cb.checked)selected.add(r.id);else selected.delete(r.id); }); render(); }
+
+/* ── DETAIL DRAWER ── */
+function openDetail(id){
+  const r = requests.find(r=>r.id===id);
+  if(!r) return;
+  document.getElementById('drawerTitle').textContent = `${r.type==='return'?'반품':'교환'} 요청 — ${r.id}`;
+
+  const statusColor = {pending:'var(--yellow)',processing:'var(--blue)',approved:'var(--green)',rejected:'var(--text3)'};
+
+  document.getElementById('drawerBody').innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;padding:14px;background:${r.type==='return'?'var(--red-light)':'var(--purple-light)'};border-radius:10px;border:1px solid ${r.type==='return'?'#FCA5A5':'#DDD6FE'};">
+      <span style="font-size:20px;">${r.type==='return'?'↩️':'🔄'}</span>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:${r.type==='return'?'var(--red)':'var(--purple)'};">${r.type==='return'?'반품 요청':'교환 요청'}</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:2px;">처리상태: <span style="color:${statusColor[r.status]};font-weight:700;">${STATUS_LABEL[r.status]}</span></div>
+      </div>
+    </div>
+
+    <div class="drawer-section">
+      <div class="drawer-section-title">구매자 정보</div>
+      <div class="detail-row"><span class="detail-key">이름</span><span class="detail-val">${r.buyer}</span></div>
+      <div class="detail-row"><span class="detail-key">이메일</span><span class="detail-val blue">${r.email}</span></div>
+    </div>
+
+    <div class="drawer-section">
+      <div class="drawer-section-title">주문 정보</div>
+      <div class="detail-row"><span class="detail-key">주문번호</span><span class="detail-val mono">${r.orderId}</span></div>
+      <div class="detail-row"><span class="detail-key">상품명</span><span class="detail-val">${r.product}</span></div>
+      <div class="detail-row"><span class="detail-key">결제금액</span><span class="detail-val mono" style="color:var(--blue);">₩${r.price.toLocaleString()}</span></div>
+    </div>
+
+    <div class="drawer-section">
+      <div class="drawer-section-title">요청 내용</div>
+      <div class="detail-row"><span class="detail-key">요청유형</span><span class="detail-val"><span class="badge ${r.type==='return'?'badge-return':'badge-exchange'}">${r.type==='return'?'반품':'교환'}</span></span></div>
+      <div class="detail-row"><span class="detail-key">요청사유</span><span class="detail-val">${REASON_LABEL[r.reason]||r.reason}</span></div>
+      <div class="detail-row"><span class="detail-key">요청일시</span><span class="detail-val mono">${r.date}</span></div>
+      ${r.type==='return'?`<div class="detail-row"><span class="detail-key">환불예정액</span><span class="detail-val mono" style="color:var(--red);font-size:15px;font-weight:700;">₩${r.price.toLocaleString()}</span></div>`:''}
+    </div>
+
+    <div class="drawer-section">
+      <div class="drawer-section-title">고객 작성 내용</div>
+      <div class="reason-box">${r.reasonDetail}</div>
+    </div>
+
+    ${r.rejectNote?`<div class="drawer-section"><div class="drawer-section-title">거부 사유 (고객 전달)</div><div class="reason-box" style="background:var(--red-light);color:var(--red);">${r.rejectNote}</div></div>`:''}
+  `;
+
+  const actions = [];
+  if(r.status==='pending'||r.status==='processing'){
+    if(r.type==='return'){
+      actions.push(`<button class="btn btn-green" onclick="quickApprove('${r.id}');closeDrawer()" style="flex:1;justify-content:center;padding:11px;">✓ 환불 승인 (₩${r.price.toLocaleString()})</button>`);
+    } else {
+      actions.push(`<button class="btn btn-purple" onclick="quickApprove('${r.id}');closeDrawer()" style="flex:1;justify-content:center;padding:11px;">🔄 교환 처리 (파일 재발송)</button>`);
+    }
+    actions.push(`<button class="btn btn-red" onclick="openRejectModal('${r.id}');closeDrawer()" style="flex:1;justify-content:center;padding:11px;">✕ 거부</button>`);
+  }
+
+  document.getElementById('drawerActions').innerHTML =
+    (actions.length ? `<div class="drawer-action-row">${actions.join('')}</div>` : '') +
+    `<button class="btn btn-outline" style="width:100%;justify-content:center;" onclick="closeDrawer()">닫기</button>` +
+    `<a href="orders.html" style="display:block;text-align:center;font-size:12px;color:var(--blue);margin-top:4px;">원주문 보기 →</a>`;
+
+  document.getElementById('detailDrawer').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeDrawer(){ document.getElementById('detailDrawer').classList.remove('open'); document.body.style.overflow=''; }
+
+/* ── APPROVE ── */
+function quickApprove(id){
+  pendingAction = {type:'approve', id};
+  const r = requests.find(r=>r.id===id);
+  document.getElementById('modalIcon').textContent  = r.type==='return'?'💸':'🔄';
+  document.getElementById('modalTitle').textContent = r.type==='return'?'환불 승인':'교환 처리';
+  document.getElementById('modalDesc').textContent  = r.type==='return'
+    ? `${r.buyer} 님의 반품 요청을 승인하고\n₩${r.price.toLocaleString()}을 환불 처리합니다.\n토스페이먼츠 API로 자동 환불이 요청됩니다.`
+    : `${r.buyer} 님의 교환 요청을 승인하고\n${r.product} 파일을 재발송합니다.`;
+  document.getElementById('modalExtra').innerHTML='';
+  document.getElementById('modalConfirmBtn').className = r.type==='return'?'btn btn-green':'btn btn-purple';
+  document.getElementById('modalConfirmBtn').textContent = r.type==='return'?'환불 승인':'교환 처리';
+  document.getElementById('confirmModal').classList.add('open');
+}
+
+function bulkApprove(){
+  if(!selected.size){ showToast('선택된 항목이 없습니다'); return; }
+  pendingAction = {type:'bulkApprove', ids:[...selected]};
+  document.getElementById('modalIcon').textContent  = '✅';
+  document.getElementById('modalTitle').textContent = '일괄 승인';
+  document.getElementById('modalDesc').textContent  = `선택된 ${selected.size}건을 일괄 승인합니다.\n반품은 환불, 교환은 파일 재발송으로 처리됩니다.`;
+  document.getElementById('modalExtra').innerHTML='';
+  document.getElementById('modalConfirmBtn').className = 'btn btn-green';
+  document.getElementById('modalConfirmBtn').textContent = '일괄 승인';
+  document.getElementById('confirmModal').classList.add('open');
+}
+
+/* ── REJECT ── */
+function openRejectModal(id){
+  pendingAction = {type:'reject', id};
+  const r = requests.find(r=>r.id===id);
+  document.getElementById('modalIcon').textContent  = '⚠️';
+  document.getElementById('modalTitle').textContent = '요청 거부';
+  document.getElementById('modalDesc').textContent  = `${r.buyer} 님의 ${r.type==='return'?'반품':'교환'} 요청을 거부합니다.\n거부 사유를 선택하면 고객에게 안내됩니다.`;
+  document.getElementById('modalExtra').innerHTML = `
+    <div class="reject-reason-wrap">
+      <div class="reject-reason-label">거부 사유 선택</div>
+      <select class="reject-reason-select" id="rejectReasonSelect">
+        <option value="">사유 선택 (필수)</option>
+        <option value="no_refund_digital">디지털 상품 특성상 단순변심 환불 불가</option>
+        <option value="already_downloaded">파일 다운로드 이력 확인 — 사용 후 반품 불가</option>
+        <option value="over_7days">구매 후 7일 초과로 환불 기간 만료</option>
+        <option value="not_our_issue">제품 자체 문제가 아닌 고객 환경 문제</option>
+        <option value="policy_violation">이용약관 위반</option>
+        <option value="custom">직접 입력</option>
+      </select>
+      <textarea class="reject-reason-textarea" id="rejectReasonText" placeholder="추가 안내 내용 (선택사항)"></textarea>
+    </div>`;
+  document.getElementById('modalConfirmBtn').className = 'btn btn-red';
+  document.getElementById('modalConfirmBtn').textContent = '거부 확정';
+  document.getElementById('confirmModal').classList.add('open');
+}
+
+function bulkReject(){
+  if(!selected.size){ showToast('선택된 항목이 없습니다'); return; }
+  pendingAction = {type:'bulkReject', ids:[...selected]};
+  document.getElementById('modalIcon').textContent  = '⚠️';
+  document.getElementById('modalTitle').textContent = '일괄 거부';
+  document.getElementById('modalDesc').textContent  = `선택된 ${selected.size}건을 일괄 거부합니다.`;
+  document.getElementById('modalExtra').innerHTML='';
+  document.getElementById('modalConfirmBtn').className = 'btn btn-red';
+  document.getElementById('modalConfirmBtn').textContent = '일괄 거부';
+  document.getElementById('confirmModal').classList.add('open');
+}
+
+function closeModal(){ document.getElementById('confirmModal').classList.remove('open'); pendingAction=null; }
+
+async function confirmAction(){
+  if(!pendingAction){ closeModal(); return; }
+  const {type,id,ids} = pendingAction;
+  closeModal();
+  const TOSS = localStorage.getItem('modulab_toss_endpoint')||'';
+
+  if(type==='approve'){
+    const r = requests.find(r=>r.id===id);
+    if(r){
+      if(r.type==='return'&&TOSS){
+        try{ await fetch(TOSS+'/refund',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderId:r.orderId,amount:r.price})}); }
+        catch(e){ showToast('토스 API 연동 실패: '+e.message); return; }
+      }
+      r.status='approved';
+    }
+    showToast(r?.type==='return'?'환불이 승인되었습니다':'교환(파일 재발송)이 처리되었습니다');
+  } else if(type==='bulkApprove'){
+    ids.forEach(i=>{ const r=requests.find(r=>r.id===i); if(r&&(r.status==='pending'||r.status==='processing')) r.status='approved'; });
+    showToast(`${ids.length}건이 일괄 승인되었습니다`); selected.clear();
+  } else if(type==='reject'){
+    const reasonEl = document.getElementById('rejectReasonSelect');
+    const textEl   = document.getElementById('rejectReasonText');
+    const reasonVal = reasonEl?.value||'';
+    if(!reasonVal){ showToast('거부 사유를 선택해주세요'); return; }
+    const r = requests.find(r=>r.id===id);
+    if(r){ r.status='rejected'; r.rejectNote=(textEl?.value||'').trim()||reasonVal; }
+    showToast('요청이 거부되었습니다');
+  } else if(type==='bulkReject'){
+    ids.forEach(i=>{ const r=requests.find(r=>r.id===i); if(r&&r.status!=='approved') r.status='rejected'; });
+    showToast(`${ids.length}건이 일괄 거부되었습니다`); selected.clear();
+  }
+
+  save(); updateSummary(); render();
+}
+
+/* ── CSV ── */
+function exportCSV(){
+  const rows=[['요청번호','구매자','이메일','상품명','원주문','요청유형','요청사유','환불금액','처리상태','요청일시']];
+  filtered.forEach(r=>rows.push([r.id,r.buyer,r.email,r.product,r.orderId,r.type==='return'?'반품':'교환',REASON_LABEL[r.reason]||r.reason,r.type==='return'?r.price:0,STATUS_LABEL[r.status],r.date]));
+  const csv='﻿'+rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a'); a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download='modulab_returns_'+new Date().toISOString().slice(0,10)+'.csv'; a.click();
+  showToast('CSV 다운로드 완료');
+}
+
+function save(){ localStorage.setItem('modulab_returns',JSON.stringify(requests)); }
+function showToast(msg){ const t=document.getElementById('toast'); document.getElementById('toastMsg').textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3200); }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){closeDrawer();closeModal();} });
+
+loadData();
+</script>
+</body>
+</html>
