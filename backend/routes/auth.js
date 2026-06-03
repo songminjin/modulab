@@ -62,9 +62,9 @@ const handleSocialLogin = async (profile, provider, done) => {
 
 // ── Passport 설정 ──
 passport.use(new GoogleStrategy({
-  clientID: process.env.GOOGLE_CLIENT_ID,
-  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL: `${process.env.BACKEND_URL || 'http://localhost:3000'}/api/auth/google/callback`
+  clientID: process.env.GOOGLE_CLIENT_ID?.trim(),
+  clientSecret: process.env.GOOGLE_CLIENT_SECRET?.trim(),
+  callbackURL: `${(process.env.BACKEND_URL || 'http://localhost:3000').trim()}/api/auth/google/callback`
 }, (accessToken, refreshToken, profile, done) => handleSocialLogin(profile, 'google', done)));
 
 passport.use(new KakaoStrategy({
