@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS 관리 — ModuLab 관리자</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--blue:#2563EB;--blue-dark:#1D4ED8;--blue-light:#EFF6FF;--blue-mid:#BFDBFE;--navy:#0F172A;--green:#16A34A;--green-light:#F0FDF4;--red:#DC2626;--red-light:#FEF2F2;--yellow:#F59E0B;--yellow-light:#FFFBEB;--purple:#7C3AED;--purple-light:#F5F3FF;--slate-light:#F1F5F9;--border:#E2E8F0;--white:#FFFFFF;--text:#0F172A;--text2:#475569;--text3:#94A3B8;--sidebar-w:220px;--header-h:64px;}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Noto Sans KR',sans-serif;color:var(--text);background:#F8FAFC;line-height:1.6;}
+a{text-decoration:none;color:inherit;}
+.mobile-guard{display:none;position:fixed;inset:0;z-index:9999;background:var(--navy);flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:32px;}
+.mobile-guard-icon{font-size:48px;}.mobile-guard-title{font-family:'Bebas Neue',sans-serif;font-size:32px;color:white;}.mobile-guard-desc{font-size:14px;color:#94A3B8;line-height:1.7;}
+@media(max-width:768px){.mobile-guard{display:flex;}}
+.admin-layout{display:flex;min-height:100vh;}
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--navy);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100;}
+.sidebar-logo{padding:20px 20px 16px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px;}
+.logo-mark{width:32px;height:32px;background:var(--blue);border-radius:7px;position:relative;overflow:hidden;flex-shrink:0;}
+.logo-mark::before{content:'';position:absolute;top:4px;left:4px;width:13px;height:13px;background:rgba(255,255,255,.3);border-radius:2px;}
+.logo-mark::after{content:'';position:absolute;bottom:4px;right:4px;width:13px;height:13px;background:#16A34A;border-radius:2px;}
+.sidebar-logo-text{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.04em;color:white;}.sidebar-logo-text span{color:var(--blue);}
+.sidebar-admin-badge{font-size:9px;font-weight:700;letter-spacing:.08em;color:#64748B;padding:2px 6px;border:1px solid #334155;border-radius:3px;display:block;margin-top:2px;}
+.sidebar-section{padding:20px 12px 8px;}.sidebar-section-label{font-size:10px;font-weight:700;letter-spacing:.1em;color:#475569;text-transform:uppercase;padding:0 8px;margin-bottom:6px;}
+.sidebar-nav{list-style:none;}.sidebar-nav li a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;font-size:13px;font-weight:500;color:#94A3B8;transition:all .15s;}
+.sidebar-nav li a:hover{background:rgba(255,255,255,.06);color:white;}.sidebar-nav li a.active{background:rgba(37,99,235,.2);color:#93C5FD;}
+.nav-icon{font-size:15px;width:18px;text-align:center;flex-shrink:0;}
+.sidebar-sub{margin-left:28px;margin-top:2px;}.sidebar-sub li a{font-size:12px;padding:6px 10px;color:#64748B;border-radius:6px;}
+.sidebar-sub li a:hover{color:#94A3B8;background:rgba(255,255,255,.04);}.sidebar-sub li a.active{color:#93C5FD;background:rgba(37,99,235,.15);}
+.sidebar-bottom{margin-top:auto;padding:16px 12px;border-top:1px solid rgba(255,255,255,.06);}
+.sidebar-bottom a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;font-size:13px;color:#64748B;transition:all .15s;}
+.sidebar-bottom a:hover{background:rgba(255,255,255,.06);color:#94A3B8;}
+.main-wrap{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh;}
+.admin-header{position:sticky;top:0;z-index:50;height:var(--header-h);background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 32px;gap:16px;}
+.header-breadcrumb{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text3);}.header-breadcrumb a{color:var(--text3);}.header-breadcrumb a:hover{color:var(--blue);}.header-breadcrumb .current{color:var(--text);font-weight:600;}
+.header-right{display:flex;align-items:center;gap:10px;}
+.header-noti-btn{width:36px;height:36px;border-radius:8px;border:1px solid var(--border);background:none;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;position:relative;transition:background .15s;}.header-noti-btn:hover{background:var(--slate-light);}
+.noti-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;background:var(--red);border-radius:50%;border:1.5px solid white;}
+.header-logout-btn{padding:7px 16px;border-radius:8px;border:1px solid var(--border);background:none;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;font-family:inherit;transition:all .15s;}.header-logout-btn:hover{background:var(--red-light);border-color:#FCA5A5;color:var(--red);}
+.header-user{display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:8px;background:var(--slate-light);border:1px solid var(--border);}
+.header-user-avatar{width:28px;height:28px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;color:white;font-weight:700;flex-shrink:0;}
+.header-user-name{font-size:13px;font-weight:500;color:var(--text2);}
+.page-content{padding:32px;flex:1;}
+.page-title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;gap:16px;flex-wrap:wrap;}
+.page-title{font-size:22px;font-weight:700;}.page-title-sub{font-size:13px;color:var(--text3);margin-top:2px;}
+.title-btns{display:flex;gap:8px;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;border:none;transition:all .15s;white-space:nowrap;text-decoration:none;}
+.btn-primary{background:var(--blue);color:white;}.btn-primary:hover{background:var(--blue-dark);}
+.btn-outline{background:var(--white);color:var(--text2);border:1px solid var(--border);}.btn-outline:hover{background:var(--slate-light);}
+.btn-green{background:var(--green-light);color:var(--green);border:1px solid #BBF7D0;}.btn-green:hover{background:var(--green);color:white;}
+.btn-sm{padding:5px 12px;font-size:12px;}
+.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+.summary-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:18px 20px;}
+.summary-card-label{font-size:12px;font-weight:600;color:var(--text3);margin-bottom:8px;}
+.summary-card-value{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:500;color:var(--text);}
+.summary-card-sub{font-size:12px;color:var(--text3);margin-top:4px;}
+.summary-card.blue{border-left:3px solid var(--blue);}.summary-card.red{border-left:3px solid var(--red);}.summary-card.green{border-left:3px solid var(--green);}.summary-card.yellow{border-left:3px solid var(--yellow);}
+/* CS layout */
+.cs-layout{display:grid;grid-template-columns:1fr 400px;gap:20px;align-items:start;}
+.cs-list-wrap{background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.cs-filter-bar{display:flex;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid var(--border);flex-wrap:wrap;}
+.filter-tag{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:500;border:1px solid var(--border);background:var(--white);color:var(--text2);cursor:pointer;transition:all .15s;white-space:nowrap;}
+.filter-tag:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-light);}
+.filter-tag.active{border-color:var(--blue);color:var(--blue);background:var(--blue-light);font-weight:700;}
+.cs-item{padding:16px 20px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;display:flex;align-items:flex-start;gap:14px;}
+.cs-item:last-child{border-bottom:none;}
+.cs-item:hover{background:#FAFBFF;}
+.cs-item.selected{background:var(--blue-light);}
+.cs-item.unread{border-left:3px solid var(--red);}
+.cs-avatar{width:36px;height:36px;border-radius:50%;background:var(--slate-light);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.cs-item-body{flex:1;min-width:0;}
+.cs-item-top{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+.cs-item-name{font-size:13px;font-weight:700;color:var(--text);}
+.cs-item-date{font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-left:auto;}
+.cs-item-subject{font-size:13px;color:var(--text);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cs-item-preview{font-size:12px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.03em;white-space:nowrap;}
+.badge-unanswered{background:var(--red-light);color:var(--red);}
+.badge-answered{background:var(--green-light);color:var(--green);}
+.badge-type{padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;}
+.type-refund{background:#FEE2E2;color:#B91C1C;}.type-file{background:#EDE9FE;color:#6D28D9;}.type-usage{background:#EFF6FF;color:#1D4ED8;}
+.type-custom{background:#FEF9C3;color:#A16207;}.type-etc{background:var(--slate-light);color:var(--text2);}
+/* reply panel */
+.reply-panel{background:var(--white);border:1px solid var(--border);border-radius:12px;position:sticky;top:calc(var(--header-h)+24px);}
+.reply-panel-head{padding:16px 20px;border-bottom:1px solid var(--border);}
+.reply-panel-title{font-size:14px;font-weight:700;color:var(--text);}
+.reply-panel-body{padding:20px;}
+.reply-msg{background:var(--slate-light);border-radius:8px;padding:14px;font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:16px;max-height:160px;overflow-y:auto;}
+.reply-label{font-size:12px;font-weight:600;color:var(--text3);margin-bottom:6px;}
+.reply-textarea{width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;color:var(--text);resize:vertical;min-height:120px;outline:none;transition:border-color .15s;line-height:1.6;}
+.reply-textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1);}
+.reply-actions{display:flex;gap:8px;margin-top:12px;}
+.reply-actions .btn{flex:1;justify-content:center;}
+.empty-panel{text-align:center;padding:48px 20px;color:var(--text3);}
+.empty-panel-icon{font-size:36px;margin-bottom:12px;}
+.empty-panel-text{font-size:13px;}
+.kakao-link{display:flex;align-items:center;gap:10px;padding:12px 16px;background:#FEE500;border-radius:10px;margin-top:16px;font-size:13px;font-weight:700;color:#000;cursor:pointer;transition:background .15s;}
+.kakao-link:hover{background:#F7DC00;}
+.avg-time{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--slate-light);border-radius:8px;margin-bottom:16px;font-size:12px;color:var(--text2);}
+.avg-time strong{font-family:'JetBrains Mono',monospace;color:var(--blue);font-size:14px;}
+#toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--navy);color:white;padding:13px 24px;border-radius:10px;font-size:14px;font-weight:500;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);transition:transform .3s,opacity .3s;opacity:0;z-index:9000;white-space:nowrap;}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+</style>
+</head>
+<body>
+<div class="mobile-guard"><div class="mobile-guard-icon">🖥️</div><div class="mobile-guard-title">PC에서 접속해주세요</div><div class="mobile-guard-desc">관리자 페이지는 PC 환경에서만<br>정상적으로 이용할 수 있습니다.</div></div>
+
+<div class="admin-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark"></div>
+      <div><div class="sidebar-logo-text">Modu<span>Lab</span></div><span class="sidebar-admin-badge">ADMIN SCM</span></div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">메인 메뉴</div>
+      <ul class="sidebar-nav">
+        <li><a href="dashboard.html"><span class="nav-icon">📊</span>대시보드</a></li>
+        <li>
+          <a href="products.html"><span class="nav-icon">📦</span>상품 관리</a>
+          <ul class="sidebar-sub sidebar-nav">
+            <li><a href="products.html">상품 목록</a></li>
+            <li><a href="product-add.html">상품 등록</a></li>
+          </ul>
+        </li>
+        <li><a href="orders.html"><span class="nav-icon">🛒</span>주문 관리</a></li>
+        <li><a href="cs.html" class="active"><span class="nav-icon">💬</span>CS 관리</a></li>
+        <li><a href="settlement.html"><span class="nav-icon">💰</span>정산 현황판</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">바로가기</div>
+      <ul class="sidebar-nav"><li><a href="../index.html" target="_blank"><span class="nav-icon">🌐</span>쇼핑몰 보기</a></li></ul>
+    </div>
+    <div class="sidebar-bottom"><a href="index.html" onclick="logout(event)"><span class="nav-icon">🚪</span>로그아웃</a></div>
+  </aside>
+
+  <div class="main-wrap">
+    <header class="admin-header">
+      <div class="header-breadcrumb">
+        <a href="dashboard.html">홈</a><span style="color:var(--border);">›</span>
+        <span class="current">CS 관리</span>
+      </div>
+      <div class="header-right">
+        <button class="header-noti-btn">🔔<span class="noti-dot"></span></button>
+        <div class="header-user"><div class="header-user-avatar">M</div><div class="header-user-name">관리자</div></div>
+        <button class="header-logout-btn" onclick="logout()">로그아웃</button>
+      </div>
+    </header>
+
+    <div class="page-content">
+      <div class="page-title-row">
+        <div><div class="page-title">CS 관리</div><div class="page-title-sub">고객 문의를 조회하고 답변을 관리합니다</div></div>
+        <a href="https://pf.kakao.com/" target="_blank" class="btn btn-primary">💬 카카오채널 열기</a>
+      </div>
+
+      <div class="summary-grid">
+        <div class="summary-card red"><div class="summary-card-label">미답변 문의</div><div class="summary-card-value" id="sumUnanswered">—</div><div class="summary-card-sub">즉시 답변 필요</div></div>
+        <div class="summary-card blue"><div class="summary-card-label">전체 문의</div><div class="summary-card-value" id="sumTotal">—</div><div class="summary-card-sub">이번 달</div></div>
+        <div class="summary-card green"><div class="summary-card-label">답변 완료</div><div class="summary-card-value" id="sumAnswered">—</div><div class="summary-card-sub">이번 달</div></div>
+        <div class="summary-card yellow"><div class="summary-card-label">평균 응답시간</div><div class="summary-card-value" id="sumAvg">—</div><div class="summary-card-sub">시간</div></div>
+      </div>
+
+      <div class="cs-layout">
+        <!-- LEFT: 문의 목록 -->
+        <div class="cs-list-wrap">
+          <div class="cs-filter-bar" id="typeFilter">
+            <div class="filter-tag active" data-val="all"    onclick="setTypeFilter('all',this)">전체</div>
+            <div class="filter-tag" data-val="unanswered"    onclick="setTypeFilter('unanswered',this)">🔴 미답변</div>
+            <div class="filter-tag" data-val="refund"        onclick="setTypeFilter('refund',this)">결제/환불</div>
+            <div class="filter-tag" data-val="file"          onclick="setTypeFilter('file',this)">파일 다운로드</div>
+            <div class="filter-tag" data-val="usage"         onclick="setTypeFilter('usage',this)">사용 방법</div>
+            <div class="filter-tag" data-val="custom"        onclick="setTypeFilter('custom',this)">맞춤제작 견적</div>
+            <div class="filter-tag" data-val="etc"           onclick="setTypeFilter('etc',this)">기타</div>
+          </div>
+          <div id="csList"></div>
+        </div>
+
+        <!-- RIGHT: 답변 패널 -->
+        <div class="reply-panel">
+          <div class="reply-panel-head">
+            <div class="reply-panel-title" id="replyPanelTitle">문의를 선택하세요</div>
+          </div>
+          <div class="reply-panel-body" id="replyPanelBody">
+            <div class="empty-panel">
+              <div class="empty-panel-icon">💬</div>
+              <div class="empty-panel-text">왼쪽 목록에서 문의를 선택하면<br>내용과 답변 작성창이 표시됩니다.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"><span id="toastMsg"></span></div>
+
+<script>
+(function(){ if(!sessionStorage.getItem('modulab_admin')) location.href='index.html'; })();
+function logout(e){ if(e)e.preventDefault(); sessionStorage.removeItem('modulab_admin'); location.href='index.html'; }
+
+const DEMO_CS = [
+  {id:'CS001', name:'김민준', email:'minjun@email.com', type:'refund', subject:'결제했는데 파일이 안 왔어요', body:'어제 오후에 프로젝트 관리 자동화 상품을 결제했는데 이메일로 파일이 오지 않았습니다. 확인 부탁드려요.', answered:false, answer:'', date:'2026-06-04 14:20', orderId:'ORD-2026060401'},
+  {id:'CS002', name:'이서연', email:'seoyeon@email.com', type:'usage', subject:'엑셀 파일이 열리지 않습니다', body:'다운받은 엑셀 파일을 열면 "매크로를 사용할 수 없습니다"라는 메시지가 뜨고 기능이 작동하지 않아요. 어떻게 해야 하나요?', answered:false, answer:'', date:'2026-06-04 11:05', orderId:'ORD-2026060402'},
+  {id:'CS003', name:'박지현', email:'jihyun@email.com', type:'custom', subject:'구글시트 재고관리 맞춤 제작 견적 문의', body:'저는 의류 소매업을 하고 있는데요, 구글시트로 재고 관리와 매출 정산을 동시에 할 수 있는 자동화 툴이 필요합니다. 견적이 얼마나 되는지 알 수 있을까요?', answered:true, answer:'안녕하세요! 문의 주셔서 감사합니다. 요청하신 기능 기준으로 약 150,000~200,000원 정도 예상됩니다. 카카오채널로 연락 주시면 더 자세히 상담해 드리겠습니다.', date:'2026-06-03 09:30', orderId:''},
+  {id:'CS004', name:'최도윤', email:'doyun@email.com', type:'file', subject:'파일 다운로드 링크가 만료됐어요', body:'지난달에 가계부 자동화를 구매했는데 이메일에 있는 다운로드 링크를 클릭하니 만료됐다고 뜹니다. 재발송 요청드립니다.', answered:true, answer:'안녕하세요 최도윤 님, 불편 드려서 죄송합니다. 파일 링크를 새로 발송해드렸습니다. 이메일 확인 부탁드리며, 추가 문의는 언제든지 연락 주세요!', date:'2026-06-03 16:44', orderId:'ORD-2026060407'},
+  {id:'CS005', name:'강예림', email:'yerim@email.com', type:'refund', subject:'환불 요청드립니다', body:'급여 관리 자동화를 구매했는데 제가 사용하는 엑셀 버전(2010)과 호환이 안 됩니다. 환불 부탁드립니다.', answered:false, answer:'', date:'2026-06-04 08:15', orderId:'ORD-2026060403'},
+  {id:'CS006', name:'윤지훈', email:'jihoon@email.com', type:'etc', subject:'영수증 발급 요청', body:'지난 주문에 대한 현금 영수증을 발급받고 싶습니다. 주문번호는 ORD-2026060409입니다.', answered:false, answer:'', date:'2026-06-04 10:00', orderId:'ORD-2026060409'},
+];
+
+const typeLabel = {refund:'결제/환불',file:'파일 다운로드',usage:'사용 방법',custom:'맞춤제작 견적',etc:'기타'};
+const typeCls   = {refund:'type-refund',file:'type-file',usage:'type-usage',custom:'type-custom',etc:'type-etc'};
+
+let inquiries = [];
+let filterType = 'all';
+let selectedId = null;
+
+function load(){
+  const saved = localStorage.getItem('modulab_cs');
+  if(saved){ try{ inquiries=JSON.parse(saved); }catch{ inquiries=[...DEMO_CS]; } }
+  else inquiries=[...DEMO_CS];
+  updateSummary(); renderList();
+}
+
+function updateSummary(){
+  const unanswered = inquiries.filter(c=>!c.answered).length;
+  const answered   = inquiries.filter(c=>c.answered).length;
+  document.getElementById('sumUnanswered').textContent = unanswered;
+  document.getElementById('sumTotal').textContent      = inquiries.length;
+  document.getElementById('sumAnswered').textContent   = answered;
+  document.getElementById('sumAvg').textContent        = '2.4h';
+}
+
+function setTypeFilter(val,el){
+  filterType=val;
+  document.querySelectorAll('#typeFilter .filter-tag').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderList();
+}
+
+function renderList(){
+  const list = inquiries.filter(c=>{
+    if(filterType==='unanswered') return !c.answered;
+    if(filterType!=='all' && c.type!==filterType) return false;
+    return true;
+  });
+  const container = document.getElementById('csList');
+  if(!list.length){ container.innerHTML='<div style="text-align:center;padding:40px 20px;color:var(--text3);font-size:13px;">해당 조건의 문의가 없습니다.</div>'; return; }
+  container.innerHTML = list.map(c=>`
+    <div class="cs-item ${!c.answered?'unread':''} ${selectedId===c.id?'selected':''}" onclick="selectItem('${c.id}')">
+      <div class="cs-avatar">${c.name.charAt(0)}</div>
+      <div class="cs-item-body">
+        <div class="cs-item-top">
+          <span class="cs-item-name">${c.name}</span>
+          <span class="badge badge-type ${typeCls[c.type]||''}">${typeLabel[c.type]||c.type}</span>
+          <span class="badge ${c.answered?'badge-answered':'badge-unanswered'}">${c.answered?'답변완료':'미답변'}</span>
+          <span class="cs-item-date">${c.date.slice(5)}</span>
+        </div>
+        <div class="cs-item-subject">${c.subject}</div>
+        <div class="cs-item-preview">${c.body}</div>
+      </div>
+    </div>`).join('');
+}
+
+function selectItem(id){
+  selectedId = id;
+  const c = inquiries.find(c=>c.id===id);
+  if(!c) return;
+  renderList();
+  document.getElementById('replyPanelTitle').textContent = c.subject;
+  document.getElementById('replyPanelBody').innerHTML = `
+    <div class="avg-time"><span>평균 응답시간</span><strong>2.4시간</strong></div>
+    <div style="margin-bottom:8px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <span style="font-size:13px;font-weight:700;">${c.name}</span>
+        <span style="font-size:11px;color:var(--text3);">${c.email}</span>
+        ${c.orderId?`<span style="font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--blue);">${c.orderId}</span>`:''}
+      </div>
+      <span class="badge badge-type ${typeCls[c.type]||''}">${typeLabel[c.type]||c.type}</span>
+      <span style="font-size:11px;color:var(--text3);margin-left:8px;">${c.date}</span>
+    </div>
+    <div class="reply-msg">${c.body}</div>
+    ${c.answered?`<div style="margin-bottom:10px;padding:12px 14px;background:var(--green-light);border:1px solid #BBF7D0;border-radius:8px;font-size:13px;color:#15803D;"><strong>이전 답변:</strong><br>${c.answer}</div>`:''}
+    <div class="reply-label">${c.answered?'답변 수정':'답변 작성'}</div>
+    <textarea class="reply-textarea" id="replyText" placeholder="답변 내용을 입력하세요...">${c.answer||''}</textarea>
+    <div class="reply-actions">
+      <button class="btn btn-green" onclick="saveReply('${c.id}')">✓ 답변 저장</button>
+      ${c.orderId?`<a href="orders.html" class="btn btn-outline btn-sm">주문 보기</a>`:''}
+    </div>
+    <a href="https://pf.kakao.com/" target="_blank" class="kakao-link">💬 카카오채널로 직접 연락하기</a>`;
+}
+
+function saveReply(id){
+  const text = document.getElementById('replyText').value.trim();
+  if(!text){ showToast('답변 내용을 입력해주세요'); return; }
+  const c = inquiries.find(c=>c.id===id);
+  if(!c) return;
+  c.answer = text; c.answered = true;
+  localStorage.setItem('modulab_cs', JSON.stringify(inquiries));
+  updateSummary(); renderList(); selectItem(id);
+  showToast('답변이 저장되었습니다');
+}
+
+function showToast(msg){ const t=document.getElementById('toast'); document.getElementById('toastMsg').textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
+load();
+</script>
+</body>
+</html>

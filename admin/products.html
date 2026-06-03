@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>상품 목록 — ModuLab 관리자</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --blue:#2563EB; --blue-dark:#1D4ED8; --blue-light:#EFF6FF; --blue-mid:#BFDBFE;
+  --navy:#0F172A; --green:#16A34A; --green-light:#F0FDF4;
+  --red:#DC2626; --red-light:#FEF2F2; --yellow:#F59E0B; --yellow-light:#FFFBEB;
+  --slate-light:#F1F5F9; --border:#E2E8F0; --white:#FFFFFF;
+  --text:#0F172A; --text2:#475569; --text3:#94A3B8;
+  --sidebar-w:220px; --header-h:64px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Noto Sans KR',sans-serif;color:var(--text);background:#F8FAFC;line-height:1.6;}
+a{text-decoration:none;color:inherit;}
+.mobile-guard{display:none;position:fixed;inset:0;z-index:9999;background:var(--navy);flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:32px;}
+.mobile-guard-icon{font-size:48px;}.mobile-guard-title{font-family:'Bebas Neue',sans-serif;font-size:32px;color:white;}.mobile-guard-desc{font-size:14px;color:#94A3B8;line-height:1.7;}
+@media(max-width:768px){.mobile-guard{display:flex;}}
+.admin-layout{display:flex;min-height:100vh;}
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--navy);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100;}
+.sidebar-logo{padding:20px 20px 16px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px;}
+.logo-mark{width:32px;height:32px;background:var(--blue);border-radius:7px;position:relative;overflow:hidden;flex-shrink:0;}
+.logo-mark::before{content:'';position:absolute;top:4px;left:4px;width:13px;height:13px;background:rgba(255,255,255,.3);border-radius:2px;}
+.logo-mark::after{content:'';position:absolute;bottom:4px;right:4px;width:13px;height:13px;background:#16A34A;border-radius:2px;}
+.sidebar-logo-text{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.04em;color:white;}
+.sidebar-logo-text span{color:var(--blue);}
+.sidebar-admin-badge{font-size:9px;font-weight:700;letter-spacing:.08em;color:#64748B;padding:2px 6px;border:1px solid #334155;border-radius:3px;display:block;margin-top:2px;}
+.sidebar-section{padding:20px 12px 8px;}
+.sidebar-section-label{font-size:10px;font-weight:700;letter-spacing:.1em;color:#475569;text-transform:uppercase;padding:0 8px;margin-bottom:6px;}
+.sidebar-nav{list-style:none;}
+.sidebar-nav li a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;font-size:13px;font-weight:500;color:#94A3B8;transition:all .15s;}
+.sidebar-nav li a:hover{background:rgba(255,255,255,.06);color:white;}
+.sidebar-nav li a.active{background:rgba(37,99,235,.2);color:#93C5FD;}
+.nav-icon{font-size:15px;width:18px;text-align:center;flex-shrink:0;}
+.sidebar-sub{margin-left:28px;margin-top:2px;}
+.sidebar-sub li a{font-size:12px;padding:6px 10px;color:#64748B;border-radius:6px;}
+.sidebar-sub li a:hover{color:#94A3B8;background:rgba(255,255,255,.04);}
+.sidebar-sub li a.active{color:#93C5FD;background:rgba(37,99,235,.15);}
+.sidebar-bottom{margin-top:auto;padding:16px 12px;border-top:1px solid rgba(255,255,255,.06);}
+.sidebar-bottom a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;font-size:13px;color:#64748B;transition:all .15s;}
+.sidebar-bottom a:hover{background:rgba(255,255,255,.06);color:#94A3B8;}
+.main-wrap{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh;}
+.admin-header{position:sticky;top:0;z-index:50;height:var(--header-h);background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 32px;gap:16px;}
+.header-breadcrumb{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text3);}
+.header-breadcrumb a{color:var(--text3);transition:color .15s;}.header-breadcrumb a:hover{color:var(--blue);}
+.header-breadcrumb .current{color:var(--text);font-weight:600;}
+.header-right{display:flex;align-items:center;gap:10px;}
+.header-noti-btn{width:36px;height:36px;border-radius:8px;border:1px solid var(--border);background:none;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;position:relative;transition:background .15s;}
+.header-noti-btn:hover{background:var(--slate-light);}
+.noti-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;background:var(--red);border-radius:50%;border:1.5px solid white;}
+.header-logout-btn{padding:7px 16px;border-radius:8px;border:1px solid var(--border);background:none;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;font-family:inherit;transition:all .15s;}
+.header-logout-btn:hover{background:var(--red-light);border-color:#FCA5A5;color:var(--red);}
+.header-user{display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:8px;background:var(--slate-light);border:1px solid var(--border);}
+.header-user-avatar{width:28px;height:28px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;color:white;font-weight:700;flex-shrink:0;}
+.header-user-name{font-size:13px;font-weight:500;color:var(--text2);}
+.page-content{padding:32px;flex:1;}
+.page-title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;gap:16px;flex-wrap:wrap;}
+.page-title{font-size:22px;font-weight:700;color:var(--text);}
+.page-title-sub{font-size:13px;color:var(--text3);margin-top:2px;}
+.title-btns{display:flex;gap:8px;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;border:none;transition:all .15s;white-space:nowrap;}
+.btn-primary{background:var(--blue);color:white;}.btn-primary:hover{background:var(--blue-dark);}
+.btn-outline{background:var(--white);color:var(--text2);border:1px solid var(--border);}.btn-outline:hover{background:var(--slate-light);}
+.btn-sm{padding:5px 12px;font-size:12px;}
+.btn-red{background:var(--red-light);color:var(--red);border:1px solid #FCA5A5;}.btn-red:hover{background:var(--red);color:white;}
+/* filter */
+.filter-bar{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:14px 20px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.filter-tags{display:flex;gap:6px;flex-wrap:wrap;}
+.filter-tag{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:500;border:1px solid var(--border);background:var(--white);color:var(--text2);cursor:pointer;transition:all .15s;white-space:nowrap;}
+.filter-tag:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-light);}
+.filter-tag.active{border-color:var(--blue);color:var(--blue);background:var(--blue-light);font-weight:700;}
+.search-wrap{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.search-input-wrap{display:flex;align-items:center;gap:8px;background:var(--slate-light);border:1px solid var(--border);border-radius:8px;padding:7px 14px;min-width:220px;transition:border-color .15s;}
+.search-input-wrap:focus-within{border-color:var(--blue);}
+.search-input-wrap input{border:none;background:none;outline:none;font-size:13px;color:var(--text);font-family:inherit;width:100%;}
+.search-input-wrap input::placeholder{color:var(--text3);}
+/* table */
+.table-wrap{background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.table-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);}
+.table-count{font-size:13px;color:var(--text3);} .table-count strong{color:var(--text);font-weight:700;}
+table{width:100%;border-collapse:collapse;}
+thead tr{background:var(--slate-light);}
+thead th{padding:10px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.05em;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap;}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:#FAFBFF;}
+td{padding:12px 16px;font-size:13px;vertical-align:middle;}
+.thumb-cell{width:52px;height:36px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.product-name-cell{font-weight:600;color:var(--text);}
+.product-sub{font-size:11px;color:var(--text3);margin-top:1px;}
+.price-cell{font-family:'JetBrains Mono',monospace;font-weight:500;color:var(--text);white-space:nowrap;}
+.price-discount{font-size:11px;color:var(--red);margin-top:1px;font-family:'JetBrains Mono',monospace;}
+.action-btns{display:flex;gap:6px;}
+input[type="checkbox"]{accent-color:var(--blue);width:15px;height:15px;cursor:pointer;}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap;}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.badge-on{background:#DCFCE7;color:#15803D;}.badge-on::before{background:#16A34A;}
+.badge-off{background:var(--slate-light);color:var(--text3);}.badge-off::before{background:#CBD5E1;}
+.cat-badge{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.04em;}
+.cat-excel{background:#DCFCE7;color:#15803D;}.cat-sheets{background:#FEF9C3;color:#A16207;}
+.cat-short{background:#EDE9FE;color:#6D28D9;}.cat-detail{background:#FFE4E6;color:#B91C1C;}
+.cat-web{background:#DBEAFE;color:#1D4ED8;}.cat-program{background:#F1F5F9;color:#475569;}
+/* toggle switch */
+.switch{position:relative;width:40px;height:22px;flex-shrink:0;}
+.switch input{display:none;}
+.switch-track{position:absolute;inset:0;background:var(--border);border-radius:11px;cursor:pointer;transition:background .2s;}
+.switch-track::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;background:white;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+.switch input:checked+.switch-track{background:var(--blue);}
+.switch input:checked+.switch-track::after{transform:translateX(18px);}
+/* empty */
+.empty-state{text-align:center;padding:60px 20px;}
+.empty-icon{font-size:40px;margin-bottom:12px;}
+.empty-title{font-size:15px;font-weight:600;color:var(--text2);margin-bottom:6px;}
+.empty-desc{font-size:13px;color:var(--text3);}
+/* toast */
+#toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--navy);color:white;padding:13px 24px;border-radius:10px;font-size:14px;font-weight:500;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);transition:transform .3s ease,opacity .3s ease;opacity:0;z-index:9000;white-space:nowrap;}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+</style>
+</head>
+<body>
+<div class="mobile-guard"><div class="mobile-guard-icon">🖥️</div><div class="mobile-guard-title">PC에서 접속해주세요</div><div class="mobile-guard-desc">관리자 페이지는 PC 환경에서만<br>정상적으로 이용할 수 있습니다.</div></div>
+
+<div class="admin-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark"></div>
+      <div><div class="sidebar-logo-text">Modu<span>Lab</span></div><span class="sidebar-admin-badge">ADMIN SCM</span></div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">메인 메뉴</div>
+      <ul class="sidebar-nav">
+        <li><a href="dashboard.html"><span class="nav-icon">📊</span>대시보드</a></li>
+        <li>
+          <a href="products.html" class="active"><span class="nav-icon">📦</span>상품 관리</a>
+          <ul class="sidebar-sub sidebar-nav">
+            <li><a href="products.html" class="active">상품 목록</a></li>
+            <li><a href="product-add.html">상품 등록</a></li>
+          </ul>
+        </li>
+        <li><a href="orders.html"><span class="nav-icon">🛒</span>주문 관리</a></li>
+        <li><a href="cs.html"><span class="nav-icon">💬</span>CS 관리</a></li>
+        <li><a href="settlement.html"><span class="nav-icon">💰</span>정산 현황판</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">바로가기</div>
+      <ul class="sidebar-nav"><li><a href="../index.html" target="_blank"><span class="nav-icon">🌐</span>쇼핑몰 보기</a></li></ul>
+    </div>
+    <div class="sidebar-bottom"><a href="index.html" onclick="logout(event)"><span class="nav-icon">🚪</span>로그아웃</a></div>
+  </aside>
+
+  <div class="main-wrap">
+    <header class="admin-header">
+      <div class="header-breadcrumb">
+        <a href="dashboard.html">홈</a><span style="color:var(--border);">›</span>
+        <span class="current">상품 목록</span>
+      </div>
+      <div class="header-right">
+        <button class="header-noti-btn">🔔<span class="noti-dot"></span></button>
+        <div class="header-user"><div class="header-user-avatar">M</div><div class="header-user-name">관리자</div></div>
+        <button class="header-logout-btn" onclick="logout()">로그아웃</button>
+      </div>
+    </header>
+
+    <div class="page-content">
+      <div class="page-title-row">
+        <div><div class="page-title">상품 목록</div><div class="page-title-sub">등록된 상품을 조회하고 노출 여부를 관리합니다</div></div>
+        <div class="title-btns">
+          <button class="btn btn-outline" onclick="exportCSV()">⬇️ CSV 다운로드</button>
+          <a href="product-add.html" class="btn btn-primary">+ 상품 등록</a>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <div class="filter-tags" id="catFilter">
+          <div class="filter-tag active" data-val="all"     onclick="setFilter('all',this)">전체</div>
+          <div class="filter-tag" data-val="excel"   onclick="setFilter('excel',this)">엑셀 프로그램</div>
+          <div class="filter-tag" data-val="sheets"  onclick="setFilter('sheets',this)">구글시트 자동화</div>
+          <div class="filter-tag" data-val="short"   onclick="setFilter('short',this)">숏폼 템플릿</div>
+          <div class="filter-tag" data-val="detail"  onclick="setFilter('detail',this)">상세페이지 제작</div>
+          <div class="filter-tag" data-val="web"     onclick="setFilter('web',this)">홈페이지 제작</div>
+          <div class="filter-tag" data-val="program" onclick="setFilter('program',this)">프로그램 제작</div>
+        </div>
+        <div class="search-wrap">
+          <div class="search-input-wrap">
+            <span style="color:var(--text3);font-size:13px;">🔍</span>
+            <input type="text" id="searchInput" placeholder="상품명 검색" onkeydown="if(event.key==='Enter')render()">
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="render()">검색</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-header">
+          <div class="table-count">총 <strong id="filteredCount">0</strong>개</div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:44px;"><input type="checkbox" id="checkAll" onchange="toggleAll(this)"></th>
+                <th>썸네일</th>
+                <th>상품명</th>
+                <th>카테고리</th>
+                <th>판매가</th>
+                <th>판매유형</th>
+                <th>노출</th>
+                <th>등록일</th>
+                <th>관리</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+        <div id="emptyState" class="empty-state" style="display:none;">
+          <div class="empty-icon">📦</div>
+          <div class="empty-title">등록된 상품이 없습니다</div>
+          <div class="empty-desc"><a href="product-add.html" style="color:var(--blue);font-weight:600;">+ 상품 등록</a>하러 가기</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"><span id="toastMsg"></span></div>
+
+<script>
+(function(){ if(!sessionStorage.getItem('modulab_admin')) location.href='index.html'; })();
+function logout(e){ if(e)e.preventDefault(); sessionStorage.removeItem('modulab_admin'); location.href='index.html'; }
+
+const DEMO = [
+  {id:'excel-pm',  name:'프로젝트 관리 자동화', cat:'excel',  price:19900, discount:0,     type:'file',    visible:true,  emoji:'📊', date:'2026-05-10'},
+  {id:'excel-hh',  name:'가계부 자동화',         cat:'excel',  price:9900,  discount:0,     type:'file',    visible:true,  emoji:'💰', date:'2026-05-12'},
+  {id:'excel-pay', name:'급여 관리 자동화',       cat:'excel',  price:29900, discount:24900, type:'file',    visible:true,  emoji:'👥', date:'2026-05-14'},
+  {id:'excel-margin',name:'마진 계산기',          cat:'excel',  price:9900,  discount:0,     type:'file',    visible:true,  emoji:'📈', date:'2026-05-15'},
+  {id:'sheets-pm', name:'구글시트 프로젝트 관리', cat:'sheets', price:19900, discount:0,     type:'file',    visible:true,  emoji:'🔧', date:'2026-05-20'},
+  {id:'sheets-crm',name:'구글시트 CRM 자동화',   cat:'sheets', price:29900, discount:0,     type:'file',    visible:true,  emoji:'⚙️', date:'2026-05-22'},
+  {id:'short-pack',name:'숏폼 편집 템플릿 Pack', cat:'short',  price:0,     discount:0,     type:'inquiry', visible:true,  emoji:'🎬', date:'2026-05-25'},
+  {id:'detail-01', name:'상세페이지 맞춤 제작',   cat:'detail', price:0,     discount:0,     type:'inquiry', visible:true,  emoji:'🖼️', date:'2026-05-28'},
+  {id:'web-01',    name:'홈페이지 맞춤 제작',     cat:'web',    price:0,     discount:0,     type:'inquiry', visible:false, emoji:'🌐', date:'2026-06-01'},
+  {id:'prog-01',   name:'맞춤 프로그램 제작',     cat:'program',price:0,     discount:0,     type:'inquiry', visible:true,  emoji:'⚙️', date:'2026-06-01'},
+];
+
+const catLabel  = {excel:'엑셀 프로그램',sheets:'구글시트',short:'숏폼 템플릿',detail:'상세페이지',web:'홈페이지 제작',program:'프로그램 제작'};
+const catCls    = {excel:'cat-excel',sheets:'cat-sheets',short:'cat-short',detail:'cat-detail',web:'cat-web',program:'cat-program'};
+const catColors = {excel:'#EFF6FF',sheets:'#FEFCE8',short:'#F5F3FF',detail:'#FFF1F2',web:'#EFF6FF',program:'#F8FAFC'};
+
+let products = [];
+let filterCat = 'all';
+let selected = new Set();
+
+function load(){
+  const saved = localStorage.getItem('modulab_products');
+  if(saved){ try{ const arr=JSON.parse(saved); products=arr.length?arr:DEMO; }catch{products=DEMO;} }
+  else products=[...DEMO];
+  render();
+}
+
+function setFilter(val, el){
+  filterCat=val;
+  document.querySelectorAll('#catFilter .filter-tag').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+
+function render(){
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  const list = products.filter(p=>{
+    if(filterCat!=='all' && p.cat!==filterCat) return false;
+    if(q && !p.name.toLowerCase().includes(q)) return false;
+    return true;
+  });
+  document.getElementById('filteredCount').textContent = list.length;
+  const tbody = document.getElementById('tbody');
+  const empty = document.getElementById('emptyState');
+  if(!list.length){ tbody.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  tbody.innerHTML = list.map(p=>`
+    <tr>
+      <td><input type="checkbox" ${selected.has(p.id)?'checked':''} onchange="toggleSel('${p.id}',this)"></td>
+      <td><div class="thumb-cell" style="background:${catColors[p.cat]||'#F1F5F9'}">${p.emoji}</div></td>
+      <td>
+        <div class="product-name-cell">${p.name}</div>
+        <div class="product-sub">${p.id}</div>
+      </td>
+      <td><span class="cat-badge ${catCls[p.cat]||''}">${catLabel[p.cat]||p.cat}</span></td>
+      <td>
+        <div class="price-cell">${p.price?'₩'+p.price.toLocaleString():'가격협의'}</div>
+        ${p.discount?`<div class="price-discount">할인가 ₩${p.discount.toLocaleString()}</div>`:''}
+      </td>
+      <td><span style="font-size:12px;color:var(--text2);">${p.type==='file'?'📂 파일판매':'💬 문의형'}</span></td>
+      <td>
+        <label class="switch">
+          <input type="checkbox" ${p.visible?'checked':''} onchange="toggleVisible('${p.id}',this)">
+          <span class="switch-track"></span>
+        </label>
+      </td>
+      <td style="font-size:12px;color:var(--text3);font-family:'JetBrains Mono',monospace;">${p.date||'—'}</td>
+      <td>
+        <div class="action-btns">
+          <a href="product-add.html?edit=${p.id}" class="btn btn-outline btn-sm">수정</a>
+          <button class="btn btn-red btn-sm" onclick="deleteProduct('${p.id}')">삭제</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+function toggleVisible(id, cb){
+  const p = products.find(p=>p.id===id);
+  if(p){ p.visible=cb.checked; localStorage.setItem('modulab_products',JSON.stringify(products)); showToast(p.visible?'상품을 노출했습니다':'상품을 숨겼습니다'); }
+}
+function toggleSel(id,cb){ if(cb.checked)selected.add(id); else selected.delete(id); }
+function toggleAll(cb){ products.forEach(p=>{if(cb.checked)selected.add(p.id);else selected.delete(p.id);}); render(); }
+function deleteProduct(id){
+  if(!confirm('이 상품을 삭제할까요?')) return;
+  products=products.filter(p=>p.id!==id);
+  localStorage.setItem('modulab_products',JSON.stringify(products));
+  render(); showToast('상품이 삭제되었습니다');
+}
+function exportCSV(){
+  const rows=[['ID','상품명','카테고리','판매가','할인가','판매유형','노출','등록일']];
+  products.forEach(p=>rows.push([p.id,p.name,catLabel[p.cat]||p.cat,p.price,p.discount,p.type==='file'?'파일판매':'문의형',p.visible?'ON':'OFF',p.date]));
+  const csv='﻿'+rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a'); a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download='modulab_products_'+new Date().toISOString().slice(0,10)+'.csv'; a.click();
+  showToast('CSV 다운로드 완료');
+}
+function showToast(msg){ const t=document.getElementById('toast'); document.getElementById('toastMsg').textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
+load();
+</script>
+</body>
+</html>
