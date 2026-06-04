@@ -168,6 +168,138 @@
   .breadcrumb { padding: 12px 20px; }
   .prod-related-grid { grid-template-columns: 1fr 1fr; }
 }
+
+/* ─── Review Toolbar ─── */
+.review-toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px; gap: 12px; flex-wrap: wrap;
+}
+.review-sort-tabs { display: flex; }
+.rsort-btn {
+  padding: 8px 16px; font-size: 14px; font-weight: 500; color: var(--text3);
+  border: none; background: none; cursor: pointer; font-family: inherit;
+  border-bottom: 2px solid transparent; transition: all .15s;
+}
+.rsort-btn:hover { color: var(--text); }
+.rsort-btn.active { color: var(--text); font-weight: 700; border-bottom-color: var(--text); }
+.review-toolbar-right { display: flex; align-items: center; gap: 10px; }
+.review-search-wrap {
+  display: flex; align-items: center; gap: 6px;
+  border: 1px solid var(--border); border-radius: 8px; padding: 7px 12px;
+  background: var(--white); min-width: 200px;
+}
+.review-search-wrap input {
+  border: none; outline: none; font-family: inherit; font-size: 13px;
+  color: var(--text); background: transparent; width: 100%;
+}
+.review-write-btn {
+  padding: 8px 16px; background: var(--blue); color: white;
+  border: none; border-radius: 8px; font-size: 13px; font-weight: 600;
+  cursor: pointer; font-family: inherit; transition: background .15s; white-space: nowrap;
+}
+.review-write-btn:hover { background: var(--blue-dark); }
+
+/* ─── Review Star Filter ─── */
+.review-filter-row { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+.review-filter-btn {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 5px 12px; border: 1px solid var(--border); border-radius: 6px;
+  font-size: 12px; font-weight: 500; color: var(--text2);
+  background: var(--white); cursor: pointer; font-family: inherit; transition: all .15s;
+}
+.review-filter-btn:hover { border-color: var(--blue); color: var(--blue); }
+.review-filter-btn.active { border-color: var(--blue); color: var(--blue); background: var(--blue-light); }
+
+/* ─── Review Item ─── */
+.review-item {
+  display: grid; grid-template-columns: 1fr 180px;
+  border-bottom: 1px solid var(--border); padding: 24px 0;
+}
+.review-item:last-child { border-bottom: none; }
+.review-item-body { padding-right: 24px; }
+.review-item-side {
+  border-left: 1px solid var(--border); padding-left: 24px;
+  display: flex; align-items: flex-start;
+}
+.review-item-side-text { font-size: 13px; color: var(--text3); line-height: 1.6; }
+.review-top-row {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;
+}
+.review-stars-inline { color: #F59E0B; font-size: 15px; letter-spacing: -1px; }
+.review-title-text { font-size: 15px; font-weight: 700; color: var(--text); }
+.review-date-text { font-size: 12px; color: var(--text3); margin-left: auto; }
+.review-content-text {
+  font-size: 14px; color: var(--text2); line-height: 1.7; margin-bottom: 12px;
+  white-space: pre-line;
+}
+.review-heart-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  border: none; background: none; cursor: pointer; font-family: inherit;
+  font-size: 14px; color: var(--text3); padding: 4px 0; transition: color .15s;
+}
+.review-heart-btn:hover { color: #EF4444; }
+.review-heart-btn.liked { color: #EF4444; }
+.review-heart-icon { font-size: 16px; line-height: 1; }
+.review-empty {
+  text-align: center; padding: 60px 20px; color: var(--text3);
+}
+.review-empty-icon { font-size: 40px; margin-bottom: 12px; }
+
+/* ─── Write Review Modal ─── */
+.review-modal-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5);
+  z-index: 9500; align-items: center; justify-content: center;
+}
+.review-modal-overlay.open { display: flex; }
+.review-modal {
+  background: var(--white); border-radius: 16px; width: 100%; max-width: 500px;
+  box-shadow: 0 24px 64px rgba(0,0,0,.18); overflow: hidden; margin: 20px;
+}
+.review-modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 24px; border-bottom: 1px solid var(--border);
+}
+.review-modal-header h3 { font-size: 16px; font-weight: 700; color: var(--text); margin: 0; }
+.review-modal-close {
+  border: none; background: none; cursor: pointer; font-size: 18px;
+  color: var(--text3); padding: 4px; line-height: 1;
+}
+.review-modal-close:hover { color: var(--text); }
+.review-modal-body { padding: 24px; }
+.review-modal-footer {
+  display: flex; gap: 10px; padding: 16px 24px;
+  border-top: 1px solid var(--border); justify-content: flex-end;
+}
+.review-star-picker { display: flex; gap: 4px; margin-bottom: 8px; }
+.star-pick {
+  font-size: 30px; color: var(--border); cursor: pointer; transition: color .1s;
+  line-height: 1; user-select: none;
+}
+.star-pick.active { color: #F59E0B; }
+.star-label { font-size: 13px; color: var(--text3); margin-bottom: 16px; min-height: 20px; }
+.review-textarea {
+  width: 100%; border: 1px solid var(--border); border-radius: 8px;
+  padding: 12px; font-family: inherit; font-size: 14px; color: var(--text);
+  resize: vertical; min-height: 120px; box-sizing: border-box; outline: none;
+  transition: border-color .15s;
+}
+.review-textarea:focus { border-color: var(--blue); }
+.review-char-count { text-align: right; font-size: 11px; color: var(--text3); margin-top: 4px; }
+.modal-btn {
+  padding: 10px 22px; border-radius: 8px; font-size: 14px; font-weight: 600;
+  cursor: pointer; font-family: inherit; border: none; transition: all .15s;
+}
+.modal-btn-cancel { background: var(--slate-light); color: var(--text2); }
+.modal-btn-cancel:hover { background: var(--border); }
+.modal-btn-submit { background: var(--blue); color: white; }
+.modal-btn-submit:hover { background: var(--blue-dark); }
+.modal-btn-submit:disabled { opacity: .5; cursor: not-allowed; }
+
+@media (max-width: 640px) {
+  .review-item { grid-template-columns: 1fr; }
+  .review-item-side { border-left: none; border-top: 1px solid var(--border); padding-left: 0; padding-top: 12px; margin-top: 4px; }
+  .review-search-wrap { min-width: 140px; }
+}
 </style>
 </head>
 <body>
@@ -310,37 +442,47 @@
 
   <!-- 리뷰 -->
   <div class="prod-tab-pane" id="tab-review">
+    <!-- 동적 요약 -->
     <div class="prod-review-summary">
       <div>
-        <div class="prod-review-big">4.9</div>
-        <div class="prod-review-stars-big">★★★★★</div>
-        <div class="prod-review-count-txt" id="reviewSummaryCount"></div>
+        <div class="prod-review-big" id="reviewAvgScore">-</div>
+        <div class="prod-review-stars-big" id="reviewAvgStars">☆☆☆☆☆</div>
+        <div class="prod-review-count-txt" id="reviewSummaryCount">리뷰 0건</div>
       </div>
-      <div style="flex:1; display:grid; gap:6px;">
+      <div style="flex:1; display:grid; gap:6px;" id="reviewDistBars">
         <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
           <span style="color:var(--text3);width:20px;">5★</span>
-          <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;">
-            <div style="width:90%;height:100%;background:#F59E0B;border-radius:3px;"></div>
-          </div>
-          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);">90%</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
-          <span style="color:var(--text3);width:20px;">4★</span>
-          <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;">
-            <div style="width:8%;height:100%;background:#F59E0B;border-radius:3px;"></div>
-          </div>
-          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);">8%</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
-          <span style="color:var(--text3);width:20px;">3★</span>
-          <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;">
-            <div style="width:2%;height:100%;background:#F59E0B;border-radius:3px;"></div>
-          </div>
-          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);">2%</span>
+          <div style="flex:1;height:6px;background:var(--border);border-radius:3px;"></div>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);">-</span>
         </div>
       </div>
     </div>
-    <div id="reviewList"></div>
+
+    <!-- 정렬 탭 + 검색 + 작성 버튼 -->
+    <div class="review-toolbar">
+      <div class="review-sort-tabs">
+        <button class="rsort-btn active" onclick="setSort('popular',this)">추천순</button>
+        <button class="rsort-btn" onclick="setSort('latest',this)">최신순</button>
+        <button class="rsort-btn" onclick="setSort('rating',this)">별점순</button>
+      </div>
+      <div class="review-toolbar-right">
+        <div class="review-search-wrap">
+          <span style="color:var(--text3);font-size:13px;">🔍</span>
+          <input type="text" id="reviewSearch" placeholder="리뷰 키워드 검색" oninput="filterReviewsByKeyword()">
+        </div>
+        <button class="review-write-btn" onclick="openWriteReview()">리뷰 작성</button>
+      </div>
+    </div>
+
+    <!-- 별점 필터 -->
+    <div class="review-filter-row">
+      <button class="review-filter-btn active" onclick="setStarFilter(0,this)">전체</button>
+      <button class="review-filter-btn" onclick="setStarFilter(5,this)">★★★★★ 5점</button>
+      <button class="review-filter-btn" onclick="setStarFilter(4,this)">★★★★ 4점</button>
+      <button class="review-filter-btn" onclick="setStarFilter(3,this)">★★★ 3점 이하</button>
+    </div>
+
+    <div id="reviewList"><div style="text-align:center;padding:40px;color:var(--text3);">불러오는 중...</div></div>
   </div>
 
   <!-- 문의 -->
@@ -426,6 +568,34 @@
 
 <div id="toast"><span id="toastMsg"></span></div>
 
+<!-- Write Review Modal -->
+<div class="review-modal-overlay" id="writeReviewModal">
+  <div class="review-modal">
+    <div class="review-modal-header">
+      <h3>리뷰 작성</h3>
+      <button class="review-modal-close" onclick="closeWriteReview()">✕</button>
+    </div>
+    <div class="review-modal-body">
+      <div class="review-star-picker" id="starPickerModal">
+        <span class="star-pick" data-val="1" onclick="pickStar(1)">★</span>
+        <span class="star-pick" data-val="2" onclick="pickStar(2)">★</span>
+        <span class="star-pick" data-val="3" onclick="pickStar(3)">★</span>
+        <span class="star-pick" data-val="4" onclick="pickStar(4)">★</span>
+        <span class="star-pick" data-val="5" onclick="pickStar(5)">★</span>
+      </div>
+      <div class="star-label" id="starLabel">별점을 선택해주세요</div>
+      <textarea class="review-textarea" id="reviewContent"
+        placeholder="이 상품에 대한 솔직한 리뷰를 작성해주세요. (최소 10자)"
+        maxlength="1000" oninput="updateCharCount()"></textarea>
+      <div class="review-char-count"><span id="reviewCharCount">0</span> / 1000</div>
+    </div>
+    <div class="review-modal-footer">
+      <button class="modal-btn modal-btn-cancel" onclick="closeWriteReview()">취소</button>
+      <button class="modal-btn modal-btn-submit" id="reviewSubmitBtn" onclick="submitReview()">등록하기</button>
+    </div>
+  </div>
+</div>
+
 <script src="auth.js"></script>
 <script src="products-renderer.js"></script>
 <script>
@@ -442,7 +612,12 @@ function closeDrawer() {
   setTimeout(() => { d.style.display = 'none'; }, 260);
   document.body.style.overflow = '';
 }
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeDrawer(); closeWriteReview(); }
+});
+document.getElementById('writeReviewModal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeWriteReview();
+});
 
 /* ── CONSTANTS ── */
 const CAT_LABEL = { excel:'엑셀 프로그램', sheets:'구글시트 자동화', short:'숏폼 템플릿', detail:'상세페이지 제작', web:'홈페이지 제작', program:'프로그램 제작' };
@@ -548,11 +723,11 @@ const DEMO = {
   },
 };
 
-const MOCK_REVIEWS = [
-  { name:'김**', avatar:'김', stars:'★★★★★', date:'2026-05-28', text:'실무에 바로 적용할 수 있어서 너무 좋았습니다. 설명서도 친절하게 작성되어 있어서 어렵지 않게 사용할 수 있었어요. 강력 추천합니다!' },
-  { name:'이**', avatar:'이', stars:'★★★★★', date:'2026-05-20', text:'처음엔 반신반의했는데 실제로 써보니 업무 시간이 확 줄었어요. 오류가 생겼을 때도 빠르게 답변해 주셔서 감동받았습니다.' },
-  { name:'박**', avatar:'박', stars:'★★★★☆', date:'2026-05-15', text:'기능은 정말 좋은데 처음 세팅하는 데 조금 시간이 걸렸어요. 그래도 한 번 익히면 정말 편리합니다. 재구매 의사 있습니다.' },
-];
+const REVIEW_API = 'https://modulab-production.up.railway.app';
+let allReviews = [];
+let currentSort = 'popular';
+let currentStarFilter = 0;
+let selectedRating = 0;
 
 /* ── LOAD & RENDER ── */
 const params = new URLSearchParams(location.search);
@@ -623,11 +798,8 @@ function init() {
   document.getElementById('prodTitle').textContent = product.name;
   document.getElementById('prodDesc').textContent = product.desc;
 
-  // Review count
-  const rc = product.downloads || Math.max(3, Math.floor(product.views * 0.12));
-  document.getElementById('reviewCountLabel').textContent = `(리뷰 ${rc}건)`;
-  document.getElementById('reviewSummaryCount').textContent = `총 ${rc}건의 리뷰`;
-  document.getElementById('reviewTabBtn').textContent = `리뷰 (${rc})`;
+  // Review count placeholder (updated after API call)
+  document.getElementById('reviewCountLabel').textContent = '';
 
   // Price
   renderPrice();
@@ -640,7 +812,7 @@ function init() {
 
   // Tabs
   renderDetailTab();
-  renderReviews(rc);
+  loadReviews();
   renderRelated();
 
   // Cart badge
@@ -781,21 +953,229 @@ function renderDetailTab() {
   }
 }
 
-function renderReviews(count) {
+/* ── REVIEW SYSTEM ── */
+function getFingerprint() {
+  let fp = localStorage.getItem('modu_fp');
+  if (!fp) {
+    fp = (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now().toString(36));
+    localStorage.setItem('modu_fp', fp);
+  }
+  return fp;
+}
+
+function starsHtml(rating) {
+  return '★'.repeat(rating) + '☆'.repeat(5 - rating);
+}
+
+function escR(str) {
+  return String(str || '').replace(/[&<>"']/g, c =>
+    ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+
+function setSort(sort, btn) {
+  currentSort = sort;
+  document.querySelectorAll('.rsort-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  loadReviews();
+}
+
+function setStarFilter(val, btn) {
+  currentStarFilter = val;
+  document.querySelectorAll('.review-filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderReviewItems(allReviews);
+}
+
+function filterReviewsByKeyword() {
+  renderReviewItems(allReviews);
+}
+
+async function loadReviews() {
   const list = document.getElementById('reviewList');
-  const reviews = MOCK_REVIEWS.slice(0, Math.min(3, Math.max(1, Math.ceil(count / 10))));
-  list.innerHTML = reviews.map(r => `
-    <div class="prod-review-card">
-      <div class="prod-review-header">
-        <div class="prod-reviewer-avatar">${r.avatar}</div>
-        <div>
-          <div class="prod-reviewer-name">${r.name}</div>
-          <div class="prod-review-date">${r.date}</div>
-        </div>
-        <div class="prod-review-stars" style="margin-left:auto;">${r.stars}</div>
+  list.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3);">불러오는 중...</div>';
+  try {
+    const r = await fetch(
+      `${REVIEW_API}/api/reviews?productId=${encodeURIComponent(product.id)}&sort=${currentSort}`,
+      { credentials: 'include' }
+    );
+    if (!r.ok) throw new Error('fetch failed');
+    const data = await r.json();
+    allReviews = data.reviews || [];
+    updateReviewSummary(data);
+    renderReviewItems(allReviews);
+  } catch {
+    allReviews = [];
+    renderReviewItems([]);
+  }
+}
+
+function updateReviewSummary(data) {
+  const { total, avg, dist } = data;
+  const avgNum = parseFloat(avg) || 0;
+  document.getElementById('reviewAvgScore').textContent = avgNum.toFixed(1);
+  document.getElementById('reviewAvgStars').textContent = '★'.repeat(Math.round(avgNum)) + '☆'.repeat(5 - Math.round(avgNum));
+  document.getElementById('reviewSummaryCount').textContent = `총 ${total}건의 리뷰`;
+  document.getElementById('reviewTabBtn').textContent = `리뷰 (${total})`;
+  document.getElementById('reviewCountLabel').textContent = total ? `(리뷰 ${total}건)` : '';
+
+  document.getElementById('reviewDistBars').innerHTML = [5,4,3,2,1].map(s => {
+    const cnt = dist[s] || 0;
+    const pct = total ? Math.round(cnt / total * 100) : 0;
+    return `<div style="display:flex;align-items:center;gap:8px;font-size:13px;">
+      <span style="color:var(--text3);width:20px;">${s}★</span>
+      <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;">
+        <div style="width:${pct}%;height:100%;background:#F59E0B;border-radius:3px;"></div>
       </div>
-      <div class="prod-review-text">${r.text}</div>
-    </div>`).join('');
+      <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);">${pct}%</span>
+    </div>`;
+  }).join('');
+}
+
+function renderReviewItems(reviews) {
+  const list = document.getElementById('reviewList');
+  const keyword = (document.getElementById('reviewSearch')?.value || '').toLowerCase().trim();
+  const likedSet = new Set(JSON.parse(localStorage.getItem('modu_liked') || '[]'));
+
+  let filtered = reviews;
+  if (currentStarFilter === 3) {
+    filtered = filtered.filter(r => r.rating <= 3);
+  } else if (currentStarFilter > 0) {
+    filtered = filtered.filter(r => r.rating === currentStarFilter);
+  }
+  if (keyword) {
+    filtered = filtered.filter(r =>
+      r.content.toLowerCase().includes(keyword) ||
+      (r.reviewer_name || '').toLowerCase().includes(keyword)
+    );
+  }
+
+  if (!filtered.length) {
+    list.innerHTML = `
+      <div class="review-empty">
+        <div class="review-empty-icon">💬</div>
+        <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:8px;">리뷰가 없습니다</div>
+        <div style="font-size:13px;">첫 번째 리뷰를 작성해보세요!</div>
+      </div>`;
+    return;
+  }
+
+  const titleMap = { 5:'아주 좋아요', 4:'좋아요', 3:'보통이에요', 2:'별로예요', 1:'나빠요' };
+
+  list.innerHTML = filtered.map(r => {
+    const liked = likedSet.has(r.id);
+    return `
+      <div class="review-item" id="review-${r.id}">
+        <div class="review-item-body">
+          <div class="review-top-row">
+            <span class="review-stars-inline">${starsHtml(r.rating)}</span>
+            <span class="review-title-text">${titleMap[r.rating] || ''}</span>
+            <span class="review-date-text">${r.date_str || ''}</span>
+          </div>
+          <div class="review-content-text">${escR(r.content)}</div>
+          <button class="review-heart-btn${liked ? ' liked' : ''}" onclick="toggleLike('${r.id}',this)">
+            <span class="review-heart-icon">${liked ? '♥' : '♡'}</span>
+            <span class="review-like-count">${r.likes_count || 0}</span>
+          </button>
+        </div>
+        <div class="review-item-side">
+          <div class="review-item-side-text">${escR(r.reviewer_name || '익명')}님의<br>리뷰입니다.</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+async function toggleLike(reviewId, btn) {
+  const fp = getFingerprint();
+  const likedSet = new Set(JSON.parse(localStorage.getItem('modu_liked') || '[]'));
+  try {
+    const r = await fetch(`${REVIEW_API}/api/reviews/${reviewId}/like`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ fingerprint: fp })
+    });
+    if (!r.ok) throw new Error();
+    const { liked, likes_count } = await r.json();
+    const icon = btn.querySelector('.review-heart-icon');
+    const count = btn.querySelector('.review-like-count');
+    if (liked) {
+      btn.classList.add('liked');
+      icon.textContent = '♥';
+      likedSet.add(reviewId);
+    } else {
+      btn.classList.remove('liked');
+      icon.textContent = '♡';
+      likedSet.delete(reviewId);
+    }
+    count.textContent = likes_count;
+    localStorage.setItem('modu_liked', JSON.stringify([...likedSet]));
+  } catch {
+    showToast('잠시 후 다시 시도해주세요.');
+  }
+}
+
+/* ─ Write Review ─ */
+function openWriteReview() {
+  const user = (() => { try { return JSON.parse(localStorage.getItem('user')); } catch { return null; } })();
+  if (!user) {
+    showToast('리뷰를 작성하려면 로그인이 필요합니다.');
+    setTimeout(() => { location.href = 'login.html'; }, 1600);
+    return;
+  }
+  selectedRating = 0;
+  document.querySelectorAll('.star-pick').forEach(s => s.classList.remove('active'));
+  document.getElementById('starLabel').textContent = '별점을 선택해주세요';
+  document.getElementById('reviewContent').value = '';
+  document.getElementById('reviewCharCount').textContent = '0';
+  document.getElementById('writeReviewModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeWriteReview() {
+  document.getElementById('writeReviewModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function pickStar(val) {
+  selectedRating = val;
+  const labels = ['', '나빠요', '별로예요', '보통이에요', '좋아요', '아주 좋아요'];
+  document.getElementById('starLabel').textContent = labels[val];
+  document.querySelectorAll('.star-pick').forEach(s => {
+    s.classList.toggle('active', parseInt(s.dataset.val) <= val);
+  });
+}
+
+function updateCharCount() {
+  document.getElementById('reviewCharCount').textContent =
+    document.getElementById('reviewContent').value.length;
+}
+
+async function submitReview() {
+  if (!selectedRating) { showToast('별점을 선택해주세요.'); return; }
+  const content = document.getElementById('reviewContent').value.trim();
+  if (content.length < 10) { showToast('리뷰 내용을 최소 10자 이상 입력해주세요.'); return; }
+
+  const btn = document.getElementById('reviewSubmitBtn');
+  btn.disabled = true;
+  btn.textContent = '등록 중...';
+  try {
+    const r = await fetch(`${REVIEW_API}/api/reviews`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ productId: product.id, rating: selectedRating, content })
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || '오류가 발생했습니다.');
+    closeWriteReview();
+    showToast('리뷰가 등록됐습니다! 감사합니다 💙');
+    loadReviews();
+  } catch (err) {
+    showToast(err.message || '등록에 실패했습니다.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '등록하기';
+  }
 }
 
 function renderRelated() {
