@@ -260,28 +260,47 @@ let products = [];
 let filterCat = 'all';
 let selected = new Set();
 
+const PRODUCTS_JSON_URL = 'https://raw.githubusercontent.com/songminjin/modulab/main/products.json';
+
+function normalizeProducts(arr) {
+  return arr.map(p => ({
+    ...p,
+    id: p.id || p.productId,
+    name: p.name || p.productName,
+    cat: p.cat || p.category,
+    type: p.type || p.saleType || p.sale_type || 'file',
+    emoji: p.emoji || p.selectedEmoji || '📦',
+    price: p.price || 0,
+    discount: p.discount || p.discountPrice || p.discount_price || 0,
+    visible: p.visible !== undefined ? p.visible : (p.is_active !== undefined ? p.is_active : p.visibility !== false),
+    date: p.date || (p.created_at ? p.created_at.slice(0,10) : ''),
+  }));
+}
+
 async function load(){
+  // 1순위: Railway 백엔드 API
   try {
     const res = await fetch(`${API_URL}/api/admin/products`, { credentials: 'include' });
     if (!res.ok) throw new Error('API error');
-    products = await res.json();
-    // normalize backend fields to match UI expectations
-    products = products.map(p => ({
-      ...p,
-      id: p.id || p.productId,
-      name: p.name || p.productName,
-      cat: p.cat || p.category,
-      type: p.type || p.sale_type || 'file',
-      emoji: p.emoji || p.selectedEmoji || '📦',
-      price: p.price || 0,
-      discount: p.discount || p.discount_price || p.discountPrice || 0,
-      visible: p.visible !== undefined ? p.visible : (p.is_active !== undefined ? p.is_active : p.visibility !== false),
-      date: p.date || (p.created_at ? p.created_at.slice(0,10) : ''),
-    }));
-  } catch(e) {
-    console.warn('[products] API error:', e.message);
-    products = [];
-  }
+    products = normalizeProducts(await res.json());
+    localStorage.setItem('modulab_products', JSON.stringify(products));
+    render(); return;
+  } catch(e) { console.warn('[products] Railway 불가, products.json으로 fallback'); }
+
+  // 2순위: products.json (GitHub 단일 진실의 원천)
+  try {
+    const res = await fetch(PRODUCTS_JSON_URL, { cache: 'no-cache' });
+    if (!res.ok) throw new Error();
+    products = normalizeProducts(await res.json());
+    localStorage.setItem('modulab_products', JSON.stringify(products));
+    render(); return;
+  } catch(e) { console.warn('[products] products.json 불가, localStorage로 fallback'); }
+
+  // 3순위: localStorage
+  try {
+    const saved = localStorage.getItem('modulab_products');
+    products = saved ? normalizeProducts(JSON.parse(saved)) : [];
+  } catch { products = []; }
   render();
 }
 
@@ -336,37 +355,34 @@ function render(){
 
 async function toggleVisible(id, cb){
   const isActive = cb.checked;
+  const p = products.find(p=>p.id===id);
+  if(p){ p.visible=isActive; p.is_active=isActive; }
+  // Railway API 시도 (실패해도 계속 진행)
   try {
-    const res = await fetch(`${API_URL}/api/admin/products/${id}`, {
-      method: 'PUT',
-      credentials: 'include',
+    await fetch(`${API_URL}/api/admin/products/${id}`, {
+      method: 'PUT', credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ is_active: isActive })
     });
-    if (!res.ok) throw new Error();
-    const p = products.find(p=>p.id===id);
-    if(p){ p.visible=isActive; p.is_active=isActive; }
-    localStorage.setItem('modulab_products', JSON.stringify(products));
-    GhSync.syncAll(showToast);
-    showToast(isActive?'상품을 노출했습니다':'상품을 숨겼습니다');
-  } catch(e) {
-    cb.checked = !isActive;
-    showToast('변경에 실패했습니다.', true);
-  }
+  } catch {}
+  // 항상 localStorage + GitHub 동기화
+  localStorage.setItem('modulab_products', JSON.stringify(products));
+  GhSync.syncAll(showToast);
+  showToast(isActive ? '상품을 노출했습니다' : '상품을 숨겼습니다');
 }
 function toggleSel(id,cb){ if(cb.checked)selected.add(id); else selected.delete(id); }
 function toggleAll(cb){ products.forEach(p=>{if(cb.checked)selected.add(p.id);else selected.delete(p.id);}); render(); }
 async function deleteProduct(id){
   if(!confirm('이 상품을 삭제할까요?')) return;
+  // Railway API 시도 (실패해도 계속 진행)
   try {
     await fetch(`${API_URL}/api/admin/products/${id}`, { method: 'DELETE', credentials: 'include' });
-    products = products.filter(p=>p.id!==id);
-    localStorage.setItem('modulab_products', JSON.stringify(products));
-    GhSync.syncAll(showToast);
-    render(); showToast('상품이 삭제되었습니다');
-  } catch(e) {
-    showToast('삭제에 실패했습니다.', true);
-  }
+  } catch {}
+  // 항상 로컬에서 삭제 + GitHub 동기화
+  products = products.filter(p=>p.id!==id);
+  localStorage.setItem('modulab_products', JSON.stringify(products));
+  GhSync.syncAll(showToast);
+  render(); showToast('상품이 삭제되었습니다');
 }
 function exportCSV(){
   const rows=[['ID','상품명','카테고리','판매가','할인가','판매유형','노출','등록일']];
