@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>이용약관 — 모듈랩</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.policy-page {
+  background: var(--slate-light);
+  min-height: calc(100vh - 72px);
+  padding: 56px 20px 80px;
+}
+.policy-wrap {
+  max-width: 860px;
+  margin: 0 auto;
+}
+.policy-hero {
+  background: var(--navy);
+  border-radius: 20px;
+  padding: 48px 56px;
+  margin-bottom: 32px;
+  position: relative;
+  overflow: hidden;
+}
+.policy-hero::before {
+  content: '';
+  position: absolute; top: -40px; right: -40px;
+  width: 200px; height: 200px;
+  background: rgba(22,163,74,.12);
+  border-radius: 50%;
+}
+.policy-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 500; letter-spacing: .12em;
+  color: #86EFAC; text-transform: uppercase; margin-bottom: 12px;
+}
+.policy-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 48px; line-height: 1; letter-spacing: .02em;
+  color: white; margin-bottom: 12px;
+}
+.policy-meta {
+  font-size: 13px; color: #64748B;
+}
+.policy-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 48px 56px;
+  margin-bottom: 16px;
+}
+.policy-toc {
+  background: #F0FDF4;
+  border: 1px solid #BBF7D0;
+  border-radius: 12px;
+  padding: 24px 32px;
+  margin-bottom: 40px;
+}
+.policy-toc h3 {
+  font-size: 13px; font-weight: 700; color: var(--green);
+  text-transform: uppercase; letter-spacing: .06em; margin-bottom: 12px;
+  font-family: 'JetBrains Mono', monospace;
+}
+.policy-toc ol {
+  list-style: none;
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 6px 24px;
+  counter-reset: toc2;
+}
+.policy-toc ol li { display: flex; gap: 8px; counter-increment: toc2; }
+.policy-toc ol li::before {
+  content: counter(toc2) '.';
+  font-size: 13px; color: var(--green); font-weight: 700;
+  font-family: 'JetBrains Mono', monospace; flex-shrink: 0;
+}
+.policy-toc ol li a {
+  font-size: 13px; color: var(--green); font-weight: 500;
+}
+.policy-toc ol li a:hover { text-decoration: underline; }
+.policy-section { margin-bottom: 48px; }
+.policy-section:last-child { margin-bottom: 0; }
+.policy-section-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 500; letter-spacing: .1em;
+  color: var(--green); text-transform: uppercase; margin-bottom: 8px;
+}
+.policy-section h2 {
+  font-size: 20px; font-weight: 700; color: var(--navy);
+  margin-bottom: 20px; padding-bottom: 12px;
+  border-bottom: 2px solid var(--border);
+}
+.policy-section p {
+  font-size: 15px; color: var(--text2); line-height: 1.85;
+  margin-bottom: 16px;
+}
+.policy-section p:last-child { margin-bottom: 0; }
+.policy-table-wrap { overflow-x: auto; margin: 20px 0; }
+.policy-table {
+  width: 100%; border-collapse: collapse;
+  font-size: 14px;
+}
+.policy-table th {
+  background: var(--slate-light);
+  font-weight: 700; color: var(--navy);
+  padding: 12px 16px; text-align: left;
+  border: 1px solid var(--border);
+  font-size: 13px;
+}
+.policy-table td {
+  padding: 12px 16px; border: 1px solid var(--border);
+  color: var(--text2); vertical-align: top; line-height: 1.7;
+}
+.policy-table tr:nth-child(even) td { background: #FAFBFC; }
+.policy-list {
+  list-style: none; margin: 16px 0;
+}
+.policy-list li {
+  font-size: 14px; color: var(--text2); line-height: 1.8;
+  padding: 6px 0 6px 20px;
+  position: relative;
+}
+.policy-list li::before {
+  content: '—';
+  position: absolute; left: 0;
+  color: var(--text3);
+}
+.policy-list.dot li::before { content: '•'; color: var(--green); }
+.policy-list.num { counter-reset: plist; }
+.policy-list.num li { counter-increment: plist; }
+.policy-list.num li::before { content: counter(plist) '.'; color: var(--text3); font-weight:700; font-family:'JetBrains Mono',monospace; font-size:12px; }
+.policy-callout {
+  background: #F0FDF4;
+  border-left: 4px solid var(--green);
+  border-radius: 0 8px 8px 0;
+  padding: 16px 20px;
+  margin: 20px 0;
+}
+.policy-callout p {
+  font-size: 14px; color: #166534; margin: 0; line-height: 1.7;
+}
+.policy-callout strong { font-weight: 700; }
+.policy-callout.warn {
+  background: #FFF7ED;
+  border-left-color: #EA580C;
+}
+.policy-callout.warn p { color: #9A3412; }
+.policy-sub-title {
+  font-size: 15px; font-weight: 700; color: var(--text);
+  margin: 24px 0 10px;
+}
+.clause-num {
+  font-size: 13px; font-weight: 700; color: var(--text3);
+  font-family: 'JetBrains Mono', monospace;
+  margin-right: 4px;
+}
+@media (max-width: 640px) {
+  .policy-hero { padding: 36px 28px; }
+  .policy-card { padding: 32px 24px; }
+  .policy-toc ol { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-left">
+      <div class="hamburger" onclick="openDrawer()">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+    <div class="nav-center">
+      <a href="index.html" class="nav-logo">
+        <div class="logo-mark"></div>
+        Modu<span>Lab</span>
+      </a>
+    </div>
+    <div class="nav-right">
+      <div class="nav-search">
+        <span style="color:var(--text3);font-size:14px;">🔍</span>
+        <input type="text" placeholder="상품 검색...">
+      </div>
+      <div id="nav-auth" style="display:flex;align-items:center;gap:8px;">
+        <button class="nav-btn nav-btn-ghost" onclick="location.href='login.html'">로그인</button>
+        <button class="nav-btn nav-btn-primary" onclick="location.href='register.html'">회원가입</button>
+      </div>
+      <a href="cart.html" class="cart-btn">🛒<div class="cart-badge" id="cart-badge-nav">0</div></a>
+    </div>
+  </div>
+</nav>
+
+<!-- DRAWER -->
+<div class="drawer-overlay" id="drawerOverlay">
+  <div class="drawer-backdrop" onclick="closeDrawer()"></div>
+  <div class="drawer-panel">
+    <div class="drawer-header">
+      <div class="drawer-logo">
+        <div class="logo-mark" style="width:28px;height:28px;"></div>
+        Modu<span>Lab</span>
+      </div>
+      <button class="drawer-close" onclick="closeDrawer()">✕</button>
+    </div>
+    <div class="drawer-search">
+      <span style="color:var(--text3);">🔍</span>
+      <input type="text" placeholder="상품 검색...">
+    </div>
+    <div class="drawer-section-title">카테고리</div>
+    <ul class="drawer-nav">
+      <li><a href="index.html"><span class="cat-icon">🏠</span>전체 상품</a></li>
+      <li><a href="category-excel.html"><span class="cat-icon">📊</span>엑셀 프로그램</a></li>
+      <li><a href="category-sheets.html"><span class="cat-icon">🔧</span>구글시트 자동화</a></li>
+      <li><a href="category-short.html"><span class="cat-icon">🎬</span>숏폼 템플릿</a></li>
+      <li><a href="category-detail.html"><span class="cat-icon">🖼️</span>상세페이지 제작</a></li>
+      <li><a href="category-web.html"><span class="cat-icon">🌐</span>홈페이지 제작</a></li>
+      <li><a href="category-program.html"><span class="cat-icon">⚙️</span>프로그램 제작</a></li>
+      <li><a href="event.html" class="hot"><span class="cat-icon">🎁</span>이벤트</a></li>
+    </ul>
+    <div class="drawer-divider"></div>
+    <div class="drawer-section-title">내 계정</div>
+    <ul class="drawer-nav">
+      <li><a href="#"><span class="cat-icon">👤</span>마이페이지</a></li>
+      <li><a href="cart.html"><span class="cat-icon">🛒</span>장바구니</a></li>
+      <li><a href="category-program.html"><span class="cat-icon">💬</span>문의하기</a></li>
+    </ul>
+    <div class="drawer-btns" id="drawer-auth">
+      <button class="nav-btn nav-btn-ghost" onclick="location.href='login.html'">로그인</button>
+      <button class="nav-btn nav-btn-primary" onclick="location.href='register.html'">회원가입</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="policy-page">
+  <div class="policy-wrap">
+
+    <!-- Hero -->
+    <div class="policy-hero">
+      <div class="policy-eyebrow">Terms of Service · 서비스 약관</div>
+      <div class="policy-title">이용약관</div>
+      <div class="policy-meta">시행일: 2026년 1월 1일 &nbsp;·&nbsp; 최종 개정: 2026년 6월 1일</div>
+    </div>
+
+    <div class="policy-card">
+
+      <div class="policy-callout">
+        <p>본 약관은 <strong>모듈랩(ModuLab)</strong>이 운영하는 온라인 디지털 상품 쇼핑몰(이하 "서비스")의 이용과 관련하여 회사와 이용자 간의 권리·의무·책임 사항을 규정합니다. 서비스에 가입하거나 이용함으로써 본 약관에 동의한 것으로 간주됩니다.</p>
+      </div>
+
+      <!-- TOC -->
+      <div class="policy-toc">
+        <h3>목차</h3>
+        <ol>
+          <li><a href="#t1">총칙 및 약관의 효력</a></li>
+          <li><a href="#t2">서비스 이용 계약</a></li>
+          <li><a href="#t3">회원 가입 및 관리</a></li>
+          <li><a href="#t4">서비스 제공 및 변경</a></li>
+          <li><a href="#t5">디지털 상품 구매 및 결제</a></li>
+          <li><a href="#t6">청약철회 및 환불 정책</a></li>
+          <li><a href="#t7">라이선스 및 지식재산권</a></li>
+          <li><a href="#t8">이용자의 의무</a></li>
+          <li><a href="#t9">회사의 의무</a></li>
+          <li><a href="#t10">분쟁 해결 및 준거법</a></li>
+        </ol>
+      </div>
+
+      <!-- T1 -->
+      <div class="policy-section" id="t1">
+        <div class="policy-section-num">Article 01</div>
+        <h2>총칙 및 약관의 효력</h2>
+        <p><span class="clause-num">①</span> 본 약관은 모듈랩(이하 "회사")이 제공하는 디지털 툴 쇼핑몰 서비스의 이용 조건 및 절차, 회사와 이용자 간의 권리·의무·책임 사항 등을 규정합니다.</p>
+        <p><span class="clause-num">②</span> 본 약관은 서비스 화면에 게시하거나 기타 방법으로 공지함으로써 효력이 발생합니다.</p>
+        <p><span class="clause-num">③</span> 회사는 「약관의 규제에 관한 법률」, 「전자상거래 등에서의 소비자보호에 관한 법률」, 「전자금융거래법」, 「정보통신망 이용촉진 및 정보보호 등에 관한 법률」 등 관련 법령을 준수합니다.</p>
+        <p><span class="clause-num">④</span> 회사는 본 약관을 변경할 경우 적용일 7일 전부터 공지합니다. 이용자의 권리·의무에 중대한 영향을 미치는 변경은 30일 전에 공지합니다. 이용자가 변경된 약관에 동의하지 않을 경우 서비스 이용을 중단하고 탈퇴할 수 있습니다.</p>
+        <p><span class="clause-num">⑤</span> 본 약관에서 정하지 않은 사항은 관련 법령 및 서비스 이용 정책에 따릅니다.</p>
+      </div>
+
+      <!-- T2 -->
+      <div class="policy-section" id="t2">
+        <div class="policy-section-num">Article 02</div>
+        <h2>서비스 이용 계약</h2>
+        <p><span class="clause-num">①</span> 서비스 이용 계약은 이용자가 회원가입 신청을 하고, 회사가 이를 수락함으로써 성립됩니다.</p>
+        <p><span class="clause-num">②</span> 회사는 다음 각 호에 해당하는 경우 가입 신청을 승낙하지 않거나 이후 이용 계약을 해지할 수 있습니다.</p>
+        <ul class="policy-list">
+          <li>타인의 명의를 도용하거나 허위 정보를 기재한 경우</li>
+          <li>만 14세 미만인 경우 (법정대리인의 동의 없이)</li>
+          <li>이전에 이용약관 위반으로 회원 자격을 상실한 경우</li>
+          <li>기술적 장애 또는 서비스 운영상 필요에 의한 경우</li>
+          <li>사회의 안녕과 질서 또는 미풍양속을 저해하는 신청인 경우</li>
+        </ul>
+        <p><span class="clause-num">③</span> 비회원도 일부 서비스를 이용할 수 있으나, 구매·다운로드 등 주요 서비스는 회원가입 후 이용 가능합니다.</p>
+      </div>
+
+      <!-- T3 -->
+      <div class="policy-section" id="t3">
+        <div class="policy-section-num">Article 03</div>
+        <h2>회원 가입 및 관리</h2>
+        <p><span class="clause-num">①</span> 회원은 가입 시 제공한 정보가 변경된 경우 즉시 마이페이지에서 수정하거나 회사에 통보해야 합니다. 미수정으로 발생한 불이익은 회원 본인의 책임입니다.</p>
+        <p><span class="clause-num">②</span> 회원의 아이디(이메일)와 비밀번호는 회원 본인만 이용할 수 있으며, 제3자에게 양도·대여·공유할 수 없습니다.</p>
+        <p><span class="clause-num">③</span> 회원은 계정 정보 도용이나 무단 사용을 발견한 경우 즉시 회사에 신고해야 합니다.</p>
+        <p><span class="clause-num">④</span> 회원은 마이페이지에서 언제든지 회원 탈퇴를 신청할 수 있습니다. 탈퇴 시 구매 이력·다운로드 기록은 관련 법령에 따라 일정 기간 보관 후 파기됩니다.</p>
+        <p><span class="clause-num">⑤</span> 1년 이상 서비스를 이용하지 않은 회원은 「개인정보 보호법」에 따라 휴면 계정으로 전환되며, 사전 통지 후 개인정보가 별도 보관됩니다.</p>
+      </div>
+
+      <!-- T4 -->
+      <div class="policy-section" id="t4">
+        <div class="policy-section-num">Article 04</div>
+        <h2>서비스 제공 및 변경</h2>
+        <p><span class="clause-num">①</span> 회사는 연중무휴 24시간 서비스를 제공함을 원칙으로 하되, 시스템 점검·업데이트 또는 불가피한 사정으로 일시 중단할 수 있습니다. 사전 점검은 서비스 내 공지를 통해 예고합니다.</p>
+        <p><span class="clause-num">②</span> 회사는 서비스의 내용 및 구성을 변경할 수 있으며, 변경 전 이용자에게 공지합니다.</p>
+        <p><span class="clause-num">③</span> 회사는 다음 각 호의 경우 서비스 전부 또는 일부를 제한·중지할 수 있습니다.</p>
+        <ul class="policy-list">
+          <li>서비스용 설비의 보수 등 공사로 인한 부득이한 경우</li>
+          <li>통신서비스업자가 전기통신 서비스를 중지한 경우</li>
+          <li>천재지변, 국가비상사태 등 불가항력적인 경우</li>
+          <li>기타 서비스 운영상 긴급한 필요가 있는 경우</li>
+        </ul>
+      </div>
+
+      <!-- T5 -->
+      <div class="policy-section" id="t5">
+        <div class="policy-section-num">Article 05</div>
+        <h2>디지털 상품 구매 및 결제</h2>
+        <p><span class="clause-num">①</span> 이용자는 서비스 내에서 제공하는 다음의 방법으로 상품을 구매할 수 있습니다.</p>
+        <ul class="policy-list dot">
+          <li>신용카드, 체크카드 결제</li>
+          <li>카카오페이, 네이버페이 등 간편결제</li>
+          <li>계좌이체 (별도 안내 시)</li>
+        </ul>
+        <p><span class="clause-num">②</span> 디지털 상품(파일 다운로드)의 경우 결제 완료 즉시 등록된 이메일로 발송됩니다. 이메일 오류로 수신하지 못한 경우 고객센터(songminjin123@gmail.com)로 문의해 주시기 바랍니다.</p>
+        <p><span class="clause-num">③</span> 구매 취소는 디지털 상품 특성상 파일을 다운로드하거나 열람하기 전까지만 가능합니다. 이미 다운로드한 상품은 「전자상거래 등에서의 소비자보호에 관한 법률」 제17조에 따라 청약철회가 제한됩니다.</p>
+        <p><span class="clause-num">④</span> 회사는 결제 오류가 발생한 경우 이를 확인하고 해결하기 위해 최선을 다합니다.</p>
+        <div class="policy-callout warn">
+          <p><strong>미성년자(만 19세 미만) 결제 안내:</strong> 미성년자가 법정대리인의 동의 없이 결제한 경우, 법정대리인은 계약을 취소할 수 있습니다. 단, 법정대리인이 동의한 것으로 볼 수 있는 경우에는 취소가 제한됩니다.</p>
+        </div>
+      </div>
+
+      <!-- T6 -->
+      <div class="policy-section" id="t6">
+        <div class="policy-section-num">Article 06</div>
+        <h2>청약철회 및 환불 정책</h2>
+        <p><span class="clause-num">①</span> 이용자는 결제일로부터 7일 이내에 청약철회를 할 수 있습니다. 다만, 다음 각 호에 해당하는 경우 청약철회가 제한됩니다.</p>
+        <ul class="policy-list num">
+          <li>구매한 디지털 파일(엑셀, 구글시트, 영상 템플릿 등)을 다운로드하거나 열람한 경우</li>
+          <li>콘텐츠를 전송받아 이용 가능한 상태가 된 경우</li>
+          <li>맞춤 제작(커스텀) 서비스로 제작이 시작된 경우</li>
+        </ul>
+        <p><span class="clause-num">②</span> 「전자상거래 등에서의 소비자보호에 관한 법률」 제17조 및 제18조에 따라, 회사는 청약철회를 거부할 수 있는 경우 이를 상품 페이지에 명시합니다.</p>
+        <p><span class="clause-num">③</span> 환불은 결제 수단에 따라 처리됩니다.</p>
+        <div class="policy-table-wrap">
+          <table class="policy-table">
+            <thead>
+              <tr>
+                <th>결제 수단</th>
+                <th>환불 방법</th>
+                <th>처리 기간</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>신용카드</td>
+                <td>카드 결제 취소</td>
+                <td>3~7 영업일</td>
+              </tr>
+              <tr>
+                <td>간편결제 (카카오페이 등)</td>
+                <td>결제 취소 또는 환불 처리</td>
+                <td>3~5 영업일</td>
+              </tr>
+              <tr>
+                <td>계좌이체</td>
+                <td>구매자 명의 계좌로 환불</td>
+                <td>3~5 영업일</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p><span class="clause-num">④</span> 상품 자체의 하자(파일 오류, 설명과 현저히 다른 기능 등)로 인한 환불은 상품 수령일로부터 3개월 이내, 또는 해당 사실을 안 날로부터 30일 이내에 요청할 수 있습니다.</p>
+        <div class="policy-callout">
+          <p><strong>환불 문의:</strong> songminjin123@gmail.com으로 주문번호, 구매 상품명, 환불 사유를 기재하여 문의해 주세요. 영업일 기준 2일 이내 답변 드립니다.</p>
+        </div>
+      </div>
+
+      <!-- T7 -->
+      <div class="policy-section" id="t7">
+        <div class="policy-section-num">Article 07</div>
+        <h2>라이선스 및 지식재산권</h2>
+        <p><span class="clause-num">①</span> 서비스 내 모든 콘텐츠(엑셀 파일, 구글시트, 영상 템플릿, 디자인, 소스코드, 이미지 등)에 대한 저작권 및 지식재산권은 회사 또는 해당 권리자에게 귀속됩니다.</p>
+        <p><span class="clause-num">②</span> 이용자가 디지털 상품을 구매하면 다음의 비독점적 라이선스를 취득합니다.</p>
+        <div class="policy-table-wrap">
+          <table class="policy-table">
+            <thead>
+              <tr>
+                <th>허용</th>
+                <th>금지</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>개인 업무 용도로의 사용 및 수정</td>
+                <td>타인에게 재배포, 판매, 양도</td>
+              </tr>
+              <tr>
+                <td>구매자 본인 운영 사업에 내부 활용</td>
+                <td>온라인 공유 사이트 업로드</td>
+              </tr>
+              <tr>
+                <td>파일 수정·응용 (개인 목적)</td>
+                <td>역공학(reverse engineering), 소스코드 추출</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p><span class="clause-num">③</span> 상품 상세 페이지에서 별도의 라이선스를 명시한 경우, 해당 라이선스 조건이 우선 적용됩니다.</p>
+        <p><span class="clause-num">④</span> 이용자가 저작권을 침해하는 경우 「저작권법」에 따른 민·형사상 책임을 질 수 있습니다.</p>
+      </div>
+
+      <!-- T8 -->
+      <div class="policy-section" id="t8">
+        <div class="policy-section-num">Article 08</div>
+        <h2>이용자의 의무</h2>
+        <p>이용자는 서비스를 이용할 때 다음 각 호의 행위를 해서는 안 됩니다.</p>
+        <ul class="policy-list num">
+          <li>타인의 정보 도용, 허위 정보 등록 등 부정한 방법으로 가입 또는 서비스 이용</li>
+          <li>회사 또는 제3자의 지식재산권, 초상권, 개인정보 등 권리 침해</li>
+          <li>구매한 디지털 상품을 무단으로 복제·배포·판매하는 행위</li>
+          <li>회사 서비스를 이용하여 영리 목적의 무단 광고·홍보 행위</li>
+          <li>회사의 서버 또는 시스템에 과부하를 주거나 정상적 운영을 방해하는 행위</li>
+          <li>악성 코드·바이러스를 유포하거나 해킹을 시도하는 행위</li>
+          <li>기타 관련 법령 또는 본 약관에서 금지하는 행위</li>
+        </ul>
+        <p>위 금지 행위 위반 시 회사는 사전 통보 없이 서비스 이용을 제한하거나 계약을 해지할 수 있으며, 손해가 발생한 경우 손해배상을 청구할 수 있습니다.</p>
+      </div>
+
+      <!-- T9 -->
+      <div class="policy-section" id="t9">
+        <div class="policy-section-num">Article 09</div>
+        <h2>회사의 의무</h2>
+        <p><span class="clause-num">①</span> 회사는 관련 법령과 본 약관을 준수하며, 이용자에게 안정적이고 신뢰할 수 있는 서비스를 제공하기 위해 최선을 다합니다.</p>
+        <p><span class="clause-num">②</span> 회사는 이용자의 개인정보를 「개인정보 보호법」 등 관련 법령에 따라 안전하게 관리합니다.</p>
+        <p><span class="clause-num">③</span> 회사는 이용자가 서비스 이용 중 피해를 호소하거나 불만을 제기하는 경우 이를 신속하게 처리합니다. 신속한 처리가 어렵더라도 그 사유와 처리 일정을 이용자에게 통보합니다.</p>
+        <p><span class="clause-num">④</span> 회사는 서비스 이용자의 다운로드 기록을 안전하게 유지하여 결제 이후 재다운로드가 가능하도록 지원합니다.</p>
+        <p><span class="clause-num">⑤</span> 회사는 판매한 디지털 상품에 심각한 오류가 발견될 경우 이를 수정하여 이용자에게 제공합니다.</p>
+      </div>
+
+      <!-- T10 -->
+      <div class="policy-section" id="t10">
+        <div class="policy-section-num">Article 10</div>
+        <h2>분쟁 해결 및 준거법</h2>
+        <p><span class="clause-num">①</span> 서비스 이용과 관련하여 분쟁이 발생한 경우, 회사와 이용자는 성실히 협의하여 해결합니다.</p>
+        <p><span class="clause-num">②</span> 협의가 이루어지지 않을 경우 「전자상거래 등에서의 소비자보호에 관한 법률」에 따라 공정거래위원회 또는 소비자분쟁조정위원회에 조정을 신청할 수 있습니다.</p>
+        <p><span class="clause-num">③</span> 본 약관에 관한 소송의 관할 법원은 「민사소송법」이 정하는 바에 따르며, 준거법은 대한민국 법률로 합니다.</p>
+        <p><span class="clause-num">④</span> 서비스 이용 관련 분쟁 발생 시 한국소비자원(1372), 공정거래위원회(1381), 전자거래분쟁조정위원회를 통해 구제 신청이 가능합니다.</p>
+        <p style="margin-top:24px;font-size:14px;color:var(--text3);">본 약관은 2026년 1월 1일부터 시행됩니다.</p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="logo-wrap"><div class="logo-mark"></div><div class="brand-name">Modu<span>Lab</span></div></div>
+      <p>혼자 일해도 팀처럼 돌아가는<br>업무 시스템을 만듭니다.</p>
+    </div>
+    <div class="footer-col">
+      <h4>카테고리</h4>
+      <ul>
+        <li><a href="category-excel.html">엑셀 프로그램</a></li>
+        <li><a href="category-sheets.html">구글시트 자동화</a></li>
+        <li><a href="category-short.html">숏폼 템플릿</a></li>
+        <li><a href="category-detail.html">상세페이지 제작</a></li>
+        <li><a href="category-web.html">홈페이지 제작</a></li>
+        <li><a href="category-program.html">프로그램 제작</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>빠른 링크</h4>
+      <ul>
+        <li><a href="index.html">홈</a></li>
+        <li><a href="#">판매자 소개</a></li>
+        <li><a href="event.html">할인 상품</a></li>
+        <li><a href="category-program.html">문의하기</a></li>
+        <li><a href="#">마이페이지</a></li>
+        <li><a href="cart.html">장바구니</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>정책 안내</h4>
+      <ul>
+        <li><a href="terms.html" style="color:var(--green);font-weight:600;">이용약관</a></li>
+        <li><a href="privacy.html">개인정보처리방침</a></li>
+        <li><a href="guide.html">이용안내</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 ModuLab. All rights reserved.</p>
+    <div class="footer-biz">사업자등록번호: 000-00-00000 · 통신판매업: 제0000-서울-0000호</div>
+  </div>
+</footer>
+
+<script src="auth.js"></script>
+<script>
+function openDrawer() {
+  const d = document.getElementById('drawerOverlay');
+  d.style.display = 'block';
+  setTimeout(() => d.classList.add('open'), 10);
+  document.body.style.overflow = 'hidden';
+}
+function closeDrawer() {
+  const d = document.getElementById('drawerOverlay');
+  d.classList.remove('open');
+  setTimeout(() => { d.style.display = 'none'; }, 260);
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+</script>
+<script>
+(function(){var c=JSON.parse(localStorage.getItem('modulab_cart')||'[]');var b=document.getElementById('cart-badge-nav');if(b)b.textContent=c.length;})();
+</script>
+</body>
+</html>

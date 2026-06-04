@@ -471,6 +471,37 @@ a { text-decoration: none; color: inherit; }
 #toast.success .toast-icon::before { content: '✓'; color: #4ADE80; }
 #toast.error .toast-icon::before { content: '✕'; color: #F87171; }
 
+/* ── DETAIL IMAGE GRID ── */
+.detail-img-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 10px; margin-top: 12px;
+}
+.detail-img-item {
+  position: relative; border-radius: 8px; overflow: hidden;
+  border: 1px solid var(--border); background: var(--slate-light);
+  aspect-ratio: 1/1; cursor: grab; transition: border-color .15s;
+}
+.detail-img-item:active { cursor: grabbing; }
+.detail-img-item.drag-over { border: 2px dashed var(--blue); background: var(--blue-light); }
+.detail-img-item img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
+.detail-img-item-remove {
+  position: absolute; top: 5px; right: 5px;
+  width: 24px; height: 24px; border-radius: 50%;
+  background: rgba(0,0,0,.65); color: white;
+  border: none; font-size: 12px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.detail-img-item-order {
+  position: absolute; bottom: 5px; left: 5px;
+  background: rgba(0,0,0,.55); color: white;
+  font-size: 11px; font-weight: 700; padding: 2px 7px;
+  border-radius: 4px; font-family: 'JetBrains Mono', monospace;
+}
+.detail-img-empty {
+  display: none; padding: 12px; text-align: center;
+  font-size: 12px; color: var(--text3);
+}
+
 /* ── GAS STATUS INDICATOR ── */
 .gas-status {
   display: flex; align-items: center; gap: 6px;
@@ -628,6 +659,25 @@ a { text-decoration: none; color: inherit; }
                 <textarea class="field-textarea" id="productDetail" placeholder="상품 상세 페이지에 표시될 내용을 입력하세요.
 주요 기능, 포함 내용, 사용 방법, 시스템 요구사항 등을 작성해주세요." style="min-height:160px;" maxlength="2000" oninput="updateCharCount(this, 'detailCount', 2000)"></textarea>
                 <div class="char-count" id="detailCount">0 / 2000</div>
+              </div>
+
+              <div class="field">
+                <label class="field-label">상세페이지 이미지</label>
+                <div class="field-hint" style="margin-bottom:8px;">상세 페이지에 표시될 이미지입니다. 여러 장 등록 가능하며 드래그로 순서를 변경할 수 있습니다.</div>
+
+                <div class="upload-zone" id="detailImgZone"
+                  ondragover="detailZoneDragOver(event)"
+                  ondragleave="detailZoneDragLeave(event)"
+                  ondrop="detailZoneDrop(event)"
+                  onclick="document.getElementById('detailImgFiles').click()">
+                  <div class="upload-icon">🗂️</div>
+                  <div class="upload-title">클릭 또는 드래그하여 이미지 추가</div>
+                  <div class="upload-sub">JPG, PNG, WebP / 장당 최대 5MB / 여러 장 선택 가능</div>
+                  <input type="file" id="detailImgFiles" accept="image/*" multiple style="display:none;" onchange="addDetailImages(this)">
+                </div>
+
+                <div class="detail-img-grid" id="detailImgGrid"></div>
+                <div class="detail-img-empty" id="detailImgEmpty">등록된 이미지가 없습니다.</div>
               </div>
             </div>
 
@@ -1044,6 +1094,98 @@ function showToast(msg, type = 'success') {
   setTimeout(() => toast.classList.remove('show'), 3200);
 }
 
+/* ── DETAIL PAGE IMAGES ── */
+let detailImages = [];
+let dragSrcIdx = null;
+
+function addDetailImages(input) {
+  if (!input.files || !input.files.length) return;
+  Array.from(input.files).forEach(file => {
+    if (file.size > 5 * 1024 * 1024) {
+      showToast(file.name + ' — 5MB 초과 파일은 업로드할 수 없습니다.', 'error');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = e => {
+      detailImages.push({ dataUrl: e.target.result, name: file.name });
+      renderDetailImgGrid();
+    };
+    reader.readAsDataURL(file);
+  });
+  input.value = '';
+}
+
+function renderDetailImgGrid() {
+  const grid = document.getElementById('detailImgGrid');
+  grid.innerHTML = '';
+  detailImages.forEach((img, idx) => {
+    const item = document.createElement('div');
+    item.className = 'detail-img-item';
+    item.draggable = true;
+    item.dataset.idx = idx;
+    item.innerHTML = `
+      <img src="${img.dataUrl}" alt="${img.name}">
+      <button class="detail-img-item-remove" onclick="removeDetailImg(${idx})" type="button">✕</button>
+      <span class="detail-img-item-order">${idx + 1}</span>
+    `;
+    item.addEventListener('dragstart', function(e) {
+      dragSrcIdx = parseInt(this.dataset.idx);
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    item.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      this.classList.add('drag-over');
+    });
+    item.addEventListener('dragleave', function() {
+      this.classList.remove('drag-over');
+    });
+    item.addEventListener('drop', function(e) {
+      e.preventDefault();
+      this.classList.remove('drag-over');
+      const targetIdx = parseInt(this.dataset.idx);
+      if (dragSrcIdx === null || dragSrcIdx === targetIdx) return;
+      const moved = detailImages.splice(dragSrcIdx, 1)[0];
+      detailImages.splice(targetIdx, 0, moved);
+      renderDetailImgGrid();
+    });
+    item.addEventListener('dragend', function() {
+      dragSrcIdx = null;
+      document.querySelectorAll('.detail-img-item').forEach(el => el.classList.remove('drag-over'));
+    });
+    grid.appendChild(item);
+  });
+}
+
+function removeDetailImg(idx) {
+  detailImages.splice(idx, 1);
+  renderDetailImgGrid();
+}
+
+function detailZoneDragOver(e) {
+  e.preventDefault();
+  document.getElementById('detailImgZone').classList.add('dragging');
+}
+function detailZoneDragLeave(e) {
+  document.getElementById('detailImgZone').classList.remove('dragging');
+}
+function detailZoneDrop(e) {
+  e.preventDefault();
+  document.getElementById('detailImgZone').classList.remove('dragging');
+  const files = e.dataTransfer.files;
+  if (!files.length) return;
+  Array.from(files).forEach(file => {
+    if (!file.type.startsWith('image/')) return;
+    if (file.size > 5 * 1024 * 1024) { showToast(file.name + ' — 5MB 초과', 'error'); return; }
+    const reader = new FileReader();
+    reader.onload = ev => {
+      detailImages.push({ dataUrl: ev.target.result, name: file.name });
+      renderDetailImgGrid();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 /* ── DRAFT SAVE ── */
 function saveDraft() {
   const data = collectFormData();
@@ -1072,6 +1214,7 @@ function collectFormData() {
     coupon3: document.getElementById('coupon3').checked,
     metaTitle: document.getElementById('metaTitle').value,
     metaDesc: document.getElementById('metaDesc').value,
+    detailImages: detailImages.map(i => ({ dataUrl: i.dataUrl, name: i.name })),
     productId: generateProductId(),
     createdAt: new Date().toISOString(),
   };

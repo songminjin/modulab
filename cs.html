@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>고객센터 — 모듈랩</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-left">
+      <div class="hamburger" onclick="openDrawer()">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+    <div class="nav-center">
+      <a href="index.html" class="nav-logo">
+        <div class="logo-mark"></div>
+        Modu<span>Lab</span>
+      </a>
+    </div>
+    <div class="nav-right">
+      <div class="nav-search">
+        <span style="color:var(--text3);font-size:14px;">🔍</span>
+        <input type="text" placeholder="상품 검색...">
+      </div>
+      <div id="nav-auth" style="display:flex;align-items:center;gap:8px;">
+        <button class="nav-btn nav-btn-ghost" onclick="location.href='login.html'">로그인</button>
+        <button class="nav-btn nav-btn-primary" onclick="location.href='register.html'">회원가입</button>
+      </div>
+      <a href="cart.html" class="cart-btn">🛒<div class="cart-badge" id="cart-badge-nav">0</div></a>
+    </div>
+  </div>
+</nav>
+
+<!-- DRAWER -->
+<div class="drawer-overlay" id="drawerOverlay">
+  <div class="drawer-backdrop" onclick="closeDrawer()"></div>
+  <div class="drawer-panel">
+    <div class="drawer-header">
+      <div class="drawer-logo">
+        <div class="logo-mark" style="width:28px;height:28px;"></div>
+        Modu<span>Lab</span>
+      </div>
+      <button class="drawer-close" onclick="closeDrawer()">✕</button>
+    </div>
+    <div class="drawer-search">
+      <span style="color:var(--text3);">🔍</span>
+      <input type="text" placeholder="상품 검색...">
+    </div>
+    <div class="drawer-section-title">카테고리</div>
+    <ul class="drawer-nav">
+      <li><a href="index.html"><span class="cat-icon">🏠</span>전체 상품</a></li>
+      <li><a href="category-excel.html"><span class="cat-icon">📊</span>엑셀 프로그램</a></li>
+      <li><a href="category-sheets.html"><span class="cat-icon">🔧</span>구글시트 자동화</a></li>
+      <li><a href="category-short.html"><span class="cat-icon">🎬</span>숏폼 템플릿</a></li>
+      <li><a href="category-detail.html"><span class="cat-icon">🖼️</span>상세페이지 제작</a></li>
+      <li><a href="category-web.html"><span class="cat-icon">🌐</span>홈페이지 제작</a></li>
+      <li><a href="category-program.html"><span class="cat-icon">⚙️</span>프로그램 제작</a></li>
+      <li><a href="event.html" class="hot"><span class="cat-icon">🎁</span>이벤트</a></li>
+    </ul>
+    <div class="drawer-divider"></div>
+    <div class="drawer-section-title">내 계정</div>
+    <ul class="drawer-nav">
+      <li><a href="#"><span class="cat-icon">👤</span>마이페이지</a></li>
+      <li><a href="cart.html"><span class="cat-icon">🛒</span>장바구니</a></li>
+      <li><a href="cs.html" class="active-cat"><span class="cat-icon">💬</span>문의하기</a></li>
+    </ul>
+    <div class="drawer-btns" id="drawer-auth">
+      <button class="nav-btn nav-btn-ghost" onclick="location.href='login.html'">로그인</button>
+      <button class="nav-btn nav-btn-primary" onclick="location.href='register.html'">회원가입</button>
+    </div>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="cs-hero">
+  <div class="cs-hero-inner">
+    <div class="cs-hero-tag">CUSTOMER SERVICE</div>
+    <h1 class="cs-hero-title">고객센터</h1>
+    <p class="cs-hero-sub">궁금한 점은 언제든지 문의해 주세요.<br>빠르고 친절하게 도와드리겠습니다.</p>
+  </div>
+</section>
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb">
+  <a href="index.html">홈</a>
+  <span style="color:var(--border);">›</span>
+  <span>고객센터</span>
+</div>
+
+<!-- TAB NAV -->
+<div class="cs-tabs-wrap">
+  <div class="cs-tabs-inner">
+    <button class="cs-tab active" onclick="switchTab('inquiry', this)">1:1 고객문의</button>
+    <button class="cs-tab" onclick="switchTab('faq', this)">자주하는 질문</button>
+    <button class="cs-tab" onclick="switchTab('notice', this)">공지사항</button>
+  </div>
+</div>
+
+<!-- ═══ TAB: 1:1 고객문의 ═══ -->
+<div id="panel-inquiry" class="cs-panel active">
+  <div class="cs-content">
+    <div class="cs-form-wrap">
+      <div class="cs-form">
+        <div class="cs-form-title">1:1 고객문의</div>
+        <div class="cs-form-sub">문의 내용을 작성하시면 등록하신 이메일로 답변 드립니다.</div>
+        <div class="form-row">
+          <label>문의 유형</label>
+          <select>
+            <option value="">선택해 주세요</option>
+            <option>주문 / 결제 문의</option>
+            <option>상품 이용 문의</option>
+            <option>환불 / 취소 문의</option>
+            <option>오류 / 버그 신고</option>
+            <option>맞춤 제작 문의</option>
+            <option>기타</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>이름</label>
+          <input type="text" placeholder="이름을 입력해 주세요">
+        </div>
+        <div class="form-row">
+          <label>이메일</label>
+          <input type="email" placeholder="답변 받으실 이메일을 입력해 주세요">
+        </div>
+        <div class="form-row">
+          <label>주문번호 <span style="color:var(--text3);font-weight:400;">(선택)</span></label>
+          <input type="text" placeholder="관련 주문번호가 있으면 입력해 주세요">
+        </div>
+        <div class="form-row">
+          <label>제목</label>
+          <input type="text" placeholder="문의 제목을 입력해 주세요">
+        </div>
+        <div class="form-row">
+          <label>문의 내용</label>
+          <textarea placeholder="문의 내용을 자세히 작성해 주세요&#10;(스크린샷이나 오류 메시지가 있다면 함께 설명해 주시면 빠른 해결이 가능합니다)"></textarea>
+        </div>
+        <button class="form-submit" onclick="submitInquiry()">문의 접수하기</button>
+        <p class="form-notice">평일 기준 1 영업일 이내 답변 드립니다.<br>긴급 문의는 카카오톡 채널을 이용해 주세요.</p>
+      </div>
+
+      <div class="cs-info-card">
+        <div class="cs-info-card-title">빠른 상담</div>
+        <div class="cs-info-item">
+          <div class="cs-info-icon">💬</div>
+          <div class="cs-info-text">
+            <strong>카카오톡 채널</strong>
+            <span>전화보다 빠른 1:1 상담<br>답변 대기 없이 바로 연결</span>
+          </div>
+        </div>
+        <div class="cs-info-item">
+          <div class="cs-info-icon">⏰</div>
+          <div class="cs-info-text">
+            <strong>상담 가능 시간</strong>
+            <span>평일 09:00 – 18:00<br>점심 12:00 – 13:00 · 주말/공휴일 휴무</span>
+          </div>
+        </div>
+        <div class="cs-info-item">
+          <div class="cs-info-icon">📧</div>
+          <div class="cs-info-text">
+            <strong>이메일 문의</strong>
+            <span>1:1 문의 폼 접수 시<br>1 영업일 이내 답변</span>
+          </div>
+        </div>
+        <a href="#" class="cs-kakao-btn">💬 카카오톡으로 바로 문의하기</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TAB: 자주하는 질문 ═══ -->
+<div id="panel-faq" class="cs-panel">
+  <div class="cs-content">
+    <div class="faq-list">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
+        <div>
+          <div style="font-size:20px;font-weight:700;color:var(--text);margin-bottom:4px;">자주 묻는 질문</div>
+          <div style="font-size:13px;color:var(--text3);">아래에서 궁금하신 내용을 찾아보세요</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="filter-tag active" onclick="filterFaq('all',this)">전체</button>
+          <button class="filter-tag" onclick="filterFaq('order',this)">주문/결제</button>
+          <button class="filter-tag" onclick="filterFaq('product',this)">상품 이용</button>
+          <button class="filter-tag" onclick="filterFaq('refund',this)">환불/취소</button>
+          <button class="filter-tag" onclick="filterFaq('custom',this)">맞춤 제작</button>
+        </div>
+      </div>
+
+      <div class="faq-item" data-cat="order">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span class="faq-q-badge">주문/결제</span>
+            <span class="faq-q-text">결제 후 상품은 어떻게 받나요?</span>
+          </div>
+          <span class="faq-arrow">▼</span>
+        </div>
+        <div class="faq-answer"><p>결제 완료 즉시 등록하신 이메일 주소로 다운로드 링크를 자동 발송합니다. 이메일이 오지 않는 경우 스팸 메일함을 확인하시거나, 1:1 문의를 남겨주시면 빠르게 재발송해 드립니다.</p></div>
+      </div>
+
+      <div class="faq-item" data-cat="order">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span class="faq-q-badge">주문/결제</span>
+            <span class="faq-q-text">어떤 결제 수단을 지원하나요?</span>
+          </div>
+          <span class="faq-arrow">▼</span>
+        </div>
+        <div class="faq-answer"><p>토스페이먼츠 PG를 통해 신용카드, 체크카드, 계좌이체, 카카오페이, 네이버페이 등 다양한 결제 수단을 지원합니다.</p></div>
+      </div>
+
+      <div class="faq-item" data-cat="product">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span class="faq-q-badge">상품 이용</span>
+            <span class="faq-q-text">엑셀 프로그램을 실행했는데 오류가 납니다.</span>
+          </div>
+          <span class="faq-arrow">▼</span>
+        </div>
+        <div class="faq-answer"><p>모든 엑셀 상품은 매크로(VBA)를 사용하므로 엑셀 보안 설정에서 <strong>콘텐츠 사용 허용</strong>을 눌러야 정상 작동합니다. 그래도 오류가 발생하면 오류 메시지 스크린샷과 함께 1:1 문의 또는 카카오톡으로 연락 주세요. 오류 무제한 수정을 지원합니다.</p></div>
+      </div>
+
+      <div class="faq-item" data-cat="product">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span class="faq-q-badge">상품 이용</span>
+            <span class="faq-q-text">구글시트 자동화는 어떻게 사용하나요?</span>
+          </div>
+          <span class="faq-arrow">▼</span>
+        </div>
+        <div class="faq-answer"><p>구글시트 상품은 파일을 본인 구글 드라이브에 복사한 후, Apps Script 편집기에서 <strong>배포 → 웹 앱으로 배포</strong>를 실행하면 됩니다. 상세한 사용 설명서는 상품과 함께 동봉되어 있으며, 추가 문의 시 카카오톡으로 연락 주시면 화면 공유로 도움드립니다.</p></div>
+      </div>
+
+      <div class="faq-item" data-cat="product">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span class="faq-q-badge">상품 이용</span>
+            <span class="faq-q-text">한 번 구매하면 영구적으로 사용할 수 있나요?</span>
+          </div>
+          <span class="faq-arrow">▼</span>
+        </div>
+        <div class="faq-answer"><p>네, 구매 후 영구 사용이 가능합니다. 단, 라이선스는 구매자 1인에게만 적용되며 타인에게 파일을 공유하거나 재판매하는 행위는 금지됩니다.</p></div>
+      </div>
+
+      <div class="faq-item" data-cat="refund">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span class="faq-q-badge">환불/취소</span>
+            <span class="faq-q-text">환불을 받을 수 있나요?</span>
+          </div>
+          <span class="faq-arrow">▼</span>
+        </div>
+        <div class="faq-answer"><p>디지털 상품 특성상 다운로드 이력이 있는 경우 환불이 어렵습니다. 다만 상품이 설명과 다르거나 작동하지 않는 오류가 있는 경우에는 수정 지원 또는 환불 처리가 가능합니다. 결제 후 7일 이내에 1:1 문의로 접수해 주세요.</p></div>
+      </div>
+
+      <div class="faq-item" data-cat="custom">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span class="faq-q-badge">맞춤 제작</span>
+            <span class="faq-q-text">맞춤 제작은 어떻게 의뢰하나요?</span>
+          </div>
+          <span class="faq-arrow">▼</span>
+        </div>
+        <div class="faq-answer"><p>카카오톡 채널로 원하시는 기능과 예산을 간략히 알려주시면 견적을 안내드립니다. 홈페이지, 엑셀 자동화, 구글시트, 프로그램 제작 등 다양한 업무 자동화 제작이 가능합니다. 30건 이상의 외주 제작 경험을 바탕으로 최적의 솔루션을 제안해 드립니다.</p></div>
+      </div>
+
+      <div class="faq-item" data-cat="custom">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span class="faq-q-badge">맞춤 제작</span>
+            <span class="faq-q-text">맞춤 제작 기간은 얼마나 걸리나요?</span>
+          </div>
+          <span class="faq-arrow">▼</span>
+        </div>
+        <div class="faq-answer"><p>작업 범위에 따라 다르지만 일반적으로 엑셀/구글시트 자동화는 3~7일, 홈페이지 제작은 5~14일이 소요됩니다. 상담 시 더 정확한 일정을 안내드립니다.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TAB: 공지사항 ═══ -->
+<div id="panel-notice" class="cs-panel">
+  <div class="cs-content">
+    <div class="notice-list">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+        <div>
+          <div style="font-size:20px;font-weight:700;color:var(--text);margin-bottom:4px;">공지사항</div>
+          <div style="font-size:13px;color:var(--text3);">모듈랩의 새로운 소식과 안내 사항을 확인하세요</div>
+        </div>
+      </div>
+
+      <div class="notice-item" onclick="toggleNotice(this, 'n1')">
+        <span class="notice-badge important">중요</span>
+        <span class="notice-title">개인정보처리방침 개정 안내</span>
+        <span class="notice-date">2026-05-20</span>
+      </div>
+      <div class="notice-detail" id="n1">
+        <p>2026년 6월 1일부터 개인정보처리방침이 일부 개정됩니다. 주요 변경 내용은 결제 정보 처리 방식 개선 및 마케팅 수신 동의 항목 추가입니다. 자세한 내용은 이용약관 페이지에서 확인하실 수 있습니다.</p>
+      </div>
+
+      <div class="notice-item" onclick="toggleNotice(this, 'n2')">
+        <span class="notice-badge update">업데이트</span>
+        <span class="notice-title">[업데이트] 프로젝트 관리 자동화 v2.1 배포</span>
+        <span class="notice-date">2026-05-15</span>
+      </div>
+      <div class="notice-detail" id="n2">
+        <p>프로젝트 관리 자동화 엑셀 프로그램이 v2.1로 업데이트되었습니다. 주요 개선 사항: 간트차트 자동 생성 기능 추가, 담당자별 업무 필터 개선, 인쇄 레이아웃 최적화. 기존 구매자분들께는 업데이트 파일을 이메일로 발송드렸습니다.</p>
+      </div>
+
+      <div class="notice-item" onclick="toggleNotice(this, 'n3')">
+        <span class="notice-badge update">업데이트</span>
+        <span class="notice-title">[업데이트] 구글시트 CRM 자동화 v1.5 배포</span>
+        <span class="notice-date">2026-05-08</span>
+      </div>
+      <div class="notice-detail" id="n3">
+        <p>구글시트 CRM 자동화 v1.5 업데이트 내용: 이메일 자동 발송 기능 추가, 고객 태그 분류 시스템 개선, 모바일 화면 최적화. 기존 구매자분들은 카카오톡 채널 또는 1:1 문의로 업데이트 파일을 요청해 주세요.</p>
+      </div>
+
+      <div class="notice-item" onclick="toggleNotice(this, 'n4')">
+        <span class="notice-badge general">공지</span>
+        <span class="notice-title">5월 황금연휴 기간 고객센터 운영 안내</span>
+        <span class="notice-date">2026-04-28</span>
+      </div>
+      <div class="notice-detail" id="n4">
+        <p>5월 1일(목) ~ 5월 6일(화) 황금연휴 기간에는 고객센터 운영이 제한됩니다. 이 기간 접수된 문의는 5월 7일(수)부터 순차적으로 답변드립니다. 긴급한 문의는 카카오톡 채널로 남겨주시면 확인 후 처리하겠습니다.</p>
+      </div>
+
+      <div class="notice-item" onclick="toggleNotice(this, 'n5')">
+        <span class="notice-badge general">공지</span>
+        <span class="notice-title">모듈랩 쇼핑몰 오픈 안내</span>
+        <span class="notice-date">2026-04-01</span>
+      </div>
+      <div class="notice-detail" id="n5">
+        <p>안녕하세요, 모듈랩입니다. 업무 자동화 디지털 툴 쇼핑몰을 오픈하였습니다. 6년간 직접 사용하며 검증한 엑셀·구글시트 자동화 프로그램을 합리적인 가격에 제공합니다. 앞으로 더 많은 유용한 툴을 선보이겠습니다. 많은 관심 부탁드립니다.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-cs-bar">
+    <div class="footer-cs-inner">
+      <div class="footer-cs-info">
+        <div class="footer-cs-label">CUSTOMER CENTER</div>
+        <div class="footer-cs-title">전화보다 빠른 상담</div>
+        <div class="footer-cs-sub">카카오채널로 문의하시면 빠르게 답변드립니다</div>
+        <div class="footer-cs-hours">평일 09:00 – 18:00 &nbsp;·&nbsp; 점심 12:00 – 13:00 &nbsp;·&nbsp; 주말/공휴일 휴무</div>
+      </div>
+      <div class="footer-cs-btns">
+        <a href="#" class="footer-cs-btn-kakao">💬 카카오톡 문의하기</a>
+        <a href="cs.html" class="footer-cs-btn-inquiry">✉️ 1:1 문의하기</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="logo-wrap"><div class="logo-mark"></div><div class="brand-name">Modu<span>Lab</span></div></div>
+      <p>혼자 일해도 팀처럼 돌아가는<br>업무 시스템을 만듭니다.</p>
+    </div>
+    <div class="footer-col">
+      <h4>카테고리</h4>
+      <ul>
+        <li><a href="category-excel.html">엑셀 프로그램</a></li>
+        <li><a href="category-sheets.html">구글시트 자동화</a></li>
+        <li><a href="category-short.html">숏폼 템플릿</a></li>
+        <li><a href="category-detail.html">상세페이지 제작</a></li>
+        <li><a href="category-web.html">홈페이지 제작</a></li>
+        <li><a href="category-program.html">프로그램 제작</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>빠른 링크</h4>
+      <ul>
+        <li><a href="index.html">홈</a></li>
+        <li><a href="#">판매자 소개</a></li>
+        <li><a href="event.html">할인 상품</a></li>
+        <li><a href="cs.html">문의하기</a></li>
+        <li><a href="#">마이페이지</a></li>
+        <li><a href="cart.html">장바구니</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>정책 안내</h4>
+      <ul>
+        <li><a href="#">이용약관</a></li>
+        <li><a href="#">개인정보처리방침</a></li>
+        <li><a href="#">라이선스 정책</a></li>
+        <li><a href="#">환불 정책</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 ModuLab. All rights reserved.</p>
+    <div class="footer-biz">사업자등록번호: 000-00-00000 · 통신판매업: 제0000-서울-0000호</div>
+  </div>
+</footer>
+
+<script src="auth.js"></script>
+<script>
+function openDrawer() {
+  const d = document.getElementById('drawerOverlay');
+  d.style.display = 'block';
+  setTimeout(() => d.classList.add('open'), 10);
+  document.body.style.overflow = 'hidden';
+}
+function closeDrawer() {
+  const d = document.getElementById('drawerOverlay');
+  d.classList.remove('open');
+  setTimeout(() => { d.style.display = 'none'; }, 260);
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+
+function switchTab(tab, btn) {
+  document.querySelectorAll('.cs-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.cs-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('panel-' + tab).classList.add('active');
+}
+
+function toggleFaq(el) {
+  const item = el.closest('.faq-item');
+  const wasOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+  if (!wasOpen) item.classList.add('open');
+}
+
+function filterFaq(cat, btn) {
+  document.querySelectorAll('.filter-tag').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.faq-item').forEach(item => {
+    if (cat === 'all' || item.dataset.cat === cat) {
+      item.style.display = '';
+    } else {
+      item.style.display = 'none';
+    }
+  });
+}
+
+function toggleNotice(el, id) {
+  const wasOpen = el.classList.contains('open');
+  document.querySelectorAll('.notice-item.open').forEach(i => i.classList.remove('open'));
+  if (!wasOpen) el.classList.add('open');
+}
+
+function submitInquiry() {
+  const inputs = document.querySelectorAll('#panel-inquiry input, #panel-inquiry select, #panel-inquiry textarea');
+  let valid = true;
+  inputs.forEach(inp => {
+    if (!inp.value.trim() && inp.getAttribute('placeholder') !== '관련 주문번호가 있으면 입력해 주세요') {
+      inp.style.borderColor = '#EF4444';
+      valid = false;
+    } else {
+      inp.style.borderColor = '';
+    }
+  });
+  if (!valid) { alert('필수 항목을 모두 입력해 주세요.'); return; }
+  alert('문의가 접수되었습니다.\n등록하신 이메일로 1 영업일 이내 답변 드리겠습니다.');
+  inputs.forEach(inp => inp.value = '');
+}
+</script>
+<script>
+(function(){var c=JSON.parse(localStorage.getItem('modulab_cart')||'[]');var b=document.getElementById('cart-badge-nav');if(b)b.textContent=c.length;})();
+</script>
+</body>
+</html>
