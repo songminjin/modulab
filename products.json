@@ -271,5 +271,26 @@
     "newBadge": false,
     "bestBadge": false,
     "detailImages": []
+  },
+  {
+    "id": "EXCEL-MPYYQMOK",
+    "name": "프로젝트 자동화",
+    "cat": "excel",
+    "type": "file",
+    "emoji": "📊",
+    "price": 10000,
+    "discount": 9900,
+    "visible": true,
+    "newBadge": true,
+    "bestBadge": false,
+    "desc": "프로젝트 관리를 쉽게",
+    "detail": "상품에 대한 설명",
+    "fileType": "xlsm",
+    "fileUrl": "https://docs.google.com/spreadsheets/d/1YPR3BqcJltTFFKA_vHTbYPdF1VFPy-v1daEt3h1_H2I/edit?gid=523316433#gid=523316433",
+    "fileName": "",
+    "date": "2026-06-04",
+    "views": 0,
+    "downloads": 0,
+    "detailImages": []
   }
 ]
