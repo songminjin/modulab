@@ -278,25 +278,19 @@ function normalizeProducts(arr) {
 }
 
 async function load(){
-  // 1순위: Railway 백엔드 API
-  try {
-    const res = await fetch(`${API_URL}/api/admin/products`, { credentials: 'include' });
-    if (!res.ok) throw new Error('API error');
-    products = normalizeProducts(await res.json());
-    localStorage.setItem('modulab_products', JSON.stringify(products));
-    render(); return;
-  } catch(e) { console.warn('[products] Railway 불가, products.json으로 fallback'); }
-
-  // 2순위: products.json (GitHub 단일 진실의 원천)
+  // 1순위: products.json (GitHub 단일 진실의 원천)
   try {
     const res = await fetch(PRODUCTS_JSON_URL, { cache: 'no-cache' });
     if (!res.ok) throw new Error();
-    products = normalizeProducts(await res.json());
-    localStorage.setItem('modulab_products', JSON.stringify(products));
-    render(); return;
+    const data = await res.json();
+    if (data.length > 0) {
+      products = normalizeProducts(data);
+      localStorage.setItem('modulab_products', JSON.stringify(products));
+      render(); return;
+    }
   } catch(e) { console.warn('[products] products.json 불가, localStorage로 fallback'); }
 
-  // 3순위: localStorage
+  // 2순위: localStorage
   try {
     const saved = localStorage.getItem('modulab_products');
     products = saved ? normalizeProducts(JSON.parse(saved)) : [];
