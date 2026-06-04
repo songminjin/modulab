@@ -37,7 +37,7 @@ router.get('/', async (req, res) => {
     res.json({ reviews: rows, total, avg, dist });
   } catch (err) {
     console.error('[reviews GET]', err);
-    res.status(500).json({ error: '서버 오류가 발생했습니다.', detail: err.message });
+    res.status(500).json({ error: '서버 오류가 발생했습니다.' });
   }
 });
 

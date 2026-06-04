@@ -76,6 +76,9 @@ async function runMigrations() {
        UNIQUE(review_id, fingerprint)
      )`,
     `ALTER TABLE reviews ADD COLUMN IF NOT EXISTS likes_count INTEGER DEFAULT 0`,
+    `ALTER TABLE reviews ADD COLUMN IF NOT EXISTS reviewer_name VARCHAR(50)`,
+    `ALTER TABLE reviews ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES users(id) ON DELETE SET NULL`,
+    `ALTER TABLE reviews ADD COLUMN IF NOT EXISTS product_id VARCHAR(100)`,
     `CREATE INDEX IF NOT EXISTS idx_reviews_product_id ON reviews(product_id)`,
     `CREATE INDEX IF NOT EXISTS idx_reviews_created_at ON reviews(created_at)`,
   ];
