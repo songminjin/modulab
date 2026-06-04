@@ -246,39 +246,41 @@ const GRADE_INFO = {
   vvip:{label:'VVIP',icon:'🔥',cls:'g-vvip'},
   blacklist:{label:'블랙리스트',icon:'🚫',cls:'g-blacklist'},
 };
-const DEMO = [
-  {id:'u-001',name:'김민준',email:'minjun@example.com',grade:'vip',total_spent:387000,monthly_amount:128000,total_orders:8,last_purchased_at:'2026-06-02',created_at:'2026-01-15',is_active:true,is_dormant:false},
-  {id:'u-002',name:'이수연',email:'suyeon@example.com',grade:'sprout',total_spent:74700,monthly_amount:25000,total_orders:3,last_purchased_at:'2026-06-01',created_at:'2026-03-10',is_active:true,is_dormant:false},
-  {id:'u-003',name:'박지훈',email:'jihoon@example.com',grade:'regular',total_spent:268800,monthly_amount:89900,total_orders:12,last_purchased_at:'2026-06-03',created_at:'2026-01-20',is_active:true,is_dormant:false},
-  {id:'u-004',name:'최유나',email:'yuna@example.com',grade:'vip',total_spent:1125000,monthly_amount:450000,total_orders:25,last_purchased_at:'2026-06-04',created_at:'2025-12-01',is_active:true,is_dormant:false},
-  {id:'u-005',name:'정하늘',email:'haneul@example.com',grade:'vvip',total_spent:3870000,monthly_amount:1500000,total_orders:45,last_purchased_at:'2026-06-04',created_at:'2025-10-15',is_active:true,is_dormant:false},
-  {id:'u-006',name:'강도현',email:'dohyun@example.com',grade:'new',total_spent:0,monthly_amount:0,total_orders:0,last_purchased_at:null,created_at:'2026-06-02',is_active:true,is_dormant:false},
-  {id:'u-007',name:'윤서아',email:'seoa@example.com',grade:'sprout',total_spent:19900,monthly_amount:19900,total_orders:1,last_purchased_at:'2026-02-28',created_at:'2026-05-25',is_active:true,is_dormant:false},
-  {id:'u-008',name:'임준호',email:'junho@example.com',grade:'regular',total_spent:576000,monthly_amount:0,total_orders:18,last_purchased_at:'2026-02-14',created_at:'2026-02-14',is_active:true,is_dormant:true},
-  {id:'u-009',name:'한지민',email:'jimin@example.com',grade:'blacklist',total_spent:9900,monthly_amount:0,total_orders:1,last_purchased_at:'2026-03-01',created_at:'2026-03-01',is_active:false,is_dormant:false},
-];
+const PROVIDER_BADGE = {
+  local:  '',
+  google: '<span style="font-size:10px;font-weight:700;color:#4285F4;margin-left:4px;">G</span>',
+  kakao:  '<span style="font-size:10px;font-weight:700;background:#FEE500;color:#3C1E1E;padding:1px 4px;border-radius:3px;margin-left:4px;">K</span>',
+  naver:  '<span style="font-size:10px;font-weight:700;background:#03C75A;color:white;padding:1px 4px;border-radius:3px;margin-left:4px;">N</span>',
+};
 
 let customers = [];
 let currentFilter = 'all';
-const TODAY = new Date('2026-06-04');
 
 function daysSince(dateStr) {
   if (!dateStr) return Infinity;
-  return Math.floor((TODAY - new Date(dateStr)) / 86400000);
+  return Math.floor((new Date() - new Date(dateStr)) / 86400000);
 }
 
 async function loadData() {
   try {
     const res = await fetch(`${API_URL}/api/admin/customers`, { credentials:'include' });
-    if (res.ok) { const d = await res.json(); customers = d.customers || d; }
-    else customers = DEMO;
-  } catch { customers = DEMO; }
+    if (!res.ok) throw new Error('API 오류');
+    const d = await res.json();
+    customers = d.customers || d;
+  } catch(e) {
+    customers = [];
+    document.getElementById('emptyState').innerHTML = `
+      <div style="font-size:36px;margin-bottom:10px;">⚠️</div>
+      <div style="font-size:14px;font-weight:600;color:var(--text2);">데이터를 불러올 수 없습니다</div>
+      <div style="font-size:13px;color:var(--text3);margin-top:4px;">서버 연결을 확인하거나 새로고침해주세요</div>`;
+  }
 }
 
 async function refreshData() { await loadData(); renderStats(); renderTable(); showToast('새로고침 완료'); }
 
 function renderStats() {
-  const thisMonth = '2026-06';
+  const now = new Date();
+  const thisMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
   const newMonth = customers.filter(c => c.created_at?.startsWith(thisMonth)).length;
   const vipPlus = customers.filter(c => c.grade==='vip'||c.grade==='vvip').length;
   const active = customers.filter(c => daysSince(c.last_purchased_at) <= 30).length;
@@ -330,9 +332,10 @@ function renderTable() {
     if (!c.is_active) statusHtml = '<span class="status-tag" style="color:var(--red);">⛔ 탈퇴</span>';
     else if (c.is_dormant) statusHtml = '<span class="status-tag" style="color:var(--yellow);">💤 정지</span>';
     else statusHtml = '<span class="status-tag" style="color:var(--green);">✓ 정상</span>';
+    const provBadge = PROVIDER_BADGE[c.provider] || '';
     return `<tr onclick="goDetail('${c.id}')">
       <td>
-        <div style="font-weight:600;">${c.name}</div>
+        <div style="font-weight:600;">${c.name}${provBadge}</div>
         <div style="font-size:11px;color:var(--text3);">${c.email}</div>
       </td>
       <td><span class="badge ${g.cls}">${g.icon} ${g.label}</span></td>

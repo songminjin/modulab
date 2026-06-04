@@ -407,57 +407,38 @@ const GRADE_INFO = {
 };
 const CAT_LABEL = {excel:'엑셀',sheets:'구글시트',short:'숏폼',detail:'상세페이지',web:'홈페이지',program:'프로그램'};
 
-const DEMO = {
-  user:{id:'u-demo',name:'김민준',email:'minjun@example.com',phone:'010-1234-5678',nickname:'민준이',
-    birthday:'1995-03-15',gender:'male',provider:'local',is_active:true,is_dormant:false,
-    created_at:'2026-01-15T09:23:11',last_login_at:'2026-06-04T14:32:00',points:15000,
-    marketing_consent:true,referral_source:'organic',manual_grade:null,grade:'vip',
-    total_orders:8,total_spent:387000,monthly_amount:128000,last_purchased_at:'2026-06-02T11:45:00',refund_count:1,
-    shipping_addresses:[
-      {name:'김민준',phone:'010-1234-5678',address:'서울시 강남구 테헤란로 123',detail:'101호',zip:'06234',isDefault:true},
-      {name:'김민준',phone:'010-1234-5678',address:'서울시 성동구 왕십리로 456',detail:'302호',zip:'04763',isDefault:false},
-    ]},
-  orders:[
-    {id:'ord-001',final_amount:49900,status:'paid',payment_method:'카드',first_product:'프로젝트 관리 자동화',item_count:2,created_at:'2026-06-02T11:45:00'},
-    {id:'ord-002',final_amount:29900,status:'paid',payment_method:'카드',first_product:'구글시트 CRM 자동화',item_count:1,created_at:'2026-05-15T14:22:00'},
-    {id:'ord-003',final_amount:19900,status:'refunded',payment_method:'카드',first_product:'가계부 자동화',item_count:1,created_at:'2026-04-20T09:11:00'},
-    {id:'ord-004',final_amount:89900,status:'paid',payment_method:'카드',first_product:'급여 관리 자동화',item_count:3,created_at:'2026-03-10T16:55:00'},
-    {id:'ord-005',final_amount:49900,status:'paid',payment_method:'카드',first_product:'마진 계산기',item_count:1,created_at:'2026-02-22T10:30:00'},
-  ],
-  reviews:[
-    {id:'rev-001',product_name:'프로젝트 관리 자동화',rating:5,content:'정말 유용해요! 업무 효율이 많이 올랐습니다.',created_at:'2026-06-03T09:00:00'},
-    {id:'rev-002',product_name:'구글시트 CRM 자동화',rating:4,content:'기능이 많고 편리합니다. 튜토리얼이 있으면 더 좋겠어요.',created_at:'2026-05-16T12:00:00'},
-  ],
-  points:[
-    {type:'earn_review',amount:500,description:'리뷰 작성 적립',created_at:'2026-06-03T09:01:00'},
-    {type:'use_order',amount:-5000,description:'주문 포인트 사용',created_at:'2026-06-02T11:45:00'},
-    {type:'admin_add',amount:10000,description:'관리자 지급 (VIP 승급 축하)',created_at:'2026-05-01T00:00:00'},
-    {type:'earn_review',amount:500,description:'리뷰 작성 적립',created_at:'2026-05-16T12:01:00'},
-  ],
-  coupons:[
-    {code:'SUMMER15',name:'6월 여름 특가',discount_type:'percent',discount_value:15,is_used:false,expires_at:'2026-06-30T23:59:59',created_at:'2026-06-01T00:00:00'},
-    {code:'WELCOME20',name:'신규가입 환영 쿠폰',discount_type:'percent',discount_value:20,is_used:true,used_at:'2026-02-22T10:30:00',expires_at:'2026-12-31T23:59:59',created_at:'2026-01-15T09:23:11'},
-  ],
-  notes:[],
+const PROVIDER_INFO = {
+  local:  { label:'이메일 가입',  badge:'' },
+  google: { label:'Google 로그인', badge:'<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:5px;background:#EFF6FF;border:1px solid #BFDBFE;font-size:11px;font-weight:700;color:#4285F4;">G Google</span>' },
+  kakao:  { label:'카카오 로그인', badge:'<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:5px;background:#FEF9C3;border:1px solid #FDE68A;font-size:11px;font-weight:700;color:#3C1E1E;">K 카카오</span>' },
+  naver:  { label:'네이버 로그인', badge:'<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:5px;background:#F0FDF4;border:1px solid #BBF7D0;font-size:11px;font-weight:700;color:#03C75A;">N 네이버</span>' },
 };
 
 let data = null;
 const cid = new URLSearchParams(location.search).get('id');
 
 async function loadData() {
+  if (!cid) {
+    document.getElementById('customerHeader').innerHTML = '<div style="padding:20px;color:var(--red);">⚠️ 고객 ID가 없습니다. <a href="customers.html" style="color:var(--blue);">목록으로 돌아가기</a></div>';
+    return;
+  }
   try {
-    const res = await fetch(`${API_URL}/api/admin/customers/${cid||'demo'}`, { credentials:'include' });
-    if (res.ok) data = await res.json();
-    else data = DEMO;
-  } catch { data = DEMO; }
+    const res = await fetch(`${API_URL}/api/admin/customers/${cid}`, { credentials:'include' });
+    if (!res.ok) throw new Error('API 오류');
+    data = await res.json();
+  } catch(e) {
+    document.getElementById('customerHeader').innerHTML = '<div style="padding:20px;color:var(--red);">⚠️ 고객 정보를 불러올 수 없습니다. <a href="customers.html" style="color:var(--blue);">목록으로 돌아가기</a></div>';
+    data = null;
+  }
 }
 
 function fmtDate(d) { return d ? d.slice(0,10) : '-'; }
 function fmtDT(d) { return d ? d.slice(0,16).replace('T',' ') : '-'; }
 function fmtW(n) { return n ? '₩'+Number(n).toLocaleString() : '-'; }
-function daysSince(d) { if(!d) return Infinity; return Math.floor((new Date('2026-06-04') - new Date(d))/86400000); }
+function daysSince(d) { if(!d) return Infinity; return Math.floor((new Date() - new Date(d))/86400000); }
 
 function renderAll() {
+  if (!data) return;
   const u = data.user;
   document.title = `${u.name} — 고객 상세`;
   document.getElementById('breadcrumbName').textContent = u.name;
@@ -491,21 +472,21 @@ function renderAll() {
 function renderInfo() {
   const u = data.user;
   const genderMap = {male:'남성',female:'여성',other:'기타'};
-  const providerMap = {local:'이메일',google:'구글',kakao:'카카오',naver:'네이버'};
-  const refMap = {organic:'자연 유입',ad:'광고',referral:'추천인',sns:'SNS',undefined:'-'};
+  const refMap = {organic:'자연 유입',ad:'광고',referral:'추천인',sns:'SNS'};
+  const pInfo = PROVIDER_INFO[u.provider] || PROVIDER_INFO.local;
   document.getElementById('infoBasic').innerHTML = `
-    <div class="info-row"><div class="info-key">이름</div><div class="info-val">${u.name}</div></div>
-    <div class="info-row"><div class="info-key">닉네임</div><div class="info-val">${u.nickname||'-'}</div></div>
+    <div class="info-row"><div class="info-key">이름</div><div class="info-val">${u.name}${u.nickname ? ` <span style="font-size:11px;color:var(--text3);">(${u.nickname})</span>` : ''}</div></div>
     <div class="info-row"><div class="info-key">이메일</div><div class="info-val">${u.email}</div></div>
     <div class="info-row"><div class="info-key">전화번호</div><div class="info-val">${u.phone||'-'}</div></div>
     <div class="info-row"><div class="info-key">생년월일</div><div class="info-val">${u.birthday||'-'}</div></div>
-    <div class="info-row"><div class="info-key">성별</div><div class="info-val">${genderMap[u.gender]||'-'}</div></div>`;
+    <div class="info-row"><div class="info-key">성별</div><div class="info-val">${genderMap[u.gender]||'-'}</div></div>
+    <div class="info-row"><div class="info-key">마케팅 수신</div><div class="info-val">${u.marketing_consent ? '✅ 동의' : '❌ 미동의'}</div></div>`;
   document.getElementById('infoExtra').innerHTML = `
-    <div class="info-row"><div class="info-key">회원 ID</div><div class="info-val" style="font-family:'JetBrains Mono',monospace;font-size:11px;">${u.id}</div></div>
-    <div class="info-row"><div class="info-key">가입 경로</div><div class="info-val">${providerMap[u.provider]||u.provider} (${refMap[u.referral_source]||'-'})</div></div>
+    <div class="info-row"><div class="info-key">로그인 방식</div><div class="info-val">${pInfo.badge || '<span style="font-size:12px;color:var(--text2);">📧 이메일 가입</span>'}</div></div>
+    <div class="info-row"><div class="info-key">유입 경로</div><div class="info-val">${refMap[u.referral_source] || '-'}</div></div>
     <div class="info-row"><div class="info-key">가입일</div><div class="info-val">${fmtDT(u.created_at)}</div></div>
     <div class="info-row"><div class="info-key">최근 로그인</div><div class="info-val">${fmtDT(u.last_login_at)}</div></div>
-    <div class="info-row"><div class="info-key">마케팅 수신</div><div class="info-val">${u.marketing_consent ? '✅ 동의' : '❌ 미동의'}</div></div>
+    <div class="info-row"><div class="info-key">회원 ID</div><div class="info-val" style="font-family:'JetBrains Mono',monospace;font-size:11px;word-break:break-all;">${u.id}</div></div>
     <div class="info-row"><div class="info-key">보유 포인트</div><div class="info-val" style="font-weight:700;color:var(--blue);">${Number(u.points||0).toLocaleString()} P</div></div>`;
 
   const addrs = u.shipping_addresses || [];
