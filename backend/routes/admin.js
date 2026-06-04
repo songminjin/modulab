@@ -65,6 +65,62 @@ router.get('/dashboard', authenticate, isAdmin, async (req, res) => {
   }
 });
 
+// GET /api/admin/orders — 주문 목록
+router.get('/orders', authenticate, isAdmin, async (req, res) => {
+  try {
+    const { status, pay, search, dateFrom, dateTo, page = 1, limit = 50 } = req.query;
+    const offset = (page - 1) * limit;
+    const params = [];
+    let where = 'WHERE 1=1';
+
+    if (status && status !== 'all') {
+      params.push(status);
+      where += ` AND o.status = $${params.length}`;
+    }
+    if (pay && pay !== 'all') {
+      params.push(pay);
+      where += ` AND o.payment_method = $${params.length}`;
+    }
+    if (search) {
+      params.push(`%${search}%`);
+      where += ` AND (u.name ILIKE $${params.length} OR u.email ILIKE $${params.length} OR p.name ILIKE $${params.length})`;
+    }
+    if (dateFrom) { params.push(dateFrom); where += ` AND o.created_at >= $${params.length}`; }
+    if (dateTo)   { params.push(dateTo);   where += ` AND o.created_at <= $${params.length}::date + 1`; }
+
+    const { rows } = await db.query(`
+      SELECT o.id, o.status, o.final_amount, o.payment_method, o.pg_provider,
+             o.payment_key, o.created_at, o.paid_at,
+             u.name AS buyer_name, u.email AS buyer_email,
+             STRING_AGG(p.name, ', ') AS product_names
+      FROM orders o
+      JOIN users u ON u.id = o.user_id
+      LEFT JOIN order_items oi ON oi.order_id = o.id
+      LEFT JOIN products p ON p.id = oi.product_id
+      ${where}
+      GROUP BY o.id, u.name, u.email
+      ORDER BY o.created_at DESC
+      LIMIT $${params.push(limit)} OFFSET $${params.push(offset)}
+    `, params);
+
+    res.json({ orders: rows, page: Number(page) });
+  } catch (err) {
+    console.error('[admin/orders]', err);
+    res.status(500).json({ error: '주문 조회 중 오류가 발생했습니다.' });
+  }
+});
+
+// PUT /api/admin/orders/:id/status — 주문 상태 변경
+router.put('/orders/:id/status', authenticate, isAdmin, async (req, res) => {
+  try {
+    const { status } = req.body;
+    await db.query('UPDATE orders SET status=$1 WHERE id=$2', [status, req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: '상태 변경 실패' });
+  }
+});
+
 // GET /api/admin/products
 router.get('/products', authenticate, isAdmin, async (req, res) => {
   const { rows } = await db.query('SELECT * FROM products ORDER BY created_at DESC');

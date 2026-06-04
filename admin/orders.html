@@ -400,11 +400,12 @@ input[type="checkbox"] { accent-color:var(--blue); width:15px; height:15px; curs
           <span class="filter-label">주문 상태</span>
           <div class="filter-tags" id="statusFilter">
             <div class="filter-tag active" data-val="all" onclick="setFilter('status','all',this)">전체</div>
-            <div class="filter-tag" data-val="paid"   onclick="setFilter('status','paid',this)">결제완료</div>
-            <div class="filter-tag" data-val="sent"   onclick="setFilter('status','sent',this)">발송완료</div>
-            <div class="filter-tag" data-val="done"   onclick="setFilter('status','done',this)">구매확정</div>
-            <div class="filter-tag" data-val="resend" onclick="setFilter('status','resend',this)">재발송 필요</div>
-            <div class="filter-tag" data-val="refund" onclick="setFilter('status','refund',this)">환불처리</div>
+            <div class="filter-tag" data-val="paid"          onclick="setFilter('status','paid',this)">결제완료</div>
+            <div class="filter-tag" data-val="vbank_pending" onclick="setFilter('status','vbank_pending',this)">입금대기</div>
+            <div class="filter-tag" data-val="sent"          onclick="setFilter('status','sent',this)">발송완료</div>
+            <div class="filter-tag" data-val="done"          onclick="setFilter('status','done',this)">구매확정</div>
+            <div class="filter-tag" data-val="resend"        onclick="setFilter('status','resend',this)">재발송 필요</div>
+            <div class="filter-tag" data-val="refund"        onclick="setFilter('status','refund',this)">환불처리</div>
           </div>
           <div class="search-wrap">
             <div class="search-input-wrap">
@@ -418,11 +419,10 @@ input[type="checkbox"] { accent-color:var(--blue); width:15px; height:15px; curs
           <span class="filter-label">결제수단</span>
           <div class="filter-tags" id="payFilter">
             <div class="filter-tag active" data-val="all"      onclick="setFilter('pay','all',this)">전체</div>
-            <div class="filter-tag" data-val="card"     onclick="setFilter('pay','card',this)">신용·체크카드</div>
-            <div class="filter-tag" data-val="kakao"    onclick="setFilter('pay','kakao',this)">카카오페이</div>
-            <div class="filter-tag" data-val="naver"    onclick="setFilter('pay','naver',this)">네이버페이</div>
-            <div class="filter-tag" data-val="toss"     onclick="setFilter('pay','toss',this)">토스페이</div>
-            <div class="filter-tag" data-val="transfer" onclick="setFilter('pay','transfer',this)">실시간 계좌이체</div>
+            <div class="filter-tag" data-val="CARD"            onclick="setFilter('pay','CARD',this)">신용·체크카드</div>
+            <div class="filter-tag" data-val="EASY_PAY"        onclick="setFilter('pay','EASY_PAY',this)">간편결제</div>
+            <div class="filter-tag" data-val="VIRTUAL_ACCOUNT" onclick="setFilter('pay','VIRTUAL_ACCOUNT',this)">무통장입금</div>
+            <div class="filter-tag" data-val="TRANSFER"        onclick="setFilter('pay','TRANSFER',this)">실시간 계좌이체</div>
           </div>
           <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
             <label style="font-size:12px;color:var(--text3);">기간</label>
@@ -502,25 +502,12 @@ input[type="checkbox"] { accent-color:var(--blue); width:15px; height:15px; curs
 
 <script>
 
-/* ── MOCK DATA ── */
-const MOCK_ORDERS = [
-  { id:'ORD-2026060401', buyer:'김민준', email:'minjun@email.com', product:'프로젝트 관리 자동화', price:19900, pay:'card',     status:'paid',   date:'2026-06-04 14:32', fileUrl:'https://drive.google.com/file/d/abc123' },
-  { id:'ORD-2026060402', buyer:'이서연', email:'seoyeon@email.com', product:'가계부 자동화',        price:9900,  pay:'kakao',    status:'sent',   date:'2026-06-04 13:21', fileUrl:'https://drive.google.com/file/d/def456' },
-  { id:'ORD-2026060403', buyer:'박도현', email:'dohyun@email.com',  product:'급여 관리 자동화',      price:29900, pay:'toss',     status:'done',   date:'2026-06-04 11:05', fileUrl:'https://drive.google.com/file/d/ghi789' },
-  { id:'ORD-2026060404', buyer:'최지우', email:'jiwoo@email.com',   product:'마진 계산기',           price:9900,  pay:'naver',    status:'resend', date:'2026-06-04 10:44', fileUrl:'https://drive.google.com/file/d/jkl012' },
-  { id:'ORD-2026060405', buyer:'정하은', email:'haeun@email.com',   product:'구글시트 CRM 자동화',   price:29900, pay:'transfer', status:'paid',   date:'2026-06-04 09:17', fileUrl:'https://drive.google.com/file/d/mno345' },
-  { id:'ORD-2026060406', buyer:'한지수', email:'jisu@email.com',    product:'프로젝트 관리 자동화',  price:19900, pay:'card',     status:'refund', date:'2026-06-03 22:50', fileUrl:'https://drive.google.com/file/d/pqr678' },
-  { id:'ORD-2026060407', buyer:'오승민', email:'seungmin@email.com',product:'가계부 자동화',         price:9900,  pay:'kakao',    status:'sent',   date:'2026-06-03 20:13', fileUrl:'https://drive.google.com/file/d/stu901' },
-  { id:'ORD-2026060408', buyer:'강예린', email:'yerin@email.com',   product:'구글시트 프로젝트 관리',price:19900, pay:'toss',     status:'done',   date:'2026-06-03 18:07', fileUrl:'https://drive.google.com/file/d/vwx234' },
-  { id:'ORD-2026060409', buyer:'윤지호', email:'jiho@email.com',    product:'급여 관리 자동화',      price:29900, pay:'card',     status:'paid',   date:'2026-06-03 16:55', fileUrl:'https://drive.google.com/file/d/yza567' },
-  { id:'ORD-2026060410', buyer:'임수아', email:'sua@email.com',     product:'마진 계산기',           price:9900,  pay:'naver',    status:'resend', date:'2026-06-03 15:30', fileUrl:'https://drive.google.com/file/d/bcd890' },
-  { id:'ORD-2026060411', buyer:'신민서', email:'minseo@email.com',  product:'프로젝트 관리 자동화',  price:19900, pay:'card',     status:'sent',   date:'2026-06-03 13:22', fileUrl:'https://drive.google.com/file/d/efg123' },
-  { id:'ORD-2026060412', buyer:'권태양', email:'taeyang@email.com', product:'구글시트 CRM 자동화',   price:29900, pay:'transfer', status:'paid',   date:'2026-06-03 11:04', fileUrl:'https://drive.google.com/file/d/hij456' },
-];
+const API = 'https://modulab-production.up.railway.app';
+function getToken(){ return localStorage.getItem('modulab_token') || ''; }
 
 /* ── STATE ── */
-let orders = [...MOCK_ORDERS];
-let filtered = [...orders];
+let orders = [];
+let filtered = [];
 let filters = { status:'all', pay:'all', search:'', dateFrom:'', dateTo:'' };
 let sortKey = 'date'; let sortDir = -1;
 let currentPage = 1; const PAGE_SIZE = 10;
@@ -528,13 +515,33 @@ let selectedIds = new Set();
 let pendingAction = null;
 
 /* ── INIT ── */
-function loadOrders(){
-  const saved = localStorage.getItem('modulab_orders');
-  if(saved){ try{ orders = JSON.parse(saved); } catch{} }
-  else { orders = [...MOCK_ORDERS]; }
-  updateSummary();
-  renderTable();
-  showToast('주문 내역을 불러왔습니다');
+async function loadOrders(){
+  try {
+    const token = getToken();
+    const res = await fetch(`${API}/api/admin/orders?limit=200`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      credentials: 'include'
+    });
+    if (!res.ok) throw new Error('API 오류');
+    const data = await res.json();
+    // DB 컬럼 → UI 포맷 변환
+    orders = (data.orders || []).map(o => ({
+      id:      o.id,
+      buyer:   o.buyer_name,
+      email:   o.buyer_email,
+      product: o.product_names,
+      price:   o.final_amount,
+      pay:     o.payment_method || '',
+      status:  o.status,
+      date:    new Date(o.created_at).toLocaleString('ko-KR'),
+      fileUrl: ''
+    }));
+    updateSummary();
+    renderTable();
+    showToast(`주문 ${orders.length}건을 불러왔습니다`);
+  } catch(e) {
+    showToast('주문 데이터 로딩 실패: ' + e.message);
+  }
 }
 
 function updateSummary(){
@@ -603,18 +610,25 @@ function renderTable(){
   empty.style.display = 'none';
 
   const statusInfo = {
-    paid:   { label:'결제완료', cls:'badge-paid'   },
-    sent:   { label:'발송완료', cls:'badge-sent'   },
-    done:   { label:'구매확정', cls:'badge-done'   },
-    resend: { label:'재발송필요',cls:'badge-resend' },
-    refund: { label:'환불처리', cls:'badge-refund' },
+    paid:          { label:'결제완료',  cls:'badge-paid'   },
+    vbank_pending: { label:'입금대기',  cls:'badge-resend' },
+    sent:          { label:'발송완료',  cls:'badge-sent'   },
+    done:          { label:'구매확정',  cls:'badge-done'   },
+    resend:        { label:'재발송필요',cls:'badge-resend' },
+    refund:        { label:'환불처리',  cls:'badge-refund' },
+    pending:       { label:'주문생성',  cls:'badge-refund' },
   };
   const payInfo = {
-    card:     { label:'카드',        cls:'pay-card'     },
-    kakao:    { label:'카카오페이',  cls:'pay-kakao'    },
-    naver:    { label:'네이버페이',  cls:'pay-naver'    },
-    toss:     { label:'토스페이',    cls:'pay-toss'     },
-    transfer: { label:'계좌이체',    cls:'pay-transfer' },
+    CARD:            { label:'카드',        cls:'pay-card'     },
+    EASY_PAY:        { label:'간편결제',    cls:'pay-toss'     },
+    VIRTUAL_ACCOUNT: { label:'무통장입금',  cls:'pay-transfer' },
+    TRANSFER:        { label:'계좌이체',    cls:'pay-transfer' },
+    PAYPAL:          { label:'PayPal',      cls:'pay-card'     },
+    card:            { label:'카드',        cls:'pay-card'     },
+    kakao:           { label:'카카오페이',  cls:'pay-kakao'    },
+    naver:           { label:'네이버페이',  cls:'pay-naver'    },
+    toss:            { label:'토스페이',    cls:'pay-toss'     },
+    transfer:        { label:'계좌이체',    cls:'pay-transfer' },
   };
 
   tbody.innerHTML = page.map(o=>{
@@ -748,11 +762,19 @@ function closeDrawer(){
 }
 
 /* ── STATUS UPDATE ── */
-function updateStatus(id, newStatus){
+async function updateStatus(id, newStatus){
   const o = orders.find(o=>o.id===id);
   if(!o) return;
+  try {
+    const token = getToken();
+    await fetch(`${API}/api/admin/orders/${id}/status`, {
+      method: 'PUT',
+      headers: { 'Content-Type':'application/json', ...(token ? { Authorization:`Bearer ${token}` } : {}) },
+      credentials: 'include',
+      body: JSON.stringify({ status: newStatus })
+    });
+  } catch(e) { console.warn('상태 변경 API 실패', e); }
   o.status = newStatus;
-  saveOrders();
   updateSummary();
   renderTable();
   showToast('주문 상태가 업데이트되었습니다');
@@ -858,7 +880,7 @@ function exportCSV(){
 }
 
 /* ── SAVE / PERSIST ── */
-function saveOrders(){ localStorage.setItem('modulab_orders', JSON.stringify(orders)); }
+function saveOrders(){ /* API 저장으로 대체됨 */ }
 
 /* ── TOAST ── */
 function showToast(msg){
