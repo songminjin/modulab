@@ -597,14 +597,29 @@ async function applyCoupon() {
   }
 }
 
+// ── slug → UUID 매핑 (products.json 기준) ──
+async function resolveProductIds(slugIds) {
+  const isUuid = id => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+  if (slugIds.every(isUuid)) return slugIds;
+  try {
+    const resp = await fetch('products.json');
+    const all = await resp.json();
+    const map = {};
+    all.forEach(p => { if (p.uuid) map[p.id] = p.uuid; });
+    return slugIds.map(id => (isUuid(id) ? id : map[id]) || id);
+  } catch { return slugIds; }
+}
+
 // ── 주문 생성 ──
 async function createOrder() {
+  const token = getCookieToken();
+  const productIds = await resolveProductIds(items.map(i => i.id));
   const res = await fetch(`${API}/api/orders`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
     credentials: 'include',
     body: JSON.stringify({
-      product_ids: items.map(i => i.id),
+      product_ids: productIds,
       coupon_code: couponCode || undefined
     })
   });
@@ -663,9 +678,10 @@ async function startPayment() {
     }
 
     // 백엔드 검증
+    const token = getCookieToken();
     const verifyRes = await fetch(`${API}/api/payments/portone/complete`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
       credentials: 'include',
       body: JSON.stringify({ paymentId, orderId })
     });
@@ -712,9 +728,10 @@ function renderPayPalButtons() {
       showSpinner(true);
       try {
         orderId = await createOrder();
+        const tkn = getCookieToken();
         const res = await fetch(`${API}/api/payments/paypal/create-order`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', ...(tkn ? { Authorization: `Bearer ${tkn}` } : {}) },
           credentials: 'include',
           body: JSON.stringify({ orderId })
         });
@@ -731,9 +748,10 @@ function renderPayPalButtons() {
     onApprove: async (data) => {
       showSpinner(true);
       try {
+        const captureToken = getCookieToken();
         const res = await fetch(`${API}/api/payments/paypal/capture/${data.orderID}`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', ...(captureToken ? { Authorization: `Bearer ${captureToken}` } : {}) },
           credentials: 'include',
           body: JSON.stringify({ orderId })
         });
