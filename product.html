@@ -669,20 +669,6 @@ function renderThumbs() {
     setActiveThumb(mainThumb);
   };
   strip.appendChild(mainThumb);
-
-  // 상세 이미지: detailImageUrls(GitHub URL) 우선, 없으면 detailImages(base64)
-  const imgs = product.detailImageUrls.length
-    ? product.detailImageUrls.map(url => ({ src: url }))
-    : product.detailImages.map(img => ({ src: img.dataUrl || img }));
-
-  imgs.forEach((img) => {
-    if (!img.src) return;
-    const t = document.createElement('div');
-    t.className = 'prod-thumb';
-    t.innerHTML = `<img src="${img.src}" alt="">`;
-    t.onclick = () => { showDetailImg(img.src); setActiveThumb(t); };
-    strip.appendChild(t);
-  });
 }
 
 function setActiveThumb(el) {
@@ -772,7 +758,26 @@ function renderDetailTab() {
       ).join('');
     dt.innerHTML = html;
   } else {
-    dt.innerHTML = '<p style="color:var(--text3);">상세 정보가 아직 등록되지 않았습니다.</p>';
+    dt.innerHTML = '';
+  }
+
+  // 상세 이미지: 상세정보 탭 하단에 표시
+  const imgs = product.detailImageUrls && product.detailImageUrls.length
+    ? product.detailImageUrls
+    : (product.detailImages || []).map(img => img.dataUrl || img).filter(Boolean);
+
+  if (imgs.length) {
+    const imgSection = document.createElement('div');
+    imgSection.style.cssText = 'margin-top:28px;display:flex;flex-direction:column;gap:12px;';
+    imgs.forEach(src => {
+      if (!src || !src.startsWith('http') && !src.startsWith('data:')) return;
+      const img = document.createElement('img');
+      img.src = src;
+      img.alt = product.name;
+      img.style.cssText = 'width:100%;border-radius:10px;display:block;';
+      imgSection.appendChild(img);
+    });
+    dt.appendChild(imgSection);
   }
 }
 
