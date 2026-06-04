@@ -200,6 +200,17 @@ CREATE TABLE IF NOT EXISTS site_event_products (
 -- Migration: coupon event conditions
 ALTER TABLE coupon_events ADD COLUMN IF NOT EXISTS min_order_amount INTEGER DEFAULT 0;
 ALTER TABLE coupon_events ADD COLUMN IF NOT EXISTS applicable_categories JSONB DEFAULT '[]';
+ALTER TABLE coupon_events ADD COLUMN IF NOT EXISTS applicable_grades JSONB DEFAULT '[]';
+
+-- Member grade config table (single-row config)
+CREATE TABLE IF NOT EXISTS member_grade_config (
+  id INTEGER PRIMARY KEY DEFAULT 1,
+  sprout_max INTEGER DEFAULT 50000,
+  regular_max INTEGER DEFAULT 300000,
+  vip_max INTEGER DEFAULT 1000000,
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+INSERT INTO member_grade_config (id) VALUES (1) ON CONFLICT (id) DO NOTHING;
 
 -- Indexes for events
 CREATE INDEX IF NOT EXISTS idx_coupon_events_dates ON coupon_events(start_date, end_date);

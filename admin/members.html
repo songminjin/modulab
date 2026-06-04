@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>회원 등급 관리 — ModuLab 관리자</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="admin-auth.js"></script>
+<style>
+:root {
+  --blue:#2563EB;--blue-dark:#1D4ED8;--blue-light:#EFF6FF;--blue-mid:#BFDBFE;
+  --navy:#0F172A;--navy2:#1E293B;--navy3:#334155;
+  --green:#16A34A;--green-light:#F0FDF4;
+  --red:#DC2626;--red-light:#FEF2F2;
+  --yellow:#F59E0B;--yellow-light:#FFFBEB;
+  --purple:#7C3AED;--purple-light:#F5F3FF;--purple-mid:#DDD6FE;
+  --orange:#EA580C;--orange-light:#FFF7ED;
+  --slate:#64748B;--slate-light:#F1F5F9;
+  --border:#E2E8F0;--white:#FFFFFF;
+  --text:#0F172A;--text2:#475569;--text3:#94A3B8;
+  --sidebar-w:220px;--header-h:64px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Noto Sans KR',sans-serif;color:var(--text);background:#F8FAFC;line-height:1.6;}
+a{text-decoration:none;color:inherit;}
+.mobile-guard{display:none;position:fixed;inset:0;z-index:9999;background:var(--navy);flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:32px;}
+@media(max-width:768px){.mobile-guard{display:flex;}}
+.admin-layout{display:flex;min-height:100vh;}
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--navy);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100;}
+.sidebar-logo{padding:20px 20px 16px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px;}
+.logo-mark{width:32px;height:32px;background:var(--blue);border-radius:7px;position:relative;overflow:hidden;flex-shrink:0;}
+.logo-mark::before{content:'';position:absolute;top:4px;left:4px;width:13px;height:13px;background:rgba(255,255,255,.3);border-radius:2px;}
+.logo-mark::after{content:'';position:absolute;bottom:4px;right:4px;width:13px;height:13px;background:#16A34A;border-radius:2px;}
+.sidebar-logo-text{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.04em;color:white;}
+.sidebar-logo-text span{color:var(--blue);}
+.sidebar-admin-badge{font-size:9px;font-weight:700;letter-spacing:.08em;color:#64748B;padding:2px 6px;border:1px solid #334155;border-radius:3px;display:block;margin-top:2px;}
+.sidebar-section{padding:20px 12px 8px;}
+.sidebar-section-label{font-size:10px;font-weight:700;letter-spacing:.1em;color:#475569;text-transform:uppercase;padding:0 8px;margin-bottom:6px;}
+.sidebar-nav{list-style:none;}
+.sidebar-nav li a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;font-size:13px;font-weight:500;color:#94A3B8;transition:all .15s;cursor:pointer;}
+.sidebar-nav li a:hover{background:rgba(255,255,255,.06);color:white;}
+.sidebar-nav li a.active{background:rgba(37,99,235,.2);color:#93C5FD;}
+.nav-icon{font-size:15px;width:18px;text-align:center;flex-shrink:0;}
+.sidebar-sub{margin-left:28px;margin-top:2px;}
+.sidebar-sub li a{font-size:12px;padding:6px 10px;color:#64748B;border-radius:6px;}
+.sidebar-sub li a:hover{color:#94A3B8;background:rgba(255,255,255,.04);}
+.sidebar-bottom{margin-top:auto;padding:16px 12px;border-top:1px solid rgba(255,255,255,.06);}
+.sidebar-bottom a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;font-size:13px;color:#64748B;transition:all .15s;}
+.sidebar-bottom a:hover{background:rgba(255,255,255,.06);color:#94A3B8;}
+.main-wrap{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh;}
+.admin-header{position:sticky;top:0;z-index:50;height:var(--header-h);background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 32px;gap:16px;}
+.header-breadcrumb{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text3);}
+.header-breadcrumb a{color:var(--text3);transition:color .15s;}.header-breadcrumb a:hover{color:var(--blue);}
+.header-breadcrumb .sep{color:var(--border);}.header-breadcrumb .current{color:var(--text);font-weight:600;}
+.header-right{display:flex;align-items:center;gap:10px;}
+.header-logout-btn{padding:7px 16px;border-radius:8px;border:1px solid var(--border);background:none;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;font-family:inherit;transition:all .15s;}
+.header-logout-btn:hover{background:var(--red-light);border-color:#FCA5A5;color:var(--red);}
+.header-user{display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:8px;background:var(--slate-light);border:1px solid var(--border);}
+.header-user-avatar{width:28px;height:28px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;color:white;font-weight:700;flex-shrink:0;}
+.header-user-name{font-size:13px;font-weight:500;color:var(--text2);}
+.page-content{padding:32px;flex:1;}
+.page-title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;gap:16px;flex-wrap:wrap;}
+.page-title{font-size:22px;font-weight:700;color:var(--text);}
+.page-title-sub{font-size:13px;color:var(--text3);margin-top:2px;}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;border:none;transition:all .15s;white-space:nowrap;}
+.btn-primary{background:var(--blue);color:white;}.btn-primary:hover{background:var(--blue-dark);}
+.btn-outline{background:var(--white);color:var(--text2);border:1px solid var(--border);}.btn-outline:hover{background:var(--slate-light);}
+.btn-ghost{background:none;color:var(--text3);}.btn-ghost:hover{color:var(--text2);background:var(--slate-light);}
+.btn-sm{padding:7px 14px;font-size:13px;}
+.btn-xs{padding:4px 10px;font-size:12px;}
+.btn-danger{background:var(--red-light);color:var(--red);border:1px solid #FCA5A5;}.btn-danger:hover{background:var(--red);color:white;}
+.card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px;}
+.card-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.card-title-icon{width:28px;height:28px;background:var(--blue-light);border:1px solid var(--blue-mid);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.field{margin-bottom:16px;}.field:last-child{margin-bottom:0;}
+.field-label{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--text);margin-bottom:7px;}
+.field-hint{font-size:11px;color:var(--text3);margin-top:5px;line-height:1.5;}
+.field-input{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;color:var(--text);background:var(--white);outline:none;transition:border-color .15s,box-shadow .15s;}
+.field-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1);}
+.field-input::placeholder{color:var(--text3);}
+.input-with-unit{position:relative;display:flex;align-items:center;}
+.input-with-unit .field-input{padding-right:48px;}
+.input-unit{position:absolute;right:12px;font-size:13px;font-weight:500;color:var(--text3);pointer-events:none;}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;}
+.grade-new{background:#F1F5F9;color:#475569;}
+.grade-sprout{background:#DCFCE7;color:#15803D;}
+.grade-regular{background:#DBEAFE;color:#1D4ED8;}
+.grade-vip{background:#EDE9FE;color:#6D28D9;}
+.grade-vvip{background:#FFEDD5;color:#C2410C;}
+table{width:100%;border-collapse:collapse;}
+thead tr{background:var(--slate-light);}
+thead th{padding:10px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.05em;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap;}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:#FAFBFF;}
+td{padding:12px 16px;font-size:13px;vertical-align:middle;}
+.table-wrap{background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px;}
+.table-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);gap:12px;flex-wrap:wrap;}
+.table-count{font-size:13px;color:var(--text3);}
+.table-count strong{color:var(--text);font-weight:700;}
+.empty-state{text-align:center;padding:48px 20px;}
+.empty-icon{font-size:36px;margin-bottom:10px;}
+.empty-title{font-size:14px;font-weight:600;color:var(--text2);margin-bottom:4px;}
+.empty-desc{font-size:13px;color:var(--text3);}
+.stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:24px;}
+.stat-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px 20px;}
+.stat-label{font-size:12px;color:var(--text3);margin-bottom:4px;}
+.stat-value{font-size:22px;font-weight:700;color:var(--text);font-family:'JetBrains Mono',monospace;}
+.stat-sub{font-size:11px;margin-top:3px;color:var(--text3);}
+
+/* Grade tier config */
+.grade-tier-list{display:flex;flex-direction:column;gap:8px;}
+.grade-tier-row{display:grid;grid-template-columns:120px 1fr;gap:16px;align-items:center;padding:12px 16px;border-radius:10px;border:1px solid var(--border);background:var(--white);}
+.grade-tier-badge{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;}
+.grade-tier-desc{font-size:13px;color:var(--text2);}
+.grade-tier-desc span{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--text);}
+.config-edit-form{display:none;}
+.config-edit-form.open{display:block;}
+.config-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px;}
+.config-row-label{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;display:flex;align-items:center;gap:6px;}
+
+/* Grade filter bar */
+.grade-filter-bar{display:flex;gap:6px;flex-wrap:wrap;}
+.grade-filter-btn{padding:5px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--white);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit;color:var(--text2);}
+.grade-filter-btn:hover{border-color:var(--blue);}
+.grade-filter-btn.active-all{border-color:var(--navy);background:var(--navy);color:white;}
+.grade-filter-btn.active-new{border-color:#64748B;background:#F1F5F9;color:#475569;}
+.grade-filter-btn.active-sprout{border-color:var(--green);background:var(--green-light);color:var(--green);}
+.grade-filter-btn.active-regular{border-color:var(--blue);background:var(--blue-light);color:var(--blue);}
+.grade-filter-btn.active-vip{border-color:var(--purple);background:var(--purple-light);color:var(--purple);}
+.grade-filter-btn.active-vvip{border-color:var(--orange);background:var(--orange-light);color:var(--orange);}
+
+/* Search */
+.search-input{padding:8px 14px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none;width:220px;transition:border-color .15s;}
+.search-input:focus{border-color:var(--blue);}
+
+#toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--navy);color:white;padding:13px 24px;border-radius:10px;font-size:14px;font-weight:500;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);transition:transform .3s ease,opacity .3s ease;opacity:0;z-index:9000;}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+</style>
+</head>
+<body>
+
+<div class="mobile-guard">
+  <div style="font-size:48px;">🖥️</div>
+  <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:white;">PC에서 접속해주세요</div>
+  <div style="font-size:14px;color:#94A3B8;">관리자 페이지는 PC 환경에서만 이용할 수 있습니다.</div>
+</div>
+
+<div class="admin-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark"></div>
+      <div>
+        <div class="sidebar-logo-text">Modu<span>Lab</span></div>
+        <span class="sidebar-admin-badge">ADMIN SCM</span>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">메인 메뉴</div>
+      <ul class="sidebar-nav">
+        <li><a href="dashboard.html"><span class="nav-icon">📊</span>대시보드</a></li>
+        <li>
+          <a href="products.html"><span class="nav-icon">📦</span>상품 관리</a>
+          <ul class="sidebar-sub sidebar-nav">
+            <li><a href="products.html">상품 목록</a></li>
+            <li><a href="product-add.html">상품 등록</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="events.html"><span class="nav-icon">🎪</span>이벤트 관리</a>
+          <ul class="sidebar-sub sidebar-nav">
+            <li><a href="events.html?tab=coupon">쿠폰 이벤트</a></li>
+            <li><a href="events.html?tab=site">사이트 이벤트</a></li>
+          </ul>
+        </li>
+        <li><a href="orders.html"><span class="nav-icon">🛒</span>주문 관리</a></li>
+        <li><a href="returns.html"><span class="nav-icon">🔄</span>반품 · 교환</a></li>
+        <li><a href="cs.html"><span class="nav-icon">💬</span>CS 관리</a></li>
+        <li><a href="members.html" class="active"><span class="nav-icon">👥</span>회원 등급 관리</a></li>
+        <li><a href="settlement.html"><span class="nav-icon">💰</span>정산 현황판</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">바로가기</div>
+      <ul class="sidebar-nav">
+        <li><a href="../index.html" target="_blank"><span class="nav-icon">🌐</span>쇼핑몰 보기</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-bottom">
+      <a href="index.html" onclick="adminLogout(event)"><span class="nav-icon">🚪</span>로그아웃</a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-wrap">
+    <header class="admin-header">
+      <div class="header-breadcrumb">
+        <a href="dashboard.html">홈</a>
+        <span class="sep">›</span>
+        <span class="current">회원 등급 관리</span>
+      </div>
+      <div class="header-right">
+        <div class="header-user">
+          <div class="header-user-avatar">M</div>
+          <div class="header-user-name">관리자</div>
+        </div>
+        <button class="header-logout-btn" onclick="adminLogout()">로그아웃</button>
+      </div>
+    </header>
+
+    <div class="page-content">
+      <div class="page-title-row">
+        <div>
+          <div class="page-title">회원 등급 관리</div>
+          <div class="page-title-sub">회원 등급 기준을 설정하고 현황을 확인합니다</div>
+        </div>
+        <button class="btn btn-primary" onclick="refreshData()">🔄 새로고침</button>
+      </div>
+
+      <!-- STATS -->
+      <div class="stats-row" id="statsRow">
+        <div class="stat-card">
+          <div class="stat-label">전체 회원</div>
+          <div class="stat-value" id="statTotal">0</div>
+          <div class="stat-sub">활성 회원 기준</div>
+        </div>
+        <div class="stat-card" style="border-color:#E2E8F0;">
+          <div class="stat-label">🆕 신규회원</div>
+          <div class="stat-value" style="color:#64748B;" id="statNew">0</div>
+          <div class="stat-sub">구매 이력 없음</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">🌱 새싹 / ⭐ 일반</div>
+          <div class="stat-value" style="color:var(--blue);" id="statMid">0</div>
+          <div class="stat-sub">일반 등급 이하</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">💜 VIP</div>
+          <div class="stat-value" style="color:var(--purple);" id="statVip">0</div>
+          <div class="stat-sub">이번달 기준</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">🔥 VVIP</div>
+          <div class="stat-value" style="color:var(--orange);" id="statVvip">0</div>
+          <div class="stat-sub">이번달 기준</div>
+        </div>
+      </div>
+
+      <!-- GRADE CONFIG CARD -->
+      <div class="card">
+        <div class="card-title">
+          <div class="card-title-icon">🏆</div>
+          등급 기준 설정
+          <button class="btn btn-outline btn-sm" style="margin-left:auto;" onclick="toggleEditMode()" id="editToggleBtn">✏️ 기준 수정</button>
+        </div>
+
+        <!-- View mode -->
+        <div id="configViewMode">
+          <div class="grade-tier-list" id="gradeTierList"></div>
+          <div style="font-size:12px;color:var(--text3);margin-top:14px;">
+            * 등급 기준은 이번달(1일~말일) 구매 금액을 기준으로 매일 자동 산정됩니다.
+          </div>
+        </div>
+
+        <!-- Edit mode -->
+        <div class="config-edit-form" id="configEditMode">
+          <div style="background:var(--yellow-light);border:1px solid #FDE68A;border-radius:8px;padding:12px 16px;margin-bottom:18px;font-size:13px;color:#92400E;">
+            ⚠️ 기준을 변경하면 모든 회원의 등급이 즉시 재산정됩니다.
+          </div>
+          <div class="config-grid">
+            <div>
+              <div class="config-row-label"><span class="badge grade-sprout">새싹</span> 상한 금액</div>
+              <div class="input-with-unit">
+                <input type="number" class="field-input" id="inputSproutMax" placeholder="50000" min="1000" step="1000">
+                <span class="input-unit">원 이하</span>
+              </div>
+              <div class="field-hint">월 구매액이 이 금액 이하면 새싹</div>
+            </div>
+            <div>
+              <div class="config-row-label"><span class="badge grade-regular">일반</span> 상한 금액</div>
+              <div class="input-with-unit">
+                <input type="number" class="field-input" id="inputRegularMax" placeholder="300000" min="1000" step="1000">
+                <span class="input-unit">원 이하</span>
+              </div>
+              <div class="field-hint">새싹 초과 ~ 이 금액 이하면 일반</div>
+            </div>
+            <div>
+              <div class="config-row-label"><span class="badge grade-vip">VIP</span> 상한 금액</div>
+              <div class="input-with-unit">
+                <input type="number" class="field-input" id="inputVipMax" placeholder="1000000" min="1000" step="1000">
+                <span class="input-unit">원 이하</span>
+              </div>
+              <div class="field-hint">일반 초과 ~ 이 금액 이하면 VIP</div>
+            </div>
+          </div>
+          <div style="font-size:12px;color:var(--text3);margin-bottom:16px;">
+            VIP 상한 초과 금액 구매 → <span class="badge grade-vvip">VVIP</span>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-primary" onclick="saveGradeConfig()">💾 저장</button>
+            <button class="btn btn-outline" onclick="cancelEditMode()">취소</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MEMBER TABLE -->
+      <div class="table-wrap">
+        <div class="table-header">
+          <div class="table-count">전체 <strong id="memberCount">0</strong>명</div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <div class="grade-filter-bar" id="gradeFilterBar">
+              <button class="grade-filter-btn active-all" data-filter="all" onclick="setGradeFilter('all')">전체</button>
+              <button class="grade-filter-btn" data-filter="new" onclick="setGradeFilter('new')">🆕 신규회원</button>
+              <button class="grade-filter-btn" data-filter="sprout" onclick="setGradeFilter('sprout')">🌱 새싹</button>
+              <button class="grade-filter-btn" data-filter="regular" onclick="setGradeFilter('regular')">⭐ 일반</button>
+              <button class="grade-filter-btn" data-filter="vip" onclick="setGradeFilter('vip')">💜 VIP</button>
+              <button class="grade-filter-btn" data-filter="vvip" onclick="setGradeFilter('vvip')">🔥 VVIP</button>
+            </div>
+            <input type="text" class="search-input" id="memberSearch" placeholder="이름 또는 이메일 검색" oninput="renderMemberTable()">
+          </div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>회원</th>
+                <th>등급</th>
+                <th>이번달 구매액</th>
+                <th>총 주문수</th>
+                <th>마지막 구매일</th>
+                <th>가입일</th>
+              </tr>
+            </thead>
+            <tbody id="memberTbody"></tbody>
+          </table>
+        </div>
+        <div id="memberEmpty" class="empty-state" style="display:none;">
+          <div class="empty-icon">👥</div>
+          <div class="empty-title">회원이 없습니다</div>
+          <div class="empty-desc">조건에 맞는 회원이 없습니다.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div id="toast"><span id="toastMsg"></span></div>
+
+<script>
+const API_URL = 'https://modulab-production.up.railway.app';
+
+const GRADE_INFO = {
+  new:     { label:'신규회원', icon:'🆕', cls:'grade-new',     filterCls:'active-new'     },
+  sprout:  { label:'새싹',     icon:'🌱', cls:'grade-sprout',  filterCls:'active-sprout'  },
+  regular: { label:'일반',     icon:'⭐', cls:'grade-regular', filterCls:'active-regular' },
+  vip:     { label:'VIP',      icon:'💜', cls:'grade-vip',     filterCls:'active-vip'     },
+  vvip:    { label:'VVIP',     icon:'🔥', cls:'grade-vvip',    filterCls:'active-vvip'    },
+};
+
+const DEMO_GRADE_CONFIG = { sprout_max: 50000, regular_max: 300000, vip_max: 1000000 };
+const DEMO_MEMBERS = [
+  { id:'u-001', name:'김민준', email:'minjun@example.com', monthly_amount:0,       total_orders:0,  last_purchased_at:null,          created_at:'2026-05-15' },
+  { id:'u-002', name:'이수연', email:'suyeon@example.com', monthly_amount:25000,   total_orders:3,  last_purchased_at:'2026-06-01',  created_at:'2026-03-10' },
+  { id:'u-003', name:'박지훈', email:'jihoon@example.com', monthly_amount:89900,   total_orders:12, last_purchased_at:'2026-06-03',  created_at:'2026-01-20' },
+  { id:'u-004', name:'최유나', email:'yuna@example.com',   monthly_amount:450000,  total_orders:25, last_purchased_at:'2026-06-04',  created_at:'2025-12-01' },
+  { id:'u-005', name:'정하늘', email:'haneul@example.com', monthly_amount:1500000, total_orders:45, last_purchased_at:'2026-06-04',  created_at:'2025-10-15' },
+  { id:'u-006', name:'강도현', email:'dohyun@example.com', monthly_amount:0,       total_orders:0,  last_purchased_at:null,          created_at:'2026-06-02' },
+  { id:'u-007', name:'윤서아', email:'seoa@example.com',   monthly_amount:19900,   total_orders:1,  last_purchased_at:'2026-05-28',  created_at:'2026-05-25' },
+  { id:'u-008', name:'임준호', email:'junho@example.com',  monthly_amount:320000,  total_orders:18, last_purchased_at:'2026-06-03',  created_at:'2026-02-14' },
+];
+
+let gradeConfig = { ...DEMO_GRADE_CONFIG };
+let members = [];
+let currentFilter = 'all';
+
+function computeGrade(m, cfg) {
+  if (m.total_orders === 0) return 'new';
+  if (m.monthly_amount <= cfg.sprout_max) return 'sprout';
+  if (m.monthly_amount <= cfg.regular_max) return 'regular';
+  if (m.monthly_amount <= cfg.vip_max) return 'vip';
+  return 'vvip';
+}
+
+async function loadData() {
+  try {
+    const [cfgRes, memRes] = await Promise.all([
+      fetch(`${API_URL}/api/admin/member-grade-config`, { credentials: 'include' }),
+      fetch(`${API_URL}/api/admin/members`, { credentials: 'include' }),
+    ]);
+    if (cfgRes.ok) gradeConfig = await cfgRes.json();
+    else gradeConfig = { ...DEMO_GRADE_CONFIG };
+
+    if (memRes.ok) {
+      const data = await memRes.json();
+      members = (data.members || data).map(m => ({ ...m, grade: computeGrade(m, gradeConfig) }));
+    } else {
+      members = DEMO_MEMBERS.map(m => ({ ...m, grade: computeGrade(m, gradeConfig) }));
+    }
+  } catch (e) {
+    gradeConfig = { ...DEMO_GRADE_CONFIG };
+    members = DEMO_MEMBERS.map(m => ({ ...m, grade: computeGrade(m, gradeConfig) }));
+  }
+}
+
+async function refreshData() {
+  await loadData();
+  renderAll();
+  showToast('회원 데이터를 새로고침했습니다.');
+}
+
+function renderAll() {
+  renderGradeConfig();
+  renderStats();
+  renderMemberTable();
+}
+
+function renderGradeConfig() {
+  const cfg = gradeConfig;
+  const fmt = n => Number(n).toLocaleString();
+  const list = document.getElementById('gradeTierList');
+  list.innerHTML = `
+    <div class="grade-tier-row" style="background:#FFF7ED;border-color:#FDBA74;">
+      <div class="grade-tier-badge"><span class="badge grade-vvip">🔥 VVIP</span></div>
+      <div class="grade-tier-desc">월 구매액 <span>₩${fmt(cfg.vip_max)}</span> 초과</div>
+    </div>
+    <div class="grade-tier-row" style="background:var(--purple-light);border-color:var(--purple-mid);">
+      <div class="grade-tier-badge"><span class="badge grade-vip">💜 VIP</span></div>
+      <div class="grade-tier-desc">월 구매액 <span>₩${fmt(cfg.regular_max)}</span> 초과 ~ <span>₩${fmt(cfg.vip_max)}</span> 이하</div>
+    </div>
+    <div class="grade-tier-row" style="background:var(--blue-light);border-color:var(--blue-mid);">
+      <div class="grade-tier-badge"><span class="badge grade-regular">⭐ 일반</span></div>
+      <div class="grade-tier-desc">월 구매액 <span>₩${fmt(cfg.sprout_max)}</span> 초과 ~ <span>₩${fmt(cfg.regular_max)}</span> 이하</div>
+    </div>
+    <div class="grade-tier-row" style="background:var(--green-light);border-color:#BBF7D0;">
+      <div class="grade-tier-badge"><span class="badge grade-sprout">🌱 새싹</span></div>
+      <div class="grade-tier-desc">월 구매액 <span>₩${fmt(cfg.sprout_max)}</span> 이하 (구매 이력 있음)</div>
+    </div>
+    <div class="grade-tier-row">
+      <div class="grade-tier-badge"><span class="badge grade-new">🆕 신규회원</span></div>
+      <div class="grade-tier-desc">구매 이력 없음 (가입 후 첫 구매 전)</div>
+    </div>
+  `;
+}
+
+function renderStats() {
+  const counts = { new:0, sprout:0, regular:0, vip:0, vvip:0 };
+  members.forEach(m => { counts[m.grade] = (counts[m.grade]||0) + 1; });
+  document.getElementById('statTotal').textContent = members.length;
+  document.getElementById('statNew').textContent = counts.new;
+  document.getElementById('statMid').textContent = counts.sprout + counts.regular;
+  document.getElementById('statVip').textContent = counts.vip;
+  document.getElementById('statVvip').textContent = counts.vvip;
+}
+
+function setGradeFilter(grade) {
+  currentFilter = grade;
+  document.querySelectorAll('.grade-filter-btn').forEach(btn => {
+    btn.className = 'grade-filter-btn';
+    if (btn.dataset.filter === grade) {
+      btn.classList.add(grade === 'all' ? 'active-all' : GRADE_INFO[grade].filterCls);
+    }
+  });
+  renderMemberTable();
+}
+
+function renderMemberTable() {
+  const kw = document.getElementById('memberSearch').value.trim().toLowerCase();
+  const filtered = members.filter(m => {
+    if (currentFilter !== 'all' && m.grade !== currentFilter) return false;
+    if (kw && !m.name.toLowerCase().includes(kw) && !m.email.toLowerCase().includes(kw)) return false;
+    return true;
+  });
+
+  document.getElementById('memberCount').textContent = filtered.length;
+  const tbody = document.getElementById('memberTbody');
+  const empty = document.getElementById('memberEmpty');
+
+  if (!filtered.length) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  const fmt = n => n ? '₩' + Number(n).toLocaleString() : '-';
+  const fmtDate = d => d ? d.slice(0, 10) : '-';
+
+  tbody.innerHTML = filtered.map(m => {
+    const g = GRADE_INFO[m.grade];
+    return `<tr>
+      <td>
+        <div style="font-weight:600;color:var(--text);">${m.name}</div>
+        <div style="font-size:11px;color:var(--text3);">${m.email}</div>
+      </td>
+      <td><span class="badge ${g.cls}">${g.icon} ${g.label}</span></td>
+      <td style="font-family:'JetBrains Mono',monospace;font-weight:600;">${m.monthly_amount > 0 ? fmt(m.monthly_amount) : '<span style="color:var(--text3);font-weight:400;">없음</span>'}</td>
+      <td style="font-family:'JetBrains Mono',monospace;">${m.total_orders}건</td>
+      <td style="font-size:12px;color:var(--text2);">${fmtDate(m.last_purchased_at)}</td>
+      <td style="font-size:12px;color:var(--text2);">${fmtDate(m.created_at)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function toggleEditMode() {
+  const edit = document.getElementById('configEditMode');
+  const view = document.getElementById('configViewMode');
+  const btn = document.getElementById('editToggleBtn');
+  const isOpen = edit.classList.contains('open');
+  if (isOpen) {
+    cancelEditMode();
+  } else {
+    document.getElementById('inputSproutMax').value = gradeConfig.sprout_max;
+    document.getElementById('inputRegularMax').value = gradeConfig.regular_max;
+    document.getElementById('inputVipMax').value = gradeConfig.vip_max;
+    edit.classList.add('open');
+    view.style.display = 'none';
+    btn.textContent = '✕ 취소';
+  }
+}
+
+function cancelEditMode() {
+  document.getElementById('configEditMode').classList.remove('open');
+  document.getElementById('configViewMode').style.display = '';
+  document.getElementById('editToggleBtn').textContent = '✏️ 기준 수정';
+}
+
+async function saveGradeConfig() {
+  const sprout_max = parseInt(document.getElementById('inputSproutMax').value);
+  const regular_max = parseInt(document.getElementById('inputRegularMax').value);
+  const vip_max = parseInt(document.getElementById('inputVipMax').value);
+  if (!sprout_max || !regular_max || !vip_max) return showToast('모든 기준 금액을 입력해주세요.', 'error');
+  if (sprout_max >= regular_max) return showToast('일반 상한은 새싹 상한보다 커야 합니다.', 'error');
+  if (regular_max >= vip_max) return showToast('VIP 상한은 일반 상한보다 커야 합니다.', 'error');
+
+  try {
+    const res = await fetch(`${API_URL}/api/admin/member-grade-config`, {
+      method: 'PUT',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sprout_max, regular_max, vip_max }),
+    });
+    if (!res.ok) { const d = await res.json(); throw new Error(d.error || '저장 오류'); }
+    gradeConfig = await res.json();
+  } catch(e) {
+    gradeConfig = { sprout_max, regular_max, vip_max };
+  }
+
+  members = members.map(m => ({ ...m, grade: computeGrade(m, gradeConfig) }));
+  cancelEditMode();
+  renderAll();
+  showToast('등급 기준이 저장되었습니다.');
+}
+
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.style.background = type === 'error' ? 'var(--red)' : 'var(--navy)';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+(async function init() {
+  await loadData();
+  renderAll();
+})();
+</script>
+</body>
+</html>

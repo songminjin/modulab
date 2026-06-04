@@ -243,6 +243,65 @@ router.delete('/events/sites/:id', authenticate, isAdmin, async (req, res) => {
   res.json({ message: '삭제됐습니다.' });
 });
 
+// GET /api/admin/member-grade-config
+router.get('/member-grade-config', authenticate, isAdmin, async (req, res) => {
+  const { rows } = await db.query('SELECT * FROM member_grade_config WHERE id = 1');
+  res.json(rows[0] || { sprout_max: 50000, regular_max: 300000, vip_max: 1000000 });
+});
+
+// PUT /api/admin/member-grade-config
+router.put('/member-grade-config', authenticate, isAdmin, async (req, res) => {
+  const { sprout_max, regular_max, vip_max } = req.body;
+  if (!sprout_max || !regular_max || !vip_max) return res.status(400).json({ error: '모든 등급 기준을 입력해주세요.' });
+  if (sprout_max >= regular_max || regular_max >= vip_max) return res.status(400).json({ error: '등급 기준은 오름차순이어야 합니다.' });
+  const { rows } = await db.query(
+    `INSERT INTO member_grade_config (id, sprout_max, regular_max, vip_max, updated_at)
+     VALUES (1, $1, $2, $3, NOW())
+     ON CONFLICT (id) DO UPDATE SET sprout_max=$1, regular_max=$2, vip_max=$3, updated_at=NOW()
+     RETURNING *`,
+    [sprout_max, regular_max, vip_max]
+  );
+  res.json(rows[0]);
+});
+
+// GET /api/admin/members
+router.get('/members', authenticate, isAdmin, async (req, res) => {
+  try {
+    const [cfgRes, membersRes] = await Promise.all([
+      db.query('SELECT * FROM member_grade_config WHERE id = 1'),
+      db.query(`
+        SELECT u.id, u.email, u.name, u.nickname, u.created_at, u.last_login_at,
+          COALESCE((
+            SELECT SUM(o.final_amount) FROM orders o
+            WHERE o.user_id = u.id AND o.status = 'paid'
+            AND o.paid_at >= date_trunc('month', NOW())
+          ), 0)::int AS monthly_amount,
+          COALESCE((
+            SELECT COUNT(*) FROM orders o
+            WHERE o.user_id = u.id AND o.status = 'paid'
+          ), 0)::int AS total_orders,
+          (SELECT MAX(o.paid_at) FROM orders o WHERE o.user_id = u.id AND o.status = 'paid') AS last_purchased_at
+        FROM users u WHERE u.role = 'user' AND u.is_active = true
+        ORDER BY u.created_at DESC
+      `)
+    ]);
+    const cfg = cfgRes.rows[0] || { sprout_max: 50000, regular_max: 300000, vip_max: 1000000 };
+    const members = membersRes.rows.map(u => {
+      let grade;
+      if (u.total_orders === 0) grade = 'new';
+      else if (u.monthly_amount <= cfg.sprout_max) grade = 'sprout';
+      else if (u.monthly_amount <= cfg.regular_max) grade = 'regular';
+      else if (u.monthly_amount <= cfg.vip_max) grade = 'vip';
+      else grade = 'vvip';
+      return { ...u, grade };
+    });
+    res.json({ members, config: cfg });
+  } catch (err) {
+    console.error('[admin/members]', err);
+    res.status(500).json({ error: '회원 목록 조회 중 오류가 발생했습니다.' });
+  }
+});
+
 // GET /api/admin/users
 router.get('/users', authenticate, isAdmin, async (req, res) => {
   const { rows } = await db.query(

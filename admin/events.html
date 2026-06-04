@@ -235,6 +235,11 @@ input[type="checkbox"]{accent-color:var(--blue);width:15px;height:15px;cursor:po
 .cond-cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:12px;background:var(--slate-light);border-radius:8px;margin-top:4px;}
 .cond-cat-item{display:flex;align-items:center;gap:8px;font-size:13px;padding:7px 10px;border-radius:7px;background:var(--white);border:1.5px solid var(--border);cursor:pointer;transition:all .15s;user-select:none;}
 .cond-cat-item.checked{border-color:var(--blue);background:var(--blue-light);color:var(--blue);font-weight:600;}
+.grade-item-new.checked{border-color:#64748B;background:#F1F5F9;color:#475569;}
+.grade-item-sprout.checked{border-color:var(--green);background:var(--green-light);color:var(--green);}
+.grade-item-regular.checked{border-color:var(--blue);background:var(--blue-light);color:var(--blue);}
+.grade-item-vip.checked{border-color:var(--purple);background:var(--purple-light);color:var(--purple);}
+.grade-item-vvip.checked{border-color:var(--orange);background:var(--orange-light);color:var(--orange);}
 </style>
 </head>
 <body>
@@ -277,6 +282,7 @@ input[type="checkbox"]{accent-color:var(--blue);width:15px;height:15px;cursor:po
         <li><a href="orders.html"><span class="nav-icon">🛒</span>주문 관리</a></li>
         <li><a href="returns.html"><span class="nav-icon">🔄</span>반품 · 교환</a></li>
         <li><a href="cs.html"><span class="nav-icon">💬</span>CS 관리</a></li>
+        <li><a href="members.html"><span class="nav-icon">👥</span>회원 등급 관리</a></li>
         <li><a href="settlement.html"><span class="nav-icon">💰</span>정산 현황판</a></li>
       </ul>
     </div>
@@ -416,6 +422,23 @@ input[type="checkbox"]{accent-color:var(--blue);width:15px;height:15px;cursor:po
                     <div class="cond-cat-item" data-cat="program" onclick="toggleCategoryCheck('program')"><input type="checkbox" id="catChk_program" style="pointer-events:none;accent-color:var(--blue);"> ⚙️ 프로그램 제작</div>
                   </div>
                   <div class="field-hint" style="margin-top:6px;">선택한 카테고리 상품에만 이 쿠폰을 사용할 수 있습니다</div>
+                </div>
+              </div>
+              <div class="field">
+                <label class="field-label">대상 회원 등급</label>
+                <div class="toggle-group" id="gradeRestrGroup" style="margin-bottom:8px;">
+                  <div class="toggle-option selected" data-value="all" onclick="selectGradeRestrType('all')">전체 등급</div>
+                  <div class="toggle-option" data-value="specific" onclick="selectGradeRestrType('specific')">특정 등급만</div>
+                </div>
+                <div id="gradeCheckboxes" style="display:none;">
+                  <div class="cond-cat-grid" id="gradeCheckGrid">
+                    <div class="cond-cat-item grade-item-new" data-grade="new" onclick="toggleGradeCheck('new')"><input type="checkbox" id="gradeChk_new" style="pointer-events:none;accent-color:#64748B;"> 🆕 신규회원</div>
+                    <div class="cond-cat-item grade-item-sprout" data-grade="sprout" onclick="toggleGradeCheck('sprout')"><input type="checkbox" id="gradeChk_sprout" style="pointer-events:none;accent-color:var(--green);"> 🌱 새싹</div>
+                    <div class="cond-cat-item grade-item-regular" data-grade="regular" onclick="toggleGradeCheck('regular')"><input type="checkbox" id="gradeChk_regular" style="pointer-events:none;accent-color:var(--blue);"> ⭐ 일반</div>
+                    <div class="cond-cat-item grade-item-vip" data-grade="vip" onclick="toggleGradeCheck('vip')"><input type="checkbox" id="gradeChk_vip" style="pointer-events:none;accent-color:var(--purple);"> 💜 VIP</div>
+                    <div class="cond-cat-item grade-item-vvip" data-grade="vvip" onclick="toggleGradeCheck('vvip')"><input type="checkbox" id="gradeChk_vvip" style="pointer-events:none;accent-color:var(--orange);"> 🔥 VVIP</div>
+                  </div>
+                  <div class="field-hint" style="margin-top:6px;">선택한 등급 회원에게만 이 쿠폰이 제공됩니다</div>
                 </div>
               </div>
               <div class="field-row">
@@ -742,9 +765,9 @@ const DEMO_PRODUCTS = [
 ];
 
 const DEMO_COUPON_EVENTS = [
-  {id:'cev-001',name:'신규가입 환영 쿠폰',discountType:'percent',discountValue:20,startDate:'2026-01-01',endDate:'2026-12-31',appliedProducts:['excel-pm','excel-hh','excel-margin'],note:'신규 회원 전용',minOrderAmount:0,applicableCategories:[],createdAt:'2026-05-01T00:00:00'},
-  {id:'cev-002',name:'6월 여름 특가 쿠폰',discountType:'percent',discountValue:15,startDate:'2026-06-01',endDate:'2026-06-30',appliedProducts:['excel-pm','sheets-pm','sheets-crm'],note:'',minOrderAmount:30000,applicableCategories:[],createdAt:'2026-05-20T00:00:00'},
-  {id:'cev-003',name:'구글시트 전용 할인',discountType:'amount',discountValue:3000,startDate:'2026-06-01',endDate:'2026-07-31',appliedProducts:['sheets-pm','sheets-crm'],note:'구글시트 전용',minOrderAmount:0,applicableCategories:['sheets'],createdAt:'2026-05-25T00:00:00'},
+  {id:'cev-001',name:'신규가입 환영 쿠폰',discountType:'percent',discountValue:20,startDate:'2026-01-01',endDate:'2026-12-31',appliedProducts:['excel-pm','excel-hh','excel-margin'],note:'신규 회원 전용',minOrderAmount:0,applicableCategories:[],applicableGrades:['new'],createdAt:'2026-05-01T00:00:00'},
+  {id:'cev-002',name:'6월 여름 특가 쿠폰',discountType:'percent',discountValue:15,startDate:'2026-06-01',endDate:'2026-06-30',appliedProducts:['excel-pm','sheets-pm','sheets-crm'],note:'',minOrderAmount:30000,applicableCategories:[],applicableGrades:[],createdAt:'2026-05-20T00:00:00'},
+  {id:'cev-003',name:'VIP 구글시트 전용 쿠폰',discountType:'amount',discountValue:5000,startDate:'2026-06-01',endDate:'2026-07-31',appliedProducts:['sheets-pm','sheets-crm'],note:'',minOrderAmount:0,applicableCategories:['sheets'],applicableGrades:['vip','vvip'],createdAt:'2026-05-25T00:00:00'},
 ];
 const DEMO_SITE_EVENTS = [
   {id:'sev-001',name:'여름 특별 기획전',bannerImg:'',descImages:[],startDate:'2026-06-01',endDate:'2026-06-30',eventType:'discount',discountValue:15,bundleCount:0,bundleRate:0,otherDesc:'',appliedProducts:['excel-pm','sheets-pm'],createdAt:'2026-05-20T00:00:00'},
@@ -769,6 +792,10 @@ let descImgData = [];
 let currentMinOrderType = 'none';
 let currentCatRestrType = 'all';
 let selectedCategories = [];
+let currentGradeRestrType = 'all';
+let selectedGrades = [];
+
+const GRADE_LABEL = { new:'신규회원', sprout:'새싹', regular:'일반', vip:'VIP', vvip:'VVIP' };
 
 /* ── LOAD / SAVE ── */
 async function loadData() {
@@ -788,6 +815,7 @@ async function loadData() {
       appliedProducts: e.applied_products || [],
       minOrderAmount: e.min_order_amount || 0,
       applicableCategories: e.applicable_categories || [],
+      applicableGrades: e.applicable_grades || [],
     })) : [...DEMO_COUPON_EVENTS];
     siteEvents = siteRes.ok ? (await siteRes.json()).map(e => ({
       ...e,
@@ -821,6 +849,7 @@ async function saveCouponEvents(ev, isEdit) {
     applied_products: ev.appliedProducts || [],
     min_order_amount: ev.minOrderAmount || 0,
     applicable_categories: ev.applicableCategories || [],
+    applicable_grades: ev.applicableGrades || [],
   };
   const url = isEdit ? `${API_URL}/api/admin/events/coupons/${ev.id}` : `${API_URL}/api/admin/events/coupons`;
   const res = await fetch(url, {
@@ -911,6 +940,9 @@ function openCouponForm(id) {
     selectedCategories = [...(ev.applicableCategories || [])];
     selectCatRestrType(selectedCategories.length > 0 ? 'specific' : 'all');
     renderCategoryCheckboxes();
+    selectedGrades = [...(ev.applicableGrades || [])];
+    selectGradeRestrType(selectedGrades.length > 0 ? 'specific' : 'all');
+    renderGradeCheckboxes();
   } else {
     document.getElementById('couponFormTitle').textContent = '새 쿠폰 이벤트 등록';
     document.getElementById('couponName').value = '';
@@ -926,6 +958,9 @@ function openCouponForm(id) {
     selectedCategories = [];
     selectCatRestrType('all');
     renderCategoryCheckboxes();
+    selectedGrades = [];
+    selectGradeRestrType('all');
+    renderGradeCheckboxes();
   }
 }
 function closeCouponForm() {
@@ -934,6 +969,35 @@ function closeCouponForm() {
   selectMinOrderType('none');
   selectedCategories = [];
   selectCatRestrType('all');
+  selectedGrades = [];
+  selectGradeRestrType('all');
+}
+
+function selectGradeRestrType(type) {
+  currentGradeRestrType = type;
+  document.querySelectorAll('#gradeRestrGroup .toggle-option').forEach(el => {
+    el.className = 'toggle-option';
+    if (el.dataset.value === type) el.classList.add('selected');
+  });
+  document.getElementById('gradeCheckboxes').style.display = type === 'specific' ? '' : 'none';
+}
+
+function toggleGradeCheck(grade) {
+  const idx = selectedGrades.indexOf(grade);
+  if (idx >= 0) selectedGrades.splice(idx, 1);
+  else selectedGrades.push(grade);
+  renderGradeCheckboxes();
+}
+
+function renderGradeCheckboxes() {
+  document.querySelectorAll('#gradeCheckGrid .cond-cat-item').forEach(item => {
+    const grade = item.dataset.grade;
+    const chk = item.querySelector('input[type="checkbox"]');
+    const checked = selectedGrades.includes(grade);
+    chk.checked = checked;
+    item.classList.toggle('checked', checked);
+    item.classList.toggle(`grade-item-${grade}`, true);
+  });
 }
 
 function selectMinOrderType(type) {
@@ -1014,6 +1078,9 @@ async function saveCouponEvent() {
   if (currentCatRestrType === 'specific' && selectedCategories.length === 0) {
     return showToast('적용할 카테고리를 하나 이상 선택해주세요.', 'error');
   }
+  if (currentGradeRestrType === 'specific' && selectedGrades.length === 0) {
+    return showToast('대상 회원 등급을 하나 이상 선택해주세요.', 'error');
+  }
 
   const isEdit = !!currentEditCouponId;
   const ev = {
@@ -1027,6 +1094,7 @@ async function saveCouponEvent() {
     note: document.getElementById('couponNote').value.trim(),
     minOrderAmount: currentMinOrderType === 'set' ? (parseInt(document.getElementById('couponMinOrder').value) || 0) : 0,
     applicableCategories: currentCatRestrType === 'specific' ? [...selectedCategories] : [],
+    applicableGrades: currentGradeRestrType === 'specific' ? [...selectedGrades] : [],
   };
 
   try {
@@ -1067,7 +1135,9 @@ function renderCouponTable() {
     const minAmtHtml = (ev.minOrderAmount > 0) ? `<div style="font-size:11px;color:var(--text2);white-space:nowrap;">₩${ev.minOrderAmount.toLocaleString()} 이상</div>` : '';
     const catHtml = (ev.applicableCategories && ev.applicableCategories.length > 0)
       ? `<div style="font-size:11px;color:var(--blue);">${ev.applicableCategories.map(c => CAT_LABEL[c]||c).join(', ')}</div>` : '';
-    const condHtml = (minAmtHtml || catHtml) ? (minAmtHtml + catHtml) : `<span style="font-size:11px;color:var(--text3);">없음</span>`;
+    const gradeHtml = (ev.applicableGrades && ev.applicableGrades.length > 0)
+      ? `<div style="font-size:11px;color:var(--purple);">${ev.applicableGrades.map(g => GRADE_LABEL[g]||g).join(', ')} 전용</div>` : '';
+    const condHtml = (minAmtHtml || catHtml || gradeHtml) ? (minAmtHtml + catHtml + gradeHtml) : `<span style="font-size:11px;color:var(--text3);">없음</span>`;
     return `<tr>
       <td>
         <div class="event-name-cell">${ev.name}</div>
