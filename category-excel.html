@@ -315,6 +315,12 @@
   </div>
 </footer>
 
+<script src="products-renderer.js"></script>
+<script>
+if (window.ModuProducts) {
+  ModuProducts.renderCategoryGrid('excel', 'productGrid', 'productCount');
+}
+</script>
 <script src="auth.js"></script>
 <script>
 function openDrawer() {

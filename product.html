@@ -427,6 +427,7 @@
 <div id="toast"><span id="toastMsg"></span></div>
 
 <script src="auth.js"></script>
+<script src="products-renderer.js"></script>
 <script>
 /* ── DRAWER ── */
 function openDrawer() {
@@ -846,7 +847,18 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-init();
+(async () => {
+  if (window.ModuProducts) {
+    try {
+      const jsonP = await ModuProducts.getProduct(urlId);
+      if (jsonP) {
+        // Override product fields with products.json data
+        Object.assign(product, jsonP);
+      }
+    } catch {}
+  }
+  init();
+})();
 </script>
 </body>
 </html>

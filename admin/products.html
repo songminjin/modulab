@@ -184,6 +184,16 @@ input[type="checkbox"]{accent-color:var(--blue);width:15px;height:15px;cursor:po
         </div>
       </div>
 
+      <!-- GITHUB SYNC SETTINGS -->
+      <div id="ghSyncBar" style="background:#F0FDF4;border:1px solid #86EFAC;border-radius:10px;padding:12px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <span style="font-size:14px;">⚙️</span>
+        <span style="font-size:13px;font-weight:600;color:#15803D;">GitHub 연동 설정</span>
+        <input type="password" id="ghTokenInput" placeholder="GitHub Personal Access Token 입력" style="flex:1;min-width:200px;padding:7px 12px;border:1px solid #86EFAC;border-radius:7px;font-size:13px;font-family:inherit;outline:none;">
+        <button onclick="saveGhToken()" style="padding:7px 16px;background:#16A34A;color:white;border:none;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">저장</button>
+        <button onclick="GhSync.syncAll(showToast)" style="padding:7px 16px;background:#2563EB;color:white;border:none;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">🔄 지금 동기화</button>
+        <span id="ghTokenStatus" style="font-size:12px;color:#16A34A;"></span>
+      </div>
+
       <div class="filter-bar">
         <div class="filter-tags" id="catFilter">
           <div class="filter-tag active" data-val="all"     onclick="setFilter('all',this)">전체</div>
@@ -237,6 +247,7 @@ input[type="checkbox"]{accent-color:var(--blue);width:15px;height:15px;cursor:po
 
 <div id="toast"><span id="toastMsg"></span></div>
 
+<script src="github-sync.js"></script>
 <script>
 
 const API_URL = 'https://modulab-production.up.railway.app';
@@ -257,12 +268,15 @@ async function load(){
     // normalize backend fields to match UI expectations
     products = products.map(p => ({
       ...p,
-      cat: p.category,
-      type: p.sale_type || 'file',
-      emoji: p.emoji || '📦',
-      discount: p.discount_price || 0,
-      visible: p.is_active,
-      date: p.created_at ? p.created_at.slice(0,10) : '',
+      id: p.id || p.productId,
+      name: p.name || p.productName,
+      cat: p.cat || p.category,
+      type: p.type || p.sale_type || 'file',
+      emoji: p.emoji || p.selectedEmoji || '📦',
+      price: p.price || 0,
+      discount: p.discount || p.discount_price || p.discountPrice || 0,
+      visible: p.visible !== undefined ? p.visible : (p.is_active !== undefined ? p.is_active : p.visibility !== false),
+      date: p.date || (p.created_at ? p.created_at.slice(0,10) : ''),
     }));
   } catch(e) {
     console.warn('[products] API error:', e.message);
@@ -332,6 +346,8 @@ async function toggleVisible(id, cb){
     if (!res.ok) throw new Error();
     const p = products.find(p=>p.id===id);
     if(p){ p.visible=isActive; p.is_active=isActive; }
+    localStorage.setItem('modulab_products', JSON.stringify(products));
+    GhSync.syncAll(showToast);
     showToast(isActive?'상품을 노출했습니다':'상품을 숨겼습니다');
   } catch(e) {
     cb.checked = !isActive;
@@ -345,6 +361,8 @@ async function deleteProduct(id){
   try {
     await fetch(`${API_URL}/api/admin/products/${id}`, { method: 'DELETE', credentials: 'include' });
     products = products.filter(p=>p.id!==id);
+    localStorage.setItem('modulab_products', JSON.stringify(products));
+    GhSync.syncAll(showToast);
     render(); showToast('상품이 삭제되었습니다');
   } catch(e) {
     showToast('삭제에 실패했습니다.', true);
@@ -359,6 +377,19 @@ function exportCSV(){
   showToast('CSV 다운로드 완료');
 }
 function showToast(msg, isError){ const t=document.getElementById('toast'); document.getElementById('toastMsg').textContent=msg; t.classList.add('show'); if(isError) t.style.background='#DC2626'; else t.style.background=''; setTimeout(()=>{ t.classList.remove('show'); t.style.background=''; },3000); }
+function saveGhToken() {
+  const t = document.getElementById('ghTokenInput').value.trim();
+  if (!t) return;
+  localStorage.setItem('modulab_gh_token', t);
+  document.getElementById('ghTokenInput').value = '';
+  document.getElementById('ghTokenStatus').textContent = '✓ 토큰 저장됨';
+  showToast('GitHub 토큰이 저장되었습니다.');
+}
+(function initGhBar(){
+  const token = localStorage.getItem('modulab_gh_token');
+  const status = document.getElementById('ghTokenStatus');
+  if (token && status) status.textContent = '✓ 토큰 설정됨';
+})();
 load();
 </script>
 </body>

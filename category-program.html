@@ -173,6 +173,12 @@
   </div>
 </section>
 
+<!-- PRODUCT GRID (dynamic, hidden when empty) -->
+<div class="section-wrap" id="productGridWrap" style="display:none;">
+  <span id="productCount" style="display:none;"></span>
+  <div class="mkt-grid" id="productGrid"></div>
+</div>
+
 <!-- INQUIRY -->
 <section class="inquiry-section" id="inquirySection">
   <div class="inquiry-inner">
@@ -244,6 +250,12 @@
   </div>
 </footer>
 
+<script src="products-renderer.js"></script>
+<script>
+if (window.ModuProducts) {
+  ModuProducts.renderCategoryGrid('program', 'productGrid', 'productCount');
+}
+</script>
 <script src="auth.js"></script>
 <script>
 function openDrawer() {

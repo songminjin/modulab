@@ -99,6 +99,7 @@
 
 <!-- PRODUCTS -->
 <div class="section-wrap">
+  <span id="productCount" style="display:none;"></span>
   <div class="mkt-grid" id="productGrid" style="grid-template-columns:repeat(2,1fr);max-width:700px;">
 
     <a href="product.html?id=sheets-pm&cat=sheets&name=구글시트+프로젝트+관리&price=19900&emoji=🔧" class="mkt-card" data-price="19900" data-name="구글시트 프로젝트 관리">
@@ -228,6 +229,12 @@
   </div>
 </footer>
 
+<script src="products-renderer.js"></script>
+<script>
+if (window.ModuProducts) {
+  ModuProducts.renderCategoryGrid('sheets', 'productGrid', 'productCount');
+}
+</script>
 <script src="auth.js"></script>
 <script>
 function openDrawer() {

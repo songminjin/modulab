@@ -940,6 +940,7 @@ a { text-decoration: none; color: inherit; }
 <!-- TOAST -->
 <div id="toast"><span class="toast-icon"></span><span id="toastMsg"></span></div>
 
+<script src="github-sync.js"></script>
 <script>
 const API_URL = 'https://modulab-production.up.railway.app';
 
@@ -1293,6 +1294,7 @@ async function submitProduct() {
     if (!res.ok) throw new Error(result.error || '오류가 발생했습니다.');
     localStorage.removeItem('modulab_product_draft');
     showToast(isEdit ? '✓ 상품이 수정되었습니다!' : '✓ 상품이 등록되었습니다!', 'success');
+    GhSync.syncAll(showToast);
   } catch(e) {
     showToast(e.message, 'error');
     return;
