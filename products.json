@@ -304,5 +304,31 @@
     "date": "2026-06-04",
     "views": 0,
     "downloads": 0
+  },
+  {
+    "id": "EXCEL-MPYZ9XIS",
+    "name": "프로젝트 관리 ",
+    "cat": "excel",
+    "type": "file",
+    "emoji": "📊",
+    "price": 100000,
+    "discount": 90000,
+    "visible": true,
+    "newBadge": true,
+    "bestBadge": false,
+    "desc": "프로젝트 관리",
+    "detail": "상품등록",
+    "fileType": "",
+    "fileUrl": "https://docs.google.com/spreadsheets/d/1YPR3BqcJltTFFKA_vHTbYPdF1VFPy-v1daEt3h1_H2I/edit?gid=523316433#gid=523316433",
+    "fileName": "",
+    "thumbUrl": "https://raw.githubusercontent.com/songminjin/modulab/main/images/products/thumb-EXCEL-MPYZ9XIS.png",
+    "detailImageUrls": [
+      "https://raw.githubusercontent.com/songminjin/modulab/main/images/products/detail-EXCEL-MPYZ9XIS-0.png",
+      "https://raw.githubusercontent.com/songminjin/modulab/main/images/products/detail-EXCEL-MPYZ9XIS-1.png",
+      "https://raw.githubusercontent.com/songminjin/modulab/main/images/products/detail-EXCEL-MPYZ9XIS-2.png"
+    ],
+    "date": "2026-06-04",
+    "views": 0,
+    "downloads": 0
   }
 ]
