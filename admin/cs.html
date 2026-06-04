@@ -223,10 +223,25 @@ let selectedId = null;
 
 function load(){
   const saved = localStorage.getItem('modulab_cs');
-  if(saved){ try{ inquiries=JSON.parse(saved); }catch{ inquiries=[...DEMO_CS]; } }
-  else inquiries=[...DEMO_CS];
+  if(saved){
+    try{ inquiries=JSON.parse(saved); }
+    catch{ inquiries=[...DEMO_CS]; localStorage.setItem('modulab_cs', JSON.stringify(inquiries)); }
+  } else {
+    inquiries=[...DEMO_CS];
+    localStorage.setItem('modulab_cs', JSON.stringify(inquiries));
+  }
   updateSummary(); renderList();
 }
+
+// cs.html에서 문의 접수 시 탭 포커스만으로 자동 반영
+window.addEventListener('focus', () => {
+  const saved = localStorage.getItem('modulab_cs');
+  if(!saved) return;
+  try {
+    const fresh = JSON.parse(saved);
+    if(fresh.length !== inquiries.length) { load(); }
+  } catch {}
+});
 
 function updateSummary(){
   const unanswered = inquiries.filter(c=>!c.answered).length;
