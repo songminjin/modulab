@@ -243,6 +243,134 @@ router.delete('/events/sites/:id', authenticate, isAdmin, async (req, res) => {
   res.json({ message: '삭제됐습니다.' });
 });
 
+// ─── CUSTOMER MANAGEMENT ───
+
+// GET /api/admin/customers
+router.get('/customers', authenticate, isAdmin, async (req, res) => {
+  try {
+    const cfgRes = await db.query('SELECT * FROM member_grade_config WHERE id=1');
+    const cfg = cfgRes.rows[0] || { sprout_max:50000, regular_max:300000, vip_max:1000000 };
+    const { rows } = await db.query(`
+      SELECT u.id, u.email, u.name, u.nickname, u.phone, u.provider, u.is_active, u.is_dormant,
+        u.last_login_at, u.created_at, u.points, u.manual_grade, u.marketing_consent, u.referral_source,
+        COALESCE((SELECT SUM(o.final_amount) FROM orders o WHERE o.user_id=u.id AND o.status='paid'),0)::int AS total_spent,
+        COALESCE((SELECT COUNT(*) FROM orders o WHERE o.user_id=u.id AND o.status='paid'),0)::int AS total_orders,
+        COALESCE((SELECT SUM(o.final_amount) FROM orders o WHERE o.user_id=u.id AND o.status='paid' AND o.paid_at>=date_trunc('month',NOW())),0)::int AS monthly_amount,
+        (SELECT MAX(o.paid_at) FROM orders o WHERE o.user_id=u.id AND o.status='paid') AS last_purchased_at
+      FROM users u WHERE u.role='user' ORDER BY u.created_at DESC`);
+    const customers = rows.map(u => {
+      let grade = u.manual_grade;
+      if (!grade) {
+        if (u.total_orders===0) grade='new';
+        else if (u.monthly_amount<=cfg.sprout_max) grade='sprout';
+        else if (u.monthly_amount<=cfg.regular_max) grade='regular';
+        else if (u.monthly_amount<=cfg.vip_max) grade='vip';
+        else grade='vvip';
+      }
+      return { ...u, grade };
+    });
+    res.json({ customers, config: cfg });
+  } catch(err) { console.error('[customers]',err); res.status(500).json({ error:'오류가 발생했습니다.' }); }
+});
+
+// GET /api/admin/customers/:id
+router.get('/customers/:id', authenticate, isAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [uRes, ordersRes, reviewsRes, pointsRes, notesRes, couponsRes, cfgRes] = await Promise.all([
+      db.query(`SELECT u.*,
+        COALESCE((SELECT SUM(o.final_amount) FROM orders o WHERE o.user_id=u.id AND o.status='paid'),0)::int AS total_spent,
+        COALESCE((SELECT COUNT(*) FROM orders o WHERE o.user_id=u.id AND o.status='paid'),0)::int AS total_orders,
+        COALESCE((SELECT SUM(o.final_amount) FROM orders o WHERE o.user_id=u.id AND o.status='paid' AND o.paid_at>=date_trunc('month',NOW())),0)::int AS monthly_amount,
+        (SELECT MAX(o.paid_at) FROM orders o WHERE o.user_id=u.id AND o.status='paid') AS last_purchased_at,
+        COALESCE((SELECT COUNT(*) FROM orders o WHERE o.user_id=u.id AND o.status='refunded'),0)::int AS refund_count
+        FROM users u WHERE u.id=$1`, [id]),
+      db.query(`SELECT o.id, o.final_amount, o.status, o.payment_method, o.created_at,
+        (SELECT p.name FROM order_items oi JOIN products p ON p.id=oi.product_id WHERE oi.order_id=o.id LIMIT 1) AS first_product,
+        (SELECT COUNT(*)::int FROM order_items WHERE order_id=o.id) AS item_count
+        FROM orders o WHERE o.user_id=$1 ORDER BY o.created_at DESC LIMIT 30`, [id]),
+      db.query(`SELECT r.*, p.name AS product_name FROM reviews r JOIN products p ON p.id=r.product_id WHERE r.user_id=$1 ORDER BY r.created_at DESC`, [id]),
+      db.query(`SELECT * FROM point_history WHERE user_id=$1 ORDER BY created_at DESC LIMIT 30`, [id]),
+      db.query(`SELECT * FROM admin_notes WHERE user_id=$1 ORDER BY created_at DESC`, [id]),
+      db.query(`SELECT uc.*, c.name, c.code, c.discount_type, c.discount_value, c.expires_at FROM user_coupons uc JOIN coupons c ON c.id=uc.coupon_id WHERE uc.user_id=$1 ORDER BY uc.created_at DESC`, [id]),
+      db.query(`SELECT * FROM member_grade_config WHERE id=1`),
+    ]);
+    if (!uRes.rows[0]) return res.status(404).json({ error:'회원을 찾을 수 없습니다.' });
+    const cfg = cfgRes.rows[0] || { sprout_max:50000, regular_max:300000, vip_max:1000000 };
+    const u = uRes.rows[0];
+    let grade = u.manual_grade;
+    if (!grade) {
+      if (u.total_orders===0) grade='new';
+      else if (u.monthly_amount<=cfg.sprout_max) grade='sprout';
+      else if (u.monthly_amount<=cfg.regular_max) grade='regular';
+      else if (u.monthly_amount<=cfg.vip_max) grade='vip';
+      else grade='vvip';
+    }
+    res.json({ user:{...u,grade}, orders:ordersRes.rows, reviews:reviewsRes.rows, points:pointsRes.rows, notes:notesRes.rows, coupons:couponsRes.rows });
+  } catch(err) { console.error('[customer detail]',err); res.status(500).json({ error:'오류가 발생했습니다.' }); }
+});
+
+// POST /api/admin/customers/:id/points
+router.post('/customers/:id/points', authenticate, isAdmin, async (req, res) => {
+  const { amount, description } = req.body;
+  if (!amount || !description) return res.status(400).json({ error:'금액과 사유를 입력해주세요.' });
+  const client = await db.pool.connect();
+  try {
+    await client.query('BEGIN');
+    await client.query('UPDATE users SET points=GREATEST(0,points+$1) WHERE id=$2', [amount, req.params.id]);
+    await client.query('INSERT INTO point_history (user_id,type,amount,description) VALUES ($1,$2,$3,$4)',
+      [req.params.id, amount>0?'admin_add':'admin_deduct', amount, description]);
+    await client.query('COMMIT');
+    const { rows } = await db.query('SELECT points FROM users WHERE id=$1', [req.params.id]);
+    res.json({ points: rows[0]?.points });
+  } catch(err) { await client.query('ROLLBACK'); res.status(500).json({ error:'포인트 처리 중 오류가 발생했습니다.' }); }
+  finally { client.release(); }
+});
+
+// PUT /api/admin/customers/:id/grade
+router.put('/customers/:id/grade', authenticate, isAdmin, async (req, res) => {
+  const { grade } = req.body;
+  const valid = ['new','sprout','regular','vip','vvip','blacklist',null];
+  if (!valid.includes(grade)) return res.status(400).json({ error:'잘못된 등급입니다.' });
+  await db.query('UPDATE users SET manual_grade=$1 WHERE id=$2', [grade, req.params.id]);
+  res.json({ grade });
+});
+
+// PUT /api/admin/customers/:id/status
+router.put('/customers/:id/status', authenticate, isAdmin, async (req, res) => {
+  const { action } = req.body;
+  if (action==='suspend') await db.query('UPDATE users SET is_dormant=true, dormant_at=NOW() WHERE id=$1', [req.params.id]);
+  else if (action==='restore') await db.query('UPDATE users SET is_dormant=false, dormant_at=NULL WHERE id=$1', [req.params.id]);
+  else if (action==='deactivate') await db.query('UPDATE users SET is_active=false WHERE id=$1', [req.params.id]);
+  else return res.status(400).json({ error:'잘못된 액션입니다.' });
+  res.json({ message:'처리되었습니다.' });
+});
+
+// GET /api/admin/customers/:id/notes
+router.get('/customers/:id/notes', authenticate, isAdmin, async (req, res) => {
+  const { rows } = await db.query('SELECT * FROM admin_notes WHERE user_id=$1 ORDER BY created_at DESC', [req.params.id]);
+  res.json(rows);
+});
+
+// POST /api/admin/customers/:id/notes
+router.post('/customers/:id/notes', authenticate, isAdmin, async (req, res) => {
+  const { content } = req.body;
+  if (!content?.trim()) return res.status(400).json({ error:'메모 내용을 입력해주세요.' });
+  const { rows } = await db.query(
+    'INSERT INTO admin_notes (user_id,content,created_by) VALUES ($1,$2,$3) RETURNING *',
+    [req.params.id, content.trim(), req.user.id]
+  );
+  res.status(201).json(rows[0]);
+});
+
+// DELETE /api/admin/customers/:id/notes/:noteId
+router.delete('/customers/:id/notes/:noteId', authenticate, isAdmin, async (req, res) => {
+  await db.query('DELETE FROM admin_notes WHERE id=$1 AND user_id=$2', [req.params.noteId, req.params.id]);
+  res.json({ message:'삭제됐습니다.' });
+});
+
+// ─── MEMBER GRADE CONFIG ───
+
 // GET /api/admin/member-grade-config
 router.get('/member-grade-config', authenticate, isAdmin, async (req, res) => {
   const { rows } = await db.query('SELECT * FROM member_grade_config WHERE id = 1');

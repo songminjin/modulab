@@ -197,6 +197,24 @@ CREATE TABLE IF NOT EXISTS site_event_products (
   PRIMARY KEY (site_event_id, product_id)
 );
 
+-- Migration: users extended fields
+ALTER TABLE users ADD COLUMN IF NOT EXISTS birthday DATE;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS gender VARCHAR(10);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS marketing_consent BOOLEAN DEFAULT false;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS referral_source VARCHAR(50);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS manual_grade VARCHAR(20);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS shipping_addresses JSONB DEFAULT '[]';
+
+-- Admin notes (internal memos per customer)
+CREATE TABLE IF NOT EXISTS admin_notes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  content TEXT NOT NULL,
+  created_by UUID REFERENCES users(id),
+  created_at TIMESTAMP DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_admin_notes_user ON admin_notes(user_id);
+
 -- Migration: coupon event conditions
 ALTER TABLE coupon_events ADD COLUMN IF NOT EXISTS min_order_amount INTEGER DEFAULT 0;
 ALTER TABLE coupon_events ADD COLUMN IF NOT EXISTS applicable_categories JSONB DEFAULT '[]';

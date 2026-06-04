@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>고객 상세 — ModuLab 관리자</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="admin-auth.js"></script>
+<style>
+:root {
+  --blue:#2563EB;--blue-dark:#1D4ED8;--blue-light:#EFF6FF;--blue-mid:#BFDBFE;
+  --navy:#0F172A;--navy2:#1E293B;--navy3:#334155;
+  --green:#16A34A;--green-light:#F0FDF4;
+  --red:#DC2626;--red-light:#FEF2F2;
+  --yellow:#F59E0B;--yellow-light:#FFFBEB;
+  --purple:#7C3AED;--purple-light:#F5F3FF;--purple-mid:#DDD6FE;
+  --orange:#EA580C;--orange-light:#FFF7ED;
+  --slate:#64748B;--slate-light:#F1F5F9;
+  --border:#E2E8F0;--white:#FFFFFF;
+  --text:#0F172A;--text2:#475569;--text3:#94A3B8;
+  --sidebar-w:220px;--header-h:64px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Noto Sans KR',sans-serif;color:var(--text);background:#F8FAFC;line-height:1.6;}
+a{text-decoration:none;color:inherit;}
+.mobile-guard{display:none;position:fixed;inset:0;z-index:9999;background:var(--navy);flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:32px;}
+@media(max-width:768px){.mobile-guard{display:flex;}}
+.admin-layout{display:flex;min-height:100vh;}
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--navy);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100;}
+.sidebar-logo{padding:20px 20px 16px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px;}
+.logo-mark{width:32px;height:32px;background:var(--blue);border-radius:7px;position:relative;overflow:hidden;flex-shrink:0;}
+.logo-mark::before{content:'';position:absolute;top:4px;left:4px;width:13px;height:13px;background:rgba(255,255,255,.3);border-radius:2px;}
+.logo-mark::after{content:'';position:absolute;bottom:4px;right:4px;width:13px;height:13px;background:#16A34A;border-radius:2px;}
+.sidebar-logo-text{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.04em;color:white;}
+.sidebar-logo-text span{color:var(--blue);}
+.sidebar-admin-badge{font-size:9px;font-weight:700;letter-spacing:.08em;color:#64748B;padding:2px 6px;border:1px solid #334155;border-radius:3px;display:block;margin-top:2px;}
+.sidebar-section{padding:20px 12px 8px;}
+.sidebar-section-label{font-size:10px;font-weight:700;letter-spacing:.1em;color:#475569;text-transform:uppercase;padding:0 8px;margin-bottom:6px;}
+.sidebar-nav{list-style:none;}
+.sidebar-nav li a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;font-size:13px;font-weight:500;color:#94A3B8;transition:all .15s;}
+.sidebar-nav li a:hover{background:rgba(255,255,255,.06);color:white;}
+.sidebar-nav li a.active{background:rgba(37,99,235,.2);color:#93C5FD;}
+.nav-icon{font-size:15px;width:18px;text-align:center;flex-shrink:0;}
+.sidebar-sub{margin-left:28px;margin-top:2px;}
+.sidebar-sub li a{font-size:12px;padding:6px 10px;color:#64748B;border-radius:6px;}
+.sidebar-sub li a:hover{color:#94A3B8;background:rgba(255,255,255,.04);}
+.sidebar-sub li a.active{color:#93C5FD;background:rgba(37,99,235,.15);}
+.sidebar-bottom{margin-top:auto;padding:16px 12px;border-top:1px solid rgba(255,255,255,.06);}
+.sidebar-bottom a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;font-size:13px;color:#64748B;transition:all .15s;}
+.sidebar-bottom a:hover{background:rgba(255,255,255,.06);color:#94A3B8;}
+.main-wrap{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh;}
+.admin-header{position:sticky;top:0;z-index:50;height:var(--header-h);background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 32px;}
+.header-breadcrumb{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text3);}
+.header-breadcrumb a{color:var(--text3);transition:color .15s;}.header-breadcrumb a:hover{color:var(--blue);}
+.header-breadcrumb .sep{color:var(--border);}.header-breadcrumb .current{color:var(--text);font-weight:600;}
+.header-right{display:flex;align-items:center;gap:10px;}
+.header-logout-btn{padding:7px 16px;border-radius:8px;border:1px solid var(--border);background:none;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;font-family:inherit;transition:all .15s;}
+.header-logout-btn:hover{background:var(--red-light);color:var(--red);}
+.header-user{display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:8px;background:var(--slate-light);border:1px solid var(--border);}
+.header-user-avatar{width:28px;height:28px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;color:white;font-weight:700;}
+.header-user-name{font-size:13px;font-weight:500;color:var(--text2);}
+.page-content{padding:32px;flex:1;}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;border:none;transition:all .15s;white-space:nowrap;}
+.btn-primary{background:var(--blue);color:white;}.btn-primary:hover{background:var(--blue-dark);}
+.btn-outline{background:var(--white);color:var(--text2);border:1px solid var(--border);}.btn-outline:hover{background:var(--slate-light);}
+.btn-danger{background:var(--red-light);color:var(--red);border:1px solid #FCA5A5;}.btn-danger:hover{background:var(--red);color:white;}
+.btn-yellow{background:var(--yellow-light);color:#92400E;border:1px solid #FDE68A;}.btn-yellow:hover{background:var(--yellow);color:white;}
+.btn-sm{padding:6px 12px;font-size:12px;}
+.btn-xs{padding:4px 9px;font-size:11px;}
+.badge{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;}
+.g-new{background:#F1F5F9;color:#475569;}.g-sprout{background:#DCFCE7;color:#15803D;}
+.g-regular{background:#DBEAFE;color:#1D4ED8;}.g-vip{background:#EDE9FE;color:#6D28D9;}
+.g-vvip{background:#FFEDD5;color:#C2410C;}.g-blacklist{background:var(--red-light);color:var(--red);}
+.field-input,.field-select,.field-textarea{width:100%;padding:9px 13px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;color:var(--text);background:var(--white);outline:none;transition:border-color .15s;}
+.field-input:focus,.field-select:focus,.field-textarea:focus{border-color:var(--blue);}
+.field-textarea{resize:vertical;min-height:72px;line-height:1.6;}
+.field-label{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:5px;}
+table{width:100%;border-collapse:collapse;}
+thead th{padding:9px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.05em;background:var(--slate-light);border-bottom:1px solid var(--border);white-space:nowrap;}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:#FAFBFF;}
+td{padding:11px 14px;font-size:13px;vertical-align:middle;}
+
+/* CUSTOMER HEADER */
+.customer-header{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:24px 28px;margin-bottom:24px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;}
+.customer-avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-size:26px;color:white;font-weight:700;flex-shrink:0;}
+.customer-info{flex:1;min-width:200px;}
+.customer-name{font-size:20px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.customer-email{font-size:13px;color:var(--text3);margin-top:3px;}
+.customer-meta{font-size:12px;color:var(--text3);margin-top:2px;}
+.quick-stats{display:flex;gap:20px;flex-wrap:wrap;}
+.qstat{text-align:center;min-width:90px;}
+.qstat-val{font-size:18px;font-weight:700;font-family:'JetBrains Mono',monospace;}
+.qstat-lbl{font-size:11px;color:var(--text3);margin-top:2px;}
+
+/* TABS */
+.tab-bar{display:flex;gap:2px;background:var(--white);border:1px solid var(--border);border-radius:12px;padding:5px;margin-bottom:22px;width:fit-content;flex-wrap:wrap;}
+.tab-btn{padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:none;color:var(--text3);font-family:inherit;transition:all .15s;}
+.tab-btn:hover{color:var(--text2);}
+.tab-btn.active{background:var(--blue);color:white;}
+.tab-pane{display:none;}.tab-pane.active{display:block;}
+
+/* CARDS */
+.card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:22px;margin-bottom:18px;}
+.card-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.card-icon{font-size:15px;margin-right:6px;}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+.info-row{display:contents;}
+.info-key{font-size:12px;color:var(--text3);padding:8px 12px 8px 0;border-bottom:1px solid var(--border);font-weight:500;}
+.info-val{font-size:13px;color:var(--text);padding:8px 0;border-bottom:1px solid var(--border);}
+.info-row:last-child .info-key,.info-row:last-child .info-val{border-bottom:none;}
+.summary-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+.summ-card{background:var(--slate-light);border-radius:10px;padding:14px 16px;text-align:center;}
+.summ-val{font-size:18px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--text);}
+.summ-lbl{font-size:11px;color:var(--text3);margin-top:2px;}
+.order-status-paid{color:var(--green);font-weight:700;}
+.order-status-refunded{color:var(--red);}
+.order-status-cancelled{color:var(--text3);}
+.order-status-pending{color:var(--yellow);}
+.star-rating{color:#F59E0B;font-size:13px;letter-spacing:1px;}
+.point-type-earn{color:var(--green);}
+.point-type-use{color:var(--red);}
+.point-type-admin{color:var(--blue);}
+.coupon-row{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border:1px solid var(--border);border-radius:9px;margin-bottom:8px;}
+.coupon-used{opacity:.5;}
+.addr-card{padding:12px 14px;border:1px solid var(--border);border-radius:9px;margin-bottom:8px;font-size:13px;position:relative;}
+.addr-default{position:absolute;top:10px;right:10px;font-size:10px;font-weight:700;background:var(--blue-light);color:var(--blue);padding:2px 7px;border-radius:4px;}
+.ltv-bar-wrap{background:var(--slate-light);border-radius:8px;height:12px;overflow:hidden;margin-top:6px;}
+.ltv-bar{height:100%;border-radius:8px;transition:width .6s;}
+.risk-gauge{display:flex;gap:0;border-radius:8px;overflow:hidden;height:14px;margin-top:6px;}
+.risk-seg{flex:1;height:100%;}
+.note-item{background:var(--slate-light);border-radius:9px;padding:12px 14px;margin-bottom:8px;font-size:13px;position:relative;}
+.note-date{font-size:11px;color:var(--text3);margin-top:4px;}
+.note-del{position:absolute;top:10px;right:10px;background:none;border:none;cursor:pointer;font-size:12px;color:var(--text3);}
+.note-del:hover{color:var(--red);}
+.section-label{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.danger-zone{border:1.5px solid #FCA5A5;border-radius:12px;padding:20px;background:var(--red-light);}
+.danger-title{font-size:13px;font-weight:700;color:var(--red);margin-bottom:12px;}
+.action-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.cat-tag{display:inline-block;padding:2px 8px;border-radius:5px;font-size:11px;font-weight:700;margin:2px;}
+.cat-excel{background:#DCFCE7;color:#15803D;}.cat-sheets{background:#FEF9C3;color:#A16207;}
+.cat-short{background:#EDE9FE;color:#6D28D9;}.cat-program{background:#F1F5F9;color:#475569;}
+#toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--navy);color:white;padding:13px 24px;border-radius:10px;font-size:14px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.25);transition:transform .3s,opacity .3s;opacity:0;z-index:9000;white-space:nowrap;}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+</style>
+</head>
+<body>
+<div class="mobile-guard">
+  <div style="font-size:48px;">🖥️</div>
+  <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:white;">PC에서 접속해주세요</div>
+</div>
+
+<div class="admin-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark"></div>
+      <div><div class="sidebar-logo-text">Modu<span>Lab</span></div><span class="sidebar-admin-badge">ADMIN SCM</span></div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">메인 메뉴</div>
+      <ul class="sidebar-nav">
+        <li><a href="dashboard.html"><span class="nav-icon">📊</span>대시보드</a></li>
+        <li>
+          <a href="products.html"><span class="nav-icon">📦</span>상품 관리</a>
+          <ul class="sidebar-sub sidebar-nav">
+            <li><a href="products.html">상품 목록</a></li>
+            <li><a href="product-add.html">상품 등록</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="events.html"><span class="nav-icon">🎪</span>이벤트 관리</a>
+          <ul class="sidebar-sub sidebar-nav">
+            <li><a href="events.html?tab=coupon">쿠폰 이벤트</a></li>
+            <li><a href="events.html?tab=site">사이트 이벤트</a></li>
+          </ul>
+        </li>
+        <li><a href="orders.html"><span class="nav-icon">🛒</span>주문 관리</a></li>
+        <li><a href="returns.html"><span class="nav-icon">🔄</span>반품 · 교환</a></li>
+        <li><a href="cs.html"><span class="nav-icon">💬</span>CS 관리</a></li>
+        <li>
+          <a href="customers.html" class="active"><span class="nav-icon">👥</span>회원 관리</a>
+          <ul class="sidebar-sub sidebar-nav">
+            <li><a href="customers.html" class="active">고객 목록</a></li>
+            <li><a href="members.html">등급 기준 설정</a></li>
+          </ul>
+        </li>
+        <li><a href="settlement.html"><span class="nav-icon">💰</span>정산 현황판</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">바로가기</div>
+      <ul class="sidebar-nav">
+        <li><a href="../index.html" target="_blank"><span class="nav-icon">🌐</span>쇼핑몰 보기</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-bottom">
+      <a href="index.html" onclick="adminLogout(event)"><span class="nav-icon">🚪</span>로그아웃</a>
+    </div>
+  </aside>
+
+  <div class="main-wrap">
+    <header class="admin-header">
+      <div class="header-breadcrumb">
+        <a href="dashboard.html">홈</a><span class="sep">›</span>
+        <a href="customers.html">고객 관리</a><span class="sep">›</span>
+        <span class="current" id="breadcrumbName">고객 상세</span>
+      </div>
+      <div class="header-right">
+        <div class="header-user"><div class="header-user-avatar">M</div><div class="header-user-name">관리자</div></div>
+        <button class="header-logout-btn" onclick="adminLogout()">로그아웃</button>
+      </div>
+    </header>
+
+    <div class="page-content">
+      <!-- CUSTOMER HEADER -->
+      <div class="customer-header" id="customerHeader">
+        <div style="display:flex;align-items:center;gap:16px;flex:1;min-width:280px;">
+          <div class="customer-avatar" id="avatarEl">?</div>
+          <div class="customer-info">
+            <div class="customer-name">
+              <span id="nameEl">로딩 중...</span>
+              <span id="gradeBadgeEl"></span>
+              <span id="statusBadgeEl"></span>
+            </div>
+            <div class="customer-email" id="emailEl"></div>
+            <div class="customer-meta" id="metaEl"></div>
+          </div>
+        </div>
+        <div class="quick-stats" id="quickStats"></div>
+        <a href="customers.html" class="btn btn-outline btn-sm">← 목록으로</a>
+      </div>
+
+      <!-- TABS -->
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('info')">👤 기본 정보</button>
+        <button class="tab-btn" onclick="switchTab('orders')">🛒 구매 이력</button>
+        <button class="tab-btn" onclick="switchTab('cs')">💬 CS / 리뷰</button>
+        <button class="tab-btn" onclick="switchTab('points')">💰 포인트 · 쿠폰</button>
+        <button class="tab-btn" onclick="switchTab('analytics')">📊 분석</button>
+        <button class="tab-btn" onclick="switchTab('manage')">⚙️ 관리</button>
+      </div>
+
+      <!-- TAB: 기본 정보 -->
+      <div class="tab-pane active" id="tab-info">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+          <div class="card">
+            <div class="card-title"><span>👤 회원 기본 정보</span></div>
+            <div class="info-grid" id="infoBasic"></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><span>📋 가입 · 활동 정보</span></div>
+            <div class="info-grid" id="infoExtra"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span>📦 배송지 목록</span></div>
+          <div id="addrList"></div>
+        </div>
+      </div>
+
+      <!-- TAB: 구매 이력 -->
+      <div class="tab-pane" id="tab-orders">
+        <div class="summary-row" id="orderSummary"></div>
+        <div class="card">
+          <div class="card-title"><span>🛒 주문 내역</span></div>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead><tr><th>주문일</th><th>상품</th><th>수량</th><th>결제금액</th><th>결제수단</th><th>상태</th></tr></thead>
+              <tbody id="ordersTbody"></tbody>
+            </table>
+          </div>
+          <div id="ordersEmpty" style="display:none;text-align:center;padding:32px;color:var(--text3);font-size:13px;">주문 내역이 없습니다</div>
+        </div>
+      </div>
+
+      <!-- TAB: CS / 리뷰 -->
+      <div class="tab-pane" id="tab-cs">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+          <div class="card">
+            <div class="card-title"><span>⭐ 작성한 리뷰</span><span style="font-size:12px;color:var(--text3);" id="reviewCount">0건</span></div>
+            <div id="reviewList"></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><span>🔄 반품 · 환불 현황</span></div>
+            <div id="refundSummary"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: 포인트·쿠폰 -->
+      <div class="tab-pane" id="tab-points">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+          <div>
+            <div class="card">
+              <div class="card-title"><span>💎 현재 포인트</span></div>
+              <div style="font-size:32px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--blue);margin-bottom:16px;" id="pointsDisplay">0 P</div>
+              <div class="section-label">포인트 수동 지급 / 차감</div>
+              <div style="display:flex;gap:8px;margin-bottom:8px;">
+                <input type="number" class="field-input" id="pointAmount" placeholder="양수: 지급, 음수: 차감" style="flex:1;">
+              </div>
+              <div style="margin-bottom:8px;">
+                <input type="text" class="field-input" id="pointDesc" placeholder="사유 (예: VIP 승급 축하, 잘못된 적립 차감)">
+              </div>
+              <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="adjustPoints()">포인트 처리</button>
+            </div>
+            <div class="card">
+              <div class="card-title"><span>🎟 보유 쿠폰</span><span style="font-size:12px;color:var(--text3);" id="couponCount">0개</span></div>
+              <div id="couponList"></div>
+            </div>
+          </div>
+          <div class="card" style="height:fit-content;">
+            <div class="card-title"><span>📜 포인트 이력</span></div>
+            <div style="overflow-x:auto;max-height:420px;overflow-y:auto;">
+              <table>
+                <thead><tr><th>일시</th><th>구분</th><th>금액</th><th>사유</th></tr></thead>
+                <tbody id="pointsTbody"></tbody>
+              </table>
+            </div>
+            <div id="pointsEmpty" style="display:none;text-align:center;padding:24px;color:var(--text3);font-size:13px;">포인트 이력이 없습니다</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: 분석 -->
+      <div class="tab-pane" id="tab-analytics">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;">
+          <div class="card">
+            <div class="card-title"><span>💡 고객 생애 가치 (LTV)</span></div>
+            <div id="ltvSection"></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><span>⚠️ 이탈 위험도</span></div>
+            <div id="churnSection"></div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+          <div class="card">
+            <div class="card-title"><span>📂 카테고리 구매 성향</span></div>
+            <div id="catSection"></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><span>📈 구매 패턴</span></div>
+            <div id="patternSection"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: 관리 -->
+      <div class="tab-pane" id="tab-manage">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;">
+          <div class="card">
+            <div class="card-title"><span>🏆 등급 수동 변경</span></div>
+            <div style="margin-bottom:10px;font-size:13px;color:var(--text2);">현재 등급: <span id="currentGradeDisplay" style="font-weight:700;"></span></div>
+            <div style="margin-bottom:10px;">
+              <select class="field-select" id="gradeSelect">
+                <option value="">자동 산정 (기준 기반)</option>
+                <option value="new">🆕 신규회원</option>
+                <option value="sprout">🌱 새싹</option>
+                <option value="regular">⭐ 일반</option>
+                <option value="vip">💜 VIP</option>
+                <option value="vvip">🔥 VVIP</option>
+                <option value="blacklist">🚫 블랙리스트</option>
+              </select>
+            </div>
+            <div class="field-input" style="background:var(--yellow-light);border-color:#FDE68A;font-size:12px;color:#92400E;cursor:default;margin-bottom:10px;">⚠️ 빈 값 선택 시 구매 기준으로 자동 복원됩니다</div>
+            <button class="btn btn-primary" onclick="changeGrade()">등급 변경 적용</button>
+          </div>
+          <div class="card">
+            <div class="card-title"><span>🔐 계정 상태</span></div>
+            <div id="accountStatusDisplay" style="margin-bottom:16px;font-size:13px;"></div>
+            <div class="action-grid" id="accountActions"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span>📝 관리자 내부 메모</span><span style="font-size:11px;color:var(--text3);">고객에게 노출되지 않습니다</span></div>
+          <div style="margin-bottom:12px;">
+            <textarea class="field-textarea" id="noteInput" placeholder="내부 메모를 입력하세요. 고객 응대 이력, 특이사항 등을 기록합니다."></textarea>
+            <button class="btn btn-primary btn-sm" style="margin-top:8px;" onclick="addNote()">메모 저장</button>
+          </div>
+          <div id="notesList"></div>
+        </div>
+
+        <div class="danger-zone">
+          <div class="danger-title">⛔ 위험 영역 — 신중하게 사용하세요</div>
+          <div class="action-grid">
+            <button class="btn btn-danger" onclick="confirmAction('deactivate','계정을 영구 탈퇴 처리할까요? 이 작업은 되돌릴 수 없습니다.')">계정 영구 탈퇴 처리</button>
+            <button class="btn btn-outline" onclick="confirmAction('resetpw','비밀번호 초기화 이메일을 발송할까요?')">비밀번호 초기화 이메일 발송</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+const API_URL = 'https://modulab-production.up.railway.app';
+const GRADE_INFO = {
+  new:{label:'신규회원',icon:'🆕',cls:'g-new'},
+  sprout:{label:'새싹',icon:'🌱',cls:'g-sprout'},
+  regular:{label:'일반',icon:'⭐',cls:'g-regular'},
+  vip:{label:'VIP',icon:'💜',cls:'g-vip'},
+  vvip:{label:'VVIP',icon:'🔥',cls:'g-vvip'},
+  blacklist:{label:'블랙리스트',icon:'🚫',cls:'g-blacklist'},
+};
+const CAT_LABEL = {excel:'엑셀',sheets:'구글시트',short:'숏폼',detail:'상세페이지',web:'홈페이지',program:'프로그램'};
+
+const DEMO = {
+  user:{id:'u-demo',name:'김민준',email:'minjun@example.com',phone:'010-1234-5678',nickname:'민준이',
+    birthday:'1995-03-15',gender:'male',provider:'local',is_active:true,is_dormant:false,
+    created_at:'2026-01-15T09:23:11',last_login_at:'2026-06-04T14:32:00',points:15000,
+    marketing_consent:true,referral_source:'organic',manual_grade:null,grade:'vip',
+    total_orders:8,total_spent:387000,monthly_amount:128000,last_purchased_at:'2026-06-02T11:45:00',refund_count:1,
+    shipping_addresses:[
+      {name:'김민준',phone:'010-1234-5678',address:'서울시 강남구 테헤란로 123',detail:'101호',zip:'06234',isDefault:true},
+      {name:'김민준',phone:'010-1234-5678',address:'서울시 성동구 왕십리로 456',detail:'302호',zip:'04763',isDefault:false},
+    ]},
+  orders:[
+    {id:'ord-001',final_amount:49900,status:'paid',payment_method:'카드',first_product:'프로젝트 관리 자동화',item_count:2,created_at:'2026-06-02T11:45:00'},
+    {id:'ord-002',final_amount:29900,status:'paid',payment_method:'카드',first_product:'구글시트 CRM 자동화',item_count:1,created_at:'2026-05-15T14:22:00'},
+    {id:'ord-003',final_amount:19900,status:'refunded',payment_method:'카드',first_product:'가계부 자동화',item_count:1,created_at:'2026-04-20T09:11:00'},
+    {id:'ord-004',final_amount:89900,status:'paid',payment_method:'카드',first_product:'급여 관리 자동화',item_count:3,created_at:'2026-03-10T16:55:00'},
+    {id:'ord-005',final_amount:49900,status:'paid',payment_method:'카드',first_product:'마진 계산기',item_count:1,created_at:'2026-02-22T10:30:00'},
+  ],
+  reviews:[
+    {id:'rev-001',product_name:'프로젝트 관리 자동화',rating:5,content:'정말 유용해요! 업무 효율이 많이 올랐습니다.',created_at:'2026-06-03T09:00:00'},
+    {id:'rev-002',product_name:'구글시트 CRM 자동화',rating:4,content:'기능이 많고 편리합니다. 튜토리얼이 있으면 더 좋겠어요.',created_at:'2026-05-16T12:00:00'},
+  ],
+  points:[
+    {type:'earn_review',amount:500,description:'리뷰 작성 적립',created_at:'2026-06-03T09:01:00'},
+    {type:'use_order',amount:-5000,description:'주문 포인트 사용',created_at:'2026-06-02T11:45:00'},
+    {type:'admin_add',amount:10000,description:'관리자 지급 (VIP 승급 축하)',created_at:'2026-05-01T00:00:00'},
+    {type:'earn_review',amount:500,description:'리뷰 작성 적립',created_at:'2026-05-16T12:01:00'},
+  ],
+  coupons:[
+    {code:'SUMMER15',name:'6월 여름 특가',discount_type:'percent',discount_value:15,is_used:false,expires_at:'2026-06-30T23:59:59',created_at:'2026-06-01T00:00:00'},
+    {code:'WELCOME20',name:'신규가입 환영 쿠폰',discount_type:'percent',discount_value:20,is_used:true,used_at:'2026-02-22T10:30:00',expires_at:'2026-12-31T23:59:59',created_at:'2026-01-15T09:23:11'},
+  ],
+  notes:[],
+};
+
+let data = null;
+const cid = new URLSearchParams(location.search).get('id');
+
+async function loadData() {
+  try {
+    const res = await fetch(`${API_URL}/api/admin/customers/${cid||'demo'}`, { credentials:'include' });
+    if (res.ok) data = await res.json();
+    else data = DEMO;
+  } catch { data = DEMO; }
+}
+
+function fmtDate(d) { return d ? d.slice(0,10) : '-'; }
+function fmtDT(d) { return d ? d.slice(0,16).replace('T',' ') : '-'; }
+function fmtW(n) { return n ? '₩'+Number(n).toLocaleString() : '-'; }
+function daysSince(d) { if(!d) return Infinity; return Math.floor((new Date('2026-06-04') - new Date(d))/86400000); }
+
+function renderAll() {
+  const u = data.user;
+  document.title = `${u.name} — 고객 상세`;
+  document.getElementById('breadcrumbName').textContent = u.name;
+
+  const g = GRADE_INFO[u.grade] || GRADE_INFO.new;
+  document.getElementById('avatarEl').textContent = u.name[0];
+  document.getElementById('nameEl').textContent = u.name;
+  document.getElementById('gradeBadgeEl').innerHTML = `<span class="badge ${g.cls}">${g.icon} ${g.label}</span>`;
+  let statusBadge = '';
+  if (!u.is_active) statusBadge = '<span class="badge" style="background:var(--red-light);color:var(--red);">탈퇴</span>';
+  else if (u.is_dormant) statusBadge = '<span class="badge" style="background:var(--yellow-light);color:#92400E;">정지</span>';
+  else statusBadge = '<span class="badge" style="background:var(--green-light);color:var(--green);">활성</span>';
+  document.getElementById('statusBadgeEl').innerHTML = statusBadge;
+  document.getElementById('emailEl').textContent = u.email;
+  document.getElementById('metaEl').textContent = `가입일 ${fmtDate(u.created_at)} · 최근 로그인 ${fmtDT(u.last_login_at)}`;
+
+  document.getElementById('quickStats').innerHTML = `
+    <div class="qstat"><div class="qstat-val" style="color:var(--blue);">${fmtW(u.total_spent)}</div><div class="qstat-lbl">총 구매액</div></div>
+    <div class="qstat"><div class="qstat-val">${u.total_orders}건</div><div class="qstat-lbl">총 주문수</div></div>
+    <div class="qstat"><div class="qstat-val" style="color:var(--purple);">${Number(u.points||0).toLocaleString()}P</div><div class="qstat-lbl">보유 포인트</div></div>
+    <div class="qstat"><div class="qstat-val" style="font-size:14px;">${fmtDate(u.last_purchased_at)}</div><div class="qstat-lbl">마지막 구매</div></div>`;
+
+  renderInfo();
+  renderOrders();
+  renderCS();
+  renderPoints();
+  renderAnalytics();
+  renderManage();
+}
+
+function renderInfo() {
+  const u = data.user;
+  const genderMap = {male:'남성',female:'여성',other:'기타'};
+  const providerMap = {local:'이메일',google:'구글',kakao:'카카오',naver:'네이버'};
+  const refMap = {organic:'자연 유입',ad:'광고',referral:'추천인',sns:'SNS',undefined:'-'};
+  document.getElementById('infoBasic').innerHTML = `
+    <div class="info-row"><div class="info-key">이름</div><div class="info-val">${u.name}</div></div>
+    <div class="info-row"><div class="info-key">닉네임</div><div class="info-val">${u.nickname||'-'}</div></div>
+    <div class="info-row"><div class="info-key">이메일</div><div class="info-val">${u.email}</div></div>
+    <div class="info-row"><div class="info-key">전화번호</div><div class="info-val">${u.phone||'-'}</div></div>
+    <div class="info-row"><div class="info-key">생년월일</div><div class="info-val">${u.birthday||'-'}</div></div>
+    <div class="info-row"><div class="info-key">성별</div><div class="info-val">${genderMap[u.gender]||'-'}</div></div>`;
+  document.getElementById('infoExtra').innerHTML = `
+    <div class="info-row"><div class="info-key">회원 ID</div><div class="info-val" style="font-family:'JetBrains Mono',monospace;font-size:11px;">${u.id}</div></div>
+    <div class="info-row"><div class="info-key">가입 경로</div><div class="info-val">${providerMap[u.provider]||u.provider} (${refMap[u.referral_source]||'-'})</div></div>
+    <div class="info-row"><div class="info-key">가입일</div><div class="info-val">${fmtDT(u.created_at)}</div></div>
+    <div class="info-row"><div class="info-key">최근 로그인</div><div class="info-val">${fmtDT(u.last_login_at)}</div></div>
+    <div class="info-row"><div class="info-key">마케팅 수신</div><div class="info-val">${u.marketing_consent ? '✅ 동의' : '❌ 미동의'}</div></div>
+    <div class="info-row"><div class="info-key">보유 포인트</div><div class="info-val" style="font-weight:700;color:var(--blue);">${Number(u.points||0).toLocaleString()} P</div></div>`;
+
+  const addrs = u.shipping_addresses || [];
+  const addrEl = document.getElementById('addrList');
+  if (!addrs.length) { addrEl.innerHTML = '<div style="color:var(--text3);font-size:13px;">등록된 배송지가 없습니다</div>'; return; }
+  addrEl.innerHTML = addrs.map(a => `
+    <div class="addr-card">
+      ${a.isDefault ? '<span class="addr-default">기본 배송지</span>' : ''}
+      <div style="font-weight:600;">${a.name} · ${a.phone}</div>
+      <div style="font-size:12px;color:var(--text2);margin-top:3px;">[${a.zip}] ${a.address} ${a.detail}</div>
+    </div>`).join('');
+}
+
+function renderOrders() {
+  const orders = data.orders || [];
+  const paid = orders.filter(o => o.status==='paid');
+  const totalPaid = paid.reduce((s,o) => s+o.final_amount, 0);
+  const avgOrder = paid.length ? Math.round(totalPaid/paid.length) : 0;
+  document.getElementById('orderSummary').innerHTML = `
+    <div class="summ-card"><div class="summ-val">${orders.length}건</div><div class="summ-lbl">총 주문수</div></div>
+    <div class="summ-card"><div class="summ-val" style="color:var(--blue);">${fmtW(totalPaid)}</div><div class="summ-lbl">총 구매액 (결제 완료)</div></div>
+    <div class="summ-card"><div class="summ-val">${fmtW(avgOrder)}</div><div class="summ-lbl">평균 주문 단가</div></div>
+    <div class="summ-card"><div class="summ-val" style="color:var(--red);">${data.user.refund_count||0}건</div><div class="summ-lbl">환불 횟수</div></div>`;
+  const tbody = document.getElementById('ordersTbody');
+  if (!orders.length) { document.getElementById('ordersEmpty').style.display='block'; tbody.innerHTML=''; return; }
+  const statusMap = {paid:'paid',refunded:'refunded',cancelled:'cancelled',pending:'pending'};
+  const statusLabel = {paid:'결제 완료',refunded:'환불',cancelled:'취소',pending:'대기중'};
+  tbody.innerHTML = orders.map(o => `<tr>
+    <td style="font-size:12px;">${fmtDate(o.created_at)}</td>
+    <td><div style="font-weight:500;">${o.first_product||'-'}</div>${o.item_count>1?`<div style="font-size:11px;color:var(--text3);">외 ${o.item_count-1}개</div>`:''}</td>
+    <td>${o.item_count}개</td>
+    <td style="font-family:'JetBrains Mono',monospace;font-weight:600;">${fmtW(o.final_amount)}</td>
+    <td style="font-size:12px;">${o.payment_method||'-'}</td>
+    <td><span class="order-status-${statusMap[o.status]||'pending'}">${statusLabel[o.status]||o.status}</span></td>
+  </tr>`).join('');
+}
+
+function renderCS() {
+  const reviews = data.reviews || [];
+  document.getElementById('reviewCount').textContent = `${reviews.length}건`;
+  const rl = document.getElementById('reviewList');
+  if (!reviews.length) { rl.innerHTML = '<div style="color:var(--text3);font-size:13px;">작성한 리뷰가 없습니다</div>'; }
+  else rl.innerHTML = reviews.map(r => `
+    <div style="border:1px solid var(--border);border-radius:9px;padding:12px;margin-bottom:8px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <div style="font-weight:600;font-size:13px;">${r.product_name}</div>
+        <div class="star-rating">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
+      </div>
+      <div style="font-size:13px;color:var(--text2);">${r.content}</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:4px;">${fmtDate(r.created_at)}</div>
+    </div>`).join('');
+
+  const u = data.user;
+  document.getElementById('refundSummary').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+      <div class="summ-card"><div class="summ-val" style="color:var(--red);">${u.refund_count||0}건</div><div class="summ-lbl">환불/반품 횟수</div></div>
+      <div class="summ-card"><div class="summ-val">${(data.orders||[]).filter(o=>o.status==='cancelled').length}건</div><div class="summ-lbl">취소 횟수</div></div>
+    </div>
+    <div style="font-size:12px;color:var(--text3);background:var(--slate-light);padding:12px;border-radius:8px;">
+      CS 난이도: ${u.refund_count >= 3 ? '<span style="color:var(--red);font-weight:700;">⚠️ 높음</span>' : u.refund_count >= 1 ? '<span style="color:var(--yellow);font-weight:700;">보통</span>' : '<span style="color:var(--green);font-weight:700;">낮음</span>'}
+    </div>`;
+}
+
+function renderPoints() {
+  const u = data.user;
+  document.getElementById('pointsDisplay').textContent = `${Number(u.points||0).toLocaleString()} P`;
+  const coupons = data.coupons || [];
+  document.getElementById('couponCount').textContent = `${coupons.filter(c=>!c.is_used).length}개 사용가능`;
+  const cl = document.getElementById('couponList');
+  if (!coupons.length) { cl.innerHTML = '<div style="color:var(--text3);font-size:13px;">보유 쿠폰이 없습니다</div>'; }
+  else cl.innerHTML = coupons.map(c => `
+    <div class="coupon-row ${c.is_used?'coupon-used':''}">
+      <div>
+        <div style="font-weight:600;font-size:13px;">${c.name}</div>
+        <div style="font-size:11px;color:var(--text3);">${c.code} · ${c.discount_type==='percent'?c.discount_value+'% 할인':fmtW(c.discount_value)+' 할인'}</div>
+      </div>
+      <div style="text-align:right;font-size:11px;color:var(--text3);">
+        ${c.is_used ? '<span style="color:var(--red);">사용완료</span>' : `만료 ${fmtDate(c.expires_at)}`}
+      </div>
+    </div>`).join('');
+
+  const pts = data.points || [];
+  const tbody = document.getElementById('pointsTbody');
+  if (!pts.length) { document.getElementById('pointsEmpty').style.display='block'; tbody.innerHTML=''; return; }
+  const ptypeLabel = {earn_review:'리뷰 적립',earn_event:'이벤트 적립',use_order:'주문 사용',admin_add:'관리자 지급',admin_deduct:'관리자 차감'};
+  tbody.innerHTML = pts.map(p => `<tr>
+    <td style="font-size:11px;color:var(--text3);">${fmtDate(p.created_at)}</td>
+    <td style="font-size:12px;">${ptypeLabel[p.type]||p.type}</td>
+    <td style="font-family:'JetBrains Mono',monospace;font-weight:700;" class="point-type-${p.amount>0?'earn':'use'}">${p.amount>0?'+':''}${Number(p.amount).toLocaleString()}P</td>
+    <td style="font-size:12px;color:var(--text2);">${p.description||'-'}</td>
+  </tr>`).join('');
+}
+
+function renderAnalytics() {
+  const u = data.user;
+  const joinDate = new Date(u.created_at);
+  const today = new Date('2026-06-04');
+  const monthsActive = Math.max(1, Math.round((today - joinDate) / (30*86400000)));
+  const ltv = u.total_spent;
+  const projLtv = Math.round((ltv / monthsActive) * 12);
+  const ltv_pct = Math.min(100, Math.round(projLtv / 1000000 * 100));
+
+  document.getElementById('ltvSection').innerHTML = `
+    <div style="font-size:28px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--blue);margin-bottom:6px;">${fmtW(ltv)}</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:12px;">실제 누적 구매액</div>
+    <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:4px;">연간 예상 가치 <span style="color:var(--purple);font-family:'JetBrains Mono',monospace;">${fmtW(projLtv)}</span></div>
+    <div class="ltv-bar-wrap"><div class="ltv-bar" style="width:${ltv_pct}%;background:linear-gradient(90deg,var(--blue),var(--purple));"></div></div>
+    <div style="font-size:11px;color:var(--text3);margin-top:4px;">평균 월 지출 ${fmtW(Math.round(ltv/monthsActive))} · 활동 ${monthsActive}개월</div>`;
+
+  const days = daysSince(u.last_purchased_at);
+  let riskColor, riskLabel, riskDesc;
+  if (u.total_orders === 0) { riskColor='#94A3B8'; riskLabel='해당없음'; riskDesc='아직 구매 이력이 없습니다'; }
+  else if (days <= 14) { riskColor=GRADE_INFO.sprout.cls; riskColor='#16A34A'; riskLabel='매우 안전'; riskDesc=`최근 ${days}일 전 구매`; }
+  else if (days <= 30) { riskColor='#22C55E'; riskLabel='안전'; riskDesc=`${days}일 전 마지막 구매`; }
+  else if (days <= 60) { riskColor=`#F59E0B`; riskLabel='주의'; riskDesc=`${days}일 동안 미구매`; }
+  else if (days <= 90) { riskColor='#EA580C'; riskLabel='위험'; riskDesc=`${days}일 동안 미구매 — 리마케팅 필요`; }
+  else { riskColor='#DC2626'; riskLabel='이탈'; riskDesc=`${days}일 동안 미구매 — 이탈 가능성 높음`; }
+  const riskPct = Math.min(100, Math.round(days / 90 * 100));
+  document.getElementById('churnSection').innerHTML = `
+    <div style="font-size:28px;font-weight:700;font-family:'JetBrains Mono',monospace;color:${riskColor};margin-bottom:4px;">${days === Infinity ? '∞' : days+'일'}</div>
+    <div style="font-size:13px;font-weight:700;color:${riskColor};margin-bottom:8px;">${riskLabel}</div>
+    <div class="ltv-bar-wrap"><div class="ltv-bar" style="width:${riskPct}%;background:${riskColor};"></div></div>
+    <div style="font-size:12px;color:var(--text2);margin-top:8px;">${riskDesc}</div>
+    <div style="font-size:11px;color:var(--text3);margin-top:4px;">재구매율: ${u.total_orders > 1 ? Math.round((u.total_orders-1)/u.total_orders*100)+'%' : '첫 구매'}</div>`;
+
+  // Category analysis (from orders)
+  const catCount = {};
+  (data.orders||[]).forEach(o => {
+    if (o.status!=='paid') return;
+    const cat = o.first_product?.includes('구글시트')||o.first_product?.includes('CRM') ? 'sheets' :
+                o.first_product?.includes('급여')||o.first_product?.includes('가계부')||o.first_product?.includes('마진')||o.first_product?.includes('프로젝트') ? 'excel' : 'program';
+    catCount[cat] = (catCount[cat]||0) + 1;
+  });
+  const sortedCats = Object.entries(catCount).sort((a,b)=>b[1]-a[1]);
+  document.getElementById('catSection').innerHTML = sortedCats.length
+    ? sortedCats.map(([cat,n]) => `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">
+        <span class="cat-tag cat-${cat}">${CAT_LABEL[cat]||cat}</span>
+        <div style="flex:1;margin:0 12px;background:var(--slate-light);border-radius:4px;height:8px;overflow:hidden;">
+          <div style="height:100%;background:var(--blue);border-radius:4px;width:${Math.round(n/(data.orders||[]).filter(o=>o.status==='paid').length*100)}%;"></div>
+        </div>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12px;">${n}건</span>
+      </div>`).join('')
+    : '<div style="color:var(--text3);font-size:13px;">구매 내역이 없습니다</div>';
+
+  document.getElementById('patternSection').innerHTML = `
+    <div style="font-size:13px;color:var(--text2);">
+      <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);"><span>첫 구매일</span><span style="font-weight:600;">${(data.orders||[]).length ? fmtDate([...data.orders].pop()?.created_at) : '-'}</span></div>
+      <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);"><span>마지막 구매일</span><span style="font-weight:600;">${fmtDate(u.last_purchased_at)}</span></div>
+      <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);"><span>평균 구매 주기</span><span style="font-weight:600;">${u.total_orders > 1 ? Math.round(monthsActive/u.total_orders*30)+'일' : '-'}</span></div>
+      <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);"><span>총 구매 횟수</span><span style="font-weight:600;color:var(--blue);">${u.total_orders}건</span></div>
+      <div style="display:flex;justify-content:space-between;padding:7px 0;"><span>활동 기간</span><span style="font-weight:600;">${monthsActive}개월</span></div>
+    </div>`;
+}
+
+function renderManage() {
+  const u = data.user;
+  const g = GRADE_INFO[u.grade] || GRADE_INFO.new;
+  document.getElementById('currentGradeDisplay').innerHTML = `<span class="badge ${g.cls}">${g.icon} ${g.label}</span> ${u.manual_grade ? '(수동 설정)' : '(자동 산정)'}`;
+  const gs = document.getElementById('gradeSelect');
+  gs.value = u.manual_grade || '';
+
+  let statusDesc = '';
+  if (!u.is_active) statusDesc = '<span style="color:var(--red);font-weight:700;">⛔ 탈퇴된 계정</span><br><span style="font-size:12px;color:var(--text3);">계정이 비활성화 상태입니다</span>';
+  else if (u.is_dormant) statusDesc = '<span style="color:var(--yellow);font-weight:700;">💤 정지된 계정</span><br><span style="font-size:12px;color:var(--text3);">로그인 및 구매가 제한됩니다</span>';
+  else statusDesc = '<span style="color:var(--green);font-weight:700;">✅ 정상 계정</span><br><span style="font-size:12px;color:var(--text3);">모든 기능을 정상 이용 중입니다</span>';
+  document.getElementById('accountStatusDisplay').innerHTML = statusDesc;
+
+  let actions = '';
+  if (!u.is_active) {
+    actions = `<button class="btn btn-outline" onclick="changeStatus('restore')">계정 복구</button>`;
+  } else if (u.is_dormant) {
+    actions = `<button class="btn btn-outline" onclick="changeStatus('restore')">정지 해제</button>
+               <button class="btn btn-danger" onclick="changeStatus('deactivate')">영구 탈퇴</button>`;
+  } else {
+    actions = `<button class="btn btn-yellow" onclick="changeStatus('suspend')">💤 계정 정지</button>
+               <button class="btn btn-danger" onclick="changeStatus('deactivate')">⛔ 영구 탈퇴</button>`;
+  }
+  document.getElementById('accountActions').innerHTML = actions;
+  renderNotes();
+}
+
+function renderNotes() {
+  const notes = data.notes || [];
+  const nl = document.getElementById('notesList');
+  if (!notes.length) { nl.innerHTML = '<div style="color:var(--text3);font-size:13px;">작성된 메모가 없습니다</div>'; return; }
+  nl.innerHTML = notes.map(n => `
+    <div class="note-item">
+      <button class="note-del" onclick="deleteNote('${n.id}')">✕</button>
+      <div>${n.content}</div>
+      <div class="note-date">${fmtDT(n.created_at)}</div>
+    </div>`).join('');
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+async function adjustPoints() {
+  const amount = parseInt(document.getElementById('pointAmount').value);
+  const desc = document.getElementById('pointDesc').value.trim();
+  if (!amount) return showToast('금액을 입력해주세요', 'error');
+  if (!desc) return showToast('사유를 입력해주세요', 'error');
+  try {
+    const res = await fetch(`${API_URL}/api/admin/customers/${cid}/points`, {
+      method:'POST', credentials:'include', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({amount, description:desc}),
+    });
+    if (res.ok) { const d = await res.json(); data.user.points = d.points; }
+    else data.user.points = (data.user.points||0) + amount;
+  } catch { data.user.points = (data.user.points||0) + amount; }
+  data.points = [{type:amount>0?'admin_add':'admin_deduct', amount, description:desc, created_at:new Date().toISOString()}, ...(data.points||[])];
+  document.getElementById('pointAmount').value = '';
+  document.getElementById('pointDesc').value = '';
+  renderPoints();
+  document.getElementById('pointsDisplay').textContent = `${Number(data.user.points||0).toLocaleString()} P`;
+  showToast(`포인트 ${amount>0?'지급':'차감'} 완료`);
+}
+
+async function changeGrade() {
+  const grade = document.getElementById('gradeSelect').value || null;
+  try {
+    await fetch(`${API_URL}/api/admin/customers/${cid}/grade`, {
+      method:'PUT', credentials:'include', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({grade}),
+    });
+  } catch {}
+  data.user.manual_grade = grade;
+  if (grade) data.user.grade = grade;
+  renderManage();
+  document.getElementById('gradeBadgeEl').innerHTML = `<span class="badge ${(GRADE_INFO[data.user.grade]||GRADE_INFO.new).cls}">${(GRADE_INFO[data.user.grade]||GRADE_INFO.new).icon} ${(GRADE_INFO[data.user.grade]||GRADE_INFO.new).label}</span>`;
+  showToast('등급이 변경되었습니다');
+}
+
+async function changeStatus(action) {
+  const labels = {suspend:'계정을 정지할까요?',restore:'계정을 복구할까요?',deactivate:'⚠️ 영구 탈퇴 처리합니다. 되돌릴 수 없습니다.'};
+  if (!confirm(labels[action])) return;
+  try {
+    await fetch(`${API_URL}/api/admin/customers/${cid}/status`, {
+      method:'PUT', credentials:'include', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action}),
+    });
+  } catch {}
+  if (action==='suspend') data.user.is_dormant = true;
+  else if (action==='restore') { data.user.is_dormant = false; data.user.is_active = true; }
+  else if (action==='deactivate') data.user.is_active = false;
+  renderManage();
+  let statusBadge = '';
+  if (!data.user.is_active) statusBadge = '<span class="badge" style="background:var(--red-light);color:var(--red);">탈퇴</span>';
+  else if (data.user.is_dormant) statusBadge = '<span class="badge" style="background:var(--yellow-light);color:#92400E;">정지</span>';
+  else statusBadge = '<span class="badge" style="background:var(--green-light);color:var(--green);">활성</span>';
+  document.getElementById('statusBadgeEl').innerHTML = statusBadge;
+  showToast('처리 완료');
+}
+
+async function addNote() {
+  const content = document.getElementById('noteInput').value.trim();
+  if (!content) return showToast('메모 내용을 입력해주세요', 'error');
+  const newNote = {id:'note-'+Date.now(), content, created_at: new Date().toISOString()};
+  try {
+    const res = await fetch(`${API_URL}/api/admin/customers/${cid}/notes`, {
+      method:'POST', credentials:'include', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({content}),
+    });
+    if (res.ok) { const d = await res.json(); newNote.id = d.id; }
+  } catch {}
+  data.notes = [newNote, ...(data.notes||[])];
+  document.getElementById('noteInput').value = '';
+  renderNotes();
+  showToast('메모가 저장되었습니다');
+}
+
+async function deleteNote(noteId) {
+  if (!confirm('이 메모를 삭제할까요?')) return;
+  try {
+    await fetch(`${API_URL}/api/admin/customers/${cid}/notes/${noteId}`, { method:'DELETE', credentials:'include' });
+  } catch {}
+  data.notes = (data.notes||[]).filter(n => n.id !== noteId);
+  renderNotes();
+}
+
+function confirmAction(action, msg) {
+  if (!confirm(msg)) return;
+  if (action === 'deactivate') changeStatus('deactivate');
+  else if (action === 'resetpw') showToast('비밀번호 초기화 이메일이 발송되었습니다');
+}
+
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = type==='error' ? 'var(--red)' : 'var(--navy)';
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 3200);
+}
+
+(async function(){ await loadData(); renderAll(); })();
+</script>
+</body>
+</html>
