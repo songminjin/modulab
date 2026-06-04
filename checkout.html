@@ -819,7 +819,9 @@ function updateBadge() {
 }
 
 function getCookieToken() {
-  return document.cookie.split(';').map(c => c.trim()).find(c => c.startsWith('token='))?.split('=')[1] || '';
+  // localStorage 우선 (크로스 오리진 쿠키 차단 우회)
+  return localStorage.getItem('modulab_token') ||
+    document.cookie.split(';').map(c => c.trim()).find(c => c.startsWith('token='))?.split('=')[1] || '';
 }
 
 function openDrawer() { document.getElementById('drawerOverlay').classList.add('open'); }

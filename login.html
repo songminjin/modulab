@@ -364,6 +364,7 @@ async function handleLogin(e) {
     const data = await res.json();
     if (!res.ok) { showToast(data.error || '로그인 실패'); return; }
     localStorage.setItem('user', JSON.stringify(data.user));
+    if (data.token) localStorage.setItem('modulab_token', data.token);
     window.location.href = 'index.html';
   } catch (err) {
     showToast('서버 연결 오류가 발생했습니다.');

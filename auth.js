@@ -49,6 +49,7 @@
   window.__moduLogout = async function () {
     try { await fetch(`${API_URL}/api/auth/logout`, { method: 'POST', credentials: 'include' }); } catch {}
     localStorage.removeItem('user');
+    localStorage.removeItem('modulab_token');
     location.href = location.pathname.includes('/admin/') ? '../login.html' : 'login.html';
   };
 
