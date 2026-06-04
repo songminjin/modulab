@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>상품 등록 — ModuLab 관리자</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="admin-auth.js"></script>
 <style>
 :root {
   --blue: #2563EB;
@@ -566,7 +567,7 @@ a { text-decoration: none; color: inherit; }
     </div>
 
     <div class="sidebar-bottom">
-      <a href="index.html" onclick="logout(event)"><span class="nav-icon">🚪</span>로그아웃</a>
+      <a href="index.html" onclick="adminLogout(event)"><span class="nav-icon">🚪</span>로그아웃</a>
     </div>
   </aside>
 
@@ -591,7 +592,7 @@ a { text-decoration: none; color: inherit; }
           <div class="header-user-avatar">M</div>
           <div class="header-user-name">관리자</div>
         </div>
-        <button class="header-logout-btn" onclick="logout()">로그아웃</button>
+        <button class="header-logout-btn" onclick="adminLogout()">로그아웃</button>
       </div>
     </header>
 
@@ -940,18 +941,7 @@ a { text-decoration: none; color: inherit; }
 <div id="toast"><span class="toast-icon"></span><span id="toastMsg"></span></div>
 
 <script>
-/* ── AUTH CHECK ── */
-(function() {
-  if (!sessionStorage.getItem('modulab_admin')) {
-    location.href = 'index.html';
-  }
-})();
-
-function logout(e) {
-  if (e) e.preventDefault();
-  sessionStorage.removeItem('modulab_admin');
-  location.href = 'index.html';
-}
+const API_URL = 'https://modulab-production.up.railway.app';
 
 /* ── EDIT MODE SETUP ── */
 const EDIT_ID = new URLSearchParams(location.search).get('edit');
@@ -1262,70 +1252,50 @@ async function submitProduct() {
     if (err) { showToast(err, 'error'); return; }
   }
 
-  const GAS_ENDPOINT = localStorage.getItem('modulab_gas_endpoint') || '';
-
-  const savedId = editingOriginalId || data.productId;
   const payload = {
-    // 표준화된 키 (product.html, products.html 공통 사용)
-    id: savedId,
     name: data.productName,
-    cat: data.category,
-    type: data.saleType,
-    emoji: data.selectedEmoji,
-    discount: parseInt(data.discountPrice) || 0,
-    visible: data.visibility,
-    date: new Date().toISOString().slice(0,10),
-
-    // 상세 필드
-    productId: savedId,
-    productName: data.productName,
-    category: data.category,
-    saleType: data.saleType,
-    productDesc: data.productDesc,
-    productDetail: data.productDetail,
+    short_description: data.productDesc || null,
+    description: data.productDetail || null,
     price: parseInt(data.price) || 0,
-    discountPrice: parseInt(data.discountPrice) || 0,
-    fileUrl: data.fileUrl || '',
-    fileName: data.fileName || '',
-    fileType: data.fileType || '',
-    visibility: data.visibility,
-    newBadge: data.newBadge,
-    bestBadge: data.bestBadge,
-    selectedEmoji: data.selectedEmoji,
-    detailImages: detailImages,
-    createdAt: data.createdAt,
+    discount_price: parseInt(data.discountPrice) || 0,
+    category: data.category,
+    emoji: data.selectedEmoji,
+    sale_type: data.saleType,
+    file_url: data.fileUrl || null,
+    file_name: data.fileName || null,
+    file_type: data.fileType || null,
+    is_active: data.visibility,
+    new_badge: data.newBadge,
+    best_badge: data.bestBadge,
+    meta_title: data.metaTitle || null,
+    meta_description: data.metaDesc || null,
+    detail_images: detailImages.map(i => i.dataUrl || i),
   };
 
-  if (GAS_ENDPOINT) {
-    try {
-      showToast('Google Sheets에 기록 중...', 'success');
-      const res = await fetch(GAS_ENDPOINT, {
-        method: 'POST',
+  try {
+    let res;
+    if (isEdit) {
+      res = await fetch(`${API_URL}/api/admin/products/${EDIT_ID}`, {
+        method: 'PUT',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...payload, action: isEdit ? 'updateProduct' : 'addProduct' }),
+        body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error('GAS 응답 오류');
-    } catch(e) {
-      showToast('Sheets 연동 실패: ' + e.message, 'error');
-      return;
-    }
-  }
-
-  const products = JSON.parse(localStorage.getItem('modulab_products') || '[]');
-  if (isEdit) {
-    const idx = products.findIndex(p => (p.id || p.productId) === EDIT_ID);
-    if (idx >= 0) {
-      products[idx] = { ...products[idx], ...payload, date: products[idx].date || payload.date };
     } else {
-      products.push(payload);
+      res = await fetch(`${API_URL}/api/admin/products`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
     }
-    localStorage.setItem('modulab_products', JSON.stringify(products));
-    showToast('✓ 상품이 수정되었습니다!');
-  } else {
-    products.push(payload);
-    localStorage.setItem('modulab_products', JSON.stringify(products));
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.error || '오류가 발생했습니다.');
     localStorage.removeItem('modulab_product_draft');
-    showToast('✓ 상품이 등록되었습니다! (ID: ' + savedId + ')');
+    showToast(isEdit ? '✓ 상품이 수정되었습니다!' : '✓ 상품이 등록되었습니다!', 'success');
+  } catch(e) {
+    showToast(e.message, 'error');
+    return;
   }
 
   setTimeout(() => {
@@ -1358,7 +1328,7 @@ async function submitProduct() {
 })();
 
 /* ── EDIT MODE INIT ── */
-(function() {
+(async function() {
   if (!EDIT_ID) return;
 
   // UI 변경
@@ -1370,87 +1340,56 @@ async function submitProduct() {
     btn.innerHTML = btn.innerHTML.replace('등록 완료', '수정 완료').replace('상품 등록 완료', '상품 수정 완료');
   });
 
-  // DEMO 시드 데이터 (localStorage에 없을 때 폴백)
-  const DEMO_SEED = [
-    {id:'excel-pm',  name:'프로젝트 관리 자동화', cat:'excel',  price:19900, discount:0,     type:'file',    visible:true,  emoji:'📊', date:'2026-05-10'},
-    {id:'excel-hh',  name:'가계부 자동화',         cat:'excel',  price:9900,  discount:0,     type:'file',    visible:true,  emoji:'💰', date:'2026-05-12'},
-    {id:'excel-pay', name:'급여 관리 자동화',       cat:'excel',  price:29900, discount:24900, type:'file',    visible:true,  emoji:'👥', date:'2026-05-14'},
-    {id:'excel-margin',name:'마진 계산기',          cat:'excel',  price:9900,  discount:0,     type:'file',    visible:true,  emoji:'📈', date:'2026-05-15'},
-    {id:'excel-crm', name:'CRM 고객관리 자동화',    cat:'excel',  price:29900, discount:0,     type:'file',    visible:true,  emoji:'🤝', date:'2026-05-18'},
-    {id:'excel-inv', name:'재고 관리 자동화',        cat:'excel',  price:19900, discount:0,     type:'file',    visible:true,  emoji:'📦', date:'2026-05-19'},
-    {id:'excel-attend',name:'근태 관리 자동화',     cat:'excel',  price:19900, discount:0,     type:'file',    visible:true,  emoji:'⏰', date:'2026-05-21'},
-    {id:'sheets-pm', name:'구글시트 프로젝트 관리', cat:'sheets', price:19900, discount:0,     type:'file',    visible:true,  emoji:'🔧', date:'2026-05-20'},
-    {id:'sheets-crm',name:'구글시트 CRM 자동화',   cat:'sheets', price:29900, discount:0,     type:'file',    visible:true,  emoji:'⚙️', date:'2026-05-22'},
-    {id:'short-pack',name:'숏폼 편집 템플릿 Pack', cat:'short',  price:0,     discount:0,     type:'inquiry', visible:true,  emoji:'🎬', date:'2026-05-25'},
-    {id:'detail-01', name:'상세페이지 맞춤 제작',   cat:'detail', price:0,     discount:0,     type:'inquiry', visible:true,  emoji:'🖼️', date:'2026-05-28'},
-    {id:'web-01',    name:'홈페이지 맞춤 제작',     cat:'web',    price:0,     discount:0,     type:'inquiry', visible:false, emoji:'🌐', date:'2026-06-01'},
-    {id:'prog-01',   name:'맞춤 프로그램 제작',     cat:'program',price:0,     discount:0,     type:'inquiry', visible:true,  emoji:'⚙️', date:'2026-06-01'},
-  ];
-
-  // localStorage에서 찾기, 없으면 DEMO에서 찾기
-  let products = JSON.parse(localStorage.getItem('modulab_products') || '[]');
-  let p = products.find(x => (x.id || x.productId) === EDIT_ID);
-
-  if (!p) {
-    // DEMO seed에서 찾아 localStorage에 저장
-    const seed = DEMO_SEED.find(x => x.id === EDIT_ID);
-    if (seed) {
-      const normalized = {
-        id: seed.id, name: seed.name, cat: seed.cat, type: seed.type,
-        emoji: seed.emoji, discount: seed.discount, visible: seed.visible, date: seed.date,
-        productId: seed.id, productName: seed.name, category: seed.cat, saleType: seed.type,
-        price: seed.price, discountPrice: seed.discount, selectedEmoji: seed.emoji, visibility: seed.visible,
-        productDesc: '', productDetail: '', fileUrl: '', fileName: '', fileType: '',
-        newBadge: true, bestBadge: false, detailImages: [], createdAt: seed.date + 'T00:00:00.000Z',
-      };
-      products.push(normalized);
-      localStorage.setItem('modulab_products', JSON.stringify(products));
-      p = normalized;
+  let p = null;
+  try {
+    const res = await fetch(`${API_URL}/api/admin/products`, { credentials: 'include' });
+    if (res.ok) {
+      const all = await res.json();
+      p = all.find(x => x.id === EDIT_ID);
     }
-  }
+  } catch(e) {}
 
   if (!p) {
     showToast('상품을 찾을 수 없습니다.', 'error');
     return;
   }
 
-  editingOriginalId = p.id || p.productId;
+  editingOriginalId = p.id;
 
   // 폼 채우기
   const set = (id, val) => { const el = document.getElementById(id); if (el && val !== undefined && val !== null) el.value = val; };
-  set('productName', p.productName || p.name);
-  set('category', p.category || p.cat);
-  set('productDesc', p.productDesc || '');
-  set('productDetail', p.productDetail || '');
+  set('productName', p.name);
+  set('category', p.category);
+  set('productDesc', p.short_description || '');
+  set('productDetail', p.description || '');
   set('price', p.price);
-  set('discountPrice', p.discountPrice || p.discount || 0);
-  set('fileUrl', p.fileUrl || '');
-  set('fileName', p.fileName || '');
-  set('fileType', p.fileType || '');
-  set('metaTitle', p.metaTitle || '');
-  set('metaDesc', p.metaDesc || '');
+  set('discountPrice', p.discount_price || 0);
+  set('fileUrl', p.file_url || '');
+  set('fileName', p.file_name || '');
+  set('fileType', p.file_type || '');
+  set('metaTitle', p.meta_title || '');
+  set('metaDesc', p.meta_description || '');
 
   // 판매유형
-  selectSaleType(p.saleType || p.type || 'file');
+  selectSaleType(p.sale_type || 'file');
 
   // 이모지
-  const emojiSrc = p.selectedEmoji || p.emoji;
-  if (emojiSrc) {
-    const chip = document.querySelector(`.emoji-chip[data-emoji="${emojiSrc}"]`);
+  if (p.emoji) {
+    const chip = document.querySelector(`.emoji-chip[data-emoji="${p.emoji}"]`);
     if (chip) selectEmoji(chip);
   }
 
   // 토글
   const vis = document.getElementById('visibility');
-  if (vis) { vis.checked = p.visibility !== false && p.visible !== false; toggleVisibility(vis); }
+  if (vis) { vis.checked = p.is_active !== false; toggleVisibility(vis); }
   const nb = document.getElementById('newBadge');
-  if (nb) nb.checked = p.newBadge !== false;
+  if (nb) nb.checked = p.new_badge !== false;
   const bb = document.getElementById('bestBadge');
-  if (bb) bb.checked = !!p.bestBadge;
+  if (bb) bb.checked = !!p.best_badge;
 
   // 상세 이미지
-  if (p.detailImages && p.detailImages.length) {
-    detailImages = p.detailImages;
+  if (p.detail_images && p.detail_images.length) {
+    detailImages = p.detail_images.map(url => ({ dataUrl: url, name: '' }));
     renderDetailImgGrid();
   }
 
@@ -1469,51 +1408,55 @@ async function submitProduct() {
 })();
 
 /* ── LOAD COUPON & SITE EVENTS ── */
-(function loadEventLists() {
+(async function loadEventLists() {
   const today = new Date().toISOString().slice(0,10);
+  const couponEl = document.getElementById('couponEventList');
+  const siteEl = document.getElementById('siteEventList');
 
   // Coupon events
-  let couponEvents = [];
-  try { couponEvents = JSON.parse(localStorage.getItem('modulab_coupon_events') || '[]'); } catch {}
-  const couponEl = document.getElementById('couponEventList');
-  if (!couponEl) return;
-
-  const activeCoupons = couponEvents.filter(e => e.startDate <= today && today <= e.endDate);
-  if (!activeCoupons.length) {
-    couponEl.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:8px 0;">현재 진행 중인 쿠폰 이벤트가 없습니다.</div>';
-  } else {
-    couponEl.innerHTML = activeCoupons.map(ev => {
-      const discLabel = ev.discountType === 'percent' ? `-${ev.discountValue}%` : `-${(ev.discountValue||0).toLocaleString()}원`;
-      return `<div class="coupon-item">
-        <div class="coupon-check"><input type="checkbox" id="cev_${ev.id}" data-evid="${ev.id}"></div>
-        <label class="coupon-name" for="cev_${ev.id}">${ev.name} <span style="font-size:11px;color:var(--text3);">(~${ev.endDate})</span></label>
-        <span class="coupon-rate">${discLabel}</span>
-      </div>`;
-    }).join('');
+  try {
+    const res = await fetch(`${API_URL}/api/admin/events/coupons`, { credentials: 'include' });
+    const couponEvents = res.ok ? await res.json() : [];
+    const activeCoupons = couponEvents.filter(e => e.start_date <= today && today <= e.end_date);
+    if (!activeCoupons.length) {
+      if (couponEl) couponEl.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:8px 0;">현재 진행 중인 쿠폰 이벤트가 없습니다.</div>';
+    } else {
+      if (couponEl) couponEl.innerHTML = activeCoupons.map(ev => {
+        const discLabel = ev.discount_type === 'percent' ? `-${ev.discount_value}%` : `-${Number(ev.discount_value||0).toLocaleString()}원`;
+        return `<div class="coupon-item">
+          <div class="coupon-check"><input type="checkbox" id="cev_${ev.id}" data-evid="${ev.id}"></div>
+          <label class="coupon-name" for="cev_${ev.id}">${ev.name} <span style="font-size:11px;color:var(--text3);">(~${ev.end_date})</span></label>
+          <span class="coupon-rate">${discLabel}</span>
+        </div>`;
+      }).join('');
+    }
+  } catch(e) {
+    if (couponEl) couponEl.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:8px 0;">불러오기 실패</div>';
   }
 
   // Site events
-  let siteEvents = [];
-  try { siteEvents = JSON.parse(localStorage.getItem('modulab_site_events') || '[]'); } catch {}
-  const siteEl = document.getElementById('siteEventList');
-  if (!siteEl) return;
-
-  const activeSiteEvents = siteEvents.filter(e => e.startDate <= today && today <= e.endDate);
-  if (!activeSiteEvents.length) {
-    siteEl.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:8px 0;">현재 진행 중인 사이트 이벤트가 없습니다.</div>';
-  } else {
-    const typeLabel = { discount:'💸 가격할인', bundle:'📦 묶음상품', other:'✏️ 직접입력' };
-    siteEl.innerHTML = activeSiteEvents.map(ev => {
-      let benefit = '';
-      if (ev.eventType === 'discount') benefit = `${ev.discountValue}% 할인`;
-      else if (ev.eventType === 'bundle') benefit = `${ev.bundleCount}개↑ 구매 시 ${ev.bundleRate}% 할인`;
-      else benefit = (ev.otherDesc || '').slice(0, 30);
-      return `<div class="coupon-item">
-        <div class="coupon-check"><input type="checkbox" id="sev_${ev.id}" data-sevid="${ev.id}"></div>
-        <label class="coupon-name" for="sev_${ev.id}">${ev.name} <span style="font-size:11px;color:var(--text3);">${typeLabel[ev.eventType]||''}</span></label>
-        <span class="coupon-rate" style="color:var(--purple);">${benefit}</span>
-      </div>`;
-    }).join('');
+  try {
+    const res = await fetch(`${API_URL}/api/admin/events/sites`, { credentials: 'include' });
+    const siteEvents = res.ok ? await res.json() : [];
+    const activeSiteEvents = siteEvents.filter(e => e.start_date <= today && today <= e.end_date);
+    if (!activeSiteEvents.length) {
+      if (siteEl) siteEl.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:8px 0;">현재 진행 중인 사이트 이벤트가 없습니다.</div>';
+    } else {
+      const typeLabel = { discount:'💸 가격할인', bundle:'📦 묶음상품', other:'✏️ 직접입력' };
+      if (siteEl) siteEl.innerHTML = activeSiteEvents.map(ev => {
+        let benefit = '';
+        if (ev.event_type === 'discount') benefit = `${ev.discount_value}% 할인`;
+        else if (ev.event_type === 'bundle') benefit = `${ev.bundle_count}개↑ 구매 시 ${ev.bundle_rate}% 할인`;
+        else benefit = (ev.other_desc || '').slice(0, 30);
+        return `<div class="coupon-item">
+          <div class="coupon-check"><input type="checkbox" id="sev_${ev.id}" data-sevid="${ev.id}"></div>
+          <label class="coupon-name" for="sev_${ev.id}">${ev.name} <span style="font-size:11px;color:var(--text3);">${typeLabel[ev.event_type]||''}</span></label>
+          <span class="coupon-rate" style="color:var(--purple);">${benefit}</span>
+        </div>`;
+      }).join('');
+    }
+  } catch(e) {
+    if (siteEl) siteEl.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:8px 0;">불러오기 실패</div>';
   }
 })();
 </script>

@@ -135,3 +135,68 @@ CREATE INDEX IF NOT EXISTS idx_cart_user ON cart_items(user_id);
 CREATE INDEX IF NOT EXISTS idx_orders_user ON orders(user_id);
 CREATE INDEX IF NOT EXISTS idx_downloads_user ON downloads(user_id);
 CREATE INDEX IF NOT EXISTS idx_reviews_product ON reviews(product_id);
+
+-- Migration: dormant account columns
+ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login_at TIMESTAMP;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS is_dormant BOOLEAN DEFAULT false;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS dormant_at TIMESTAMP;
+
+-- Migration: product extended fields
+ALTER TABLE products ADD COLUMN IF NOT EXISTS discount_price INTEGER DEFAULT 0;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS sale_type VARCHAR(20) DEFAULT 'file';
+ALTER TABLE products ADD COLUMN IF NOT EXISTS short_description VARCHAR(255);
+ALTER TABLE products ADD COLUMN IF NOT EXISTS detail_images JSONB DEFAULT '[]';
+ALTER TABLE products ADD COLUMN IF NOT EXISTS new_badge BOOLEAN DEFAULT true;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS best_badge BOOLEAN DEFAULT false;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS meta_title VARCHAR(255);
+ALTER TABLE products ADD COLUMN IF NOT EXISTS meta_description TEXT;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS file_name VARCHAR(255);
+ALTER TABLE products ADD COLUMN IF NOT EXISTS file_type VARCHAR(50);
+
+-- Coupon events table
+CREATE TABLE IF NOT EXISTS coupon_events (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name VARCHAR(255) NOT NULL,
+  discount_type VARCHAR(20) NOT NULL CHECK (discount_type IN ('percent', 'amount')),
+  discount_value NUMERIC(10,2) NOT NULL,
+  start_date DATE NOT NULL,
+  end_date DATE NOT NULL,
+  note TEXT,
+  created_by UUID REFERENCES users(id),
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS coupon_event_products (
+  coupon_event_id UUID REFERENCES coupon_events(id) ON DELETE CASCADE,
+  product_id VARCHAR(255) NOT NULL,
+  PRIMARY KEY (coupon_event_id, product_id)
+);
+
+-- Site events table
+CREATE TABLE IF NOT EXISTS site_events (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name VARCHAR(255) NOT NULL,
+  banner_img TEXT,
+  desc_images JSONB DEFAULT '[]',
+  start_date DATE NOT NULL,
+  end_date DATE NOT NULL,
+  event_type VARCHAR(20) NOT NULL CHECK (event_type IN ('discount', 'bundle', 'other')),
+  discount_value NUMERIC(10,2) DEFAULT 0,
+  bundle_count INTEGER DEFAULT 0,
+  bundle_rate NUMERIC(10,2) DEFAULT 0,
+  other_desc TEXT,
+  created_by UUID REFERENCES users(id),
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS site_event_products (
+  site_event_id UUID REFERENCES site_events(id) ON DELETE CASCADE,
+  product_id VARCHAR(255) NOT NULL,
+  PRIMARY KEY (site_event_id, product_id)
+);
+
+-- Indexes for events
+CREATE INDEX IF NOT EXISTS idx_coupon_events_dates ON coupon_events(start_date, end_date);
+CREATE INDEX IF NOT EXISTS idx_site_events_dates ON site_events(start_date, end_date);

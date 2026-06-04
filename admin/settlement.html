@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>정산 현황판 — ModuLab 관리자</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="admin-auth.js"></script>
 <style>
 :root{
   --blue:#2563EB;--blue-dark:#1D4ED8;--blue-light:#EFF6FF;--blue-mid:#BFDBFE;
@@ -166,15 +167,6 @@ td{padding:11px 14px;font-size:13px;vertical-align:middle;}
 </head>
 <body>
 
-<script>
-(function(){
-  var ADMIN_EMAIL = 'songminjin123@gmail.com';
-  var hasSession = sessionStorage.getItem('modulab_admin') === 'true';
-  var hasMainAuth = false;
-  try { var u = JSON.parse(localStorage.getItem('user')); hasMainAuth = !!(u && (u.email === ADMIN_EMAIL || u.role === 'admin')); } catch(e) {}
-  if (!hasSession && !hasMainAuth) location.replace('index.html');
-})();
-</script>
 
 <div class="mobile-guard">
   <div class="mobile-guard-icon">🖥️</div>
@@ -223,7 +215,7 @@ td{padding:11px 14px;font-size:13px;vertical-align:middle;}
       </ul>
     </div>
     <div class="sidebar-bottom">
-      <a href="index.html" onclick="logout(event)"><span class="nav-icon">🚪</span>로그아웃</a>
+      <a href="index.html" onclick="adminLogout(event)"><span class="nav-icon">🚪</span>로그아웃</a>
     </div>
   </aside>
 
@@ -241,7 +233,7 @@ td{padding:11px 14px;font-size:13px;vertical-align:middle;}
           <div class="header-user-avatar" id="userAvatar">M</div>
           <div class="header-user-name" id="userName">관리자</div>
         </div>
-        <button class="header-logout-btn" onclick="logout()">로그아웃</button>
+        <button class="header-logout-btn" onclick="adminLogout()">로그아웃</button>
       </div>
     </header>
 
@@ -371,7 +363,6 @@ td{padding:11px 14px;font-size:13px;vertical-align:middle;}
 
 <script>
 /* AUTH */
-function logout(e){ if(e)e.preventDefault(); sessionStorage.removeItem('modulab_admin'); location.href='index.html'; }
 (function(){
   try{
     const u=JSON.parse(localStorage.getItem('user'));

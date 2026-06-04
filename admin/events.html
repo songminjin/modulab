@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>이벤트 관리 — ModuLab 관리자</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="admin-auth.js"></script>
 <style>
 :root {
   --blue:#2563EB;--blue-dark:#1D4ED8;--blue-light:#EFF6FF;--blue-mid:#BFDBFE;
@@ -282,7 +283,7 @@ input[type="checkbox"]{accent-color:var(--blue);width:15px;height:15px;cursor:po
       </ul>
     </div>
     <div class="sidebar-bottom">
-      <a href="index.html" onclick="logout(event)"><span class="nav-icon">🚪</span>로그아웃</a>
+      <a href="index.html" onclick="adminLogout(event)"><span class="nav-icon">🚪</span>로그아웃</a>
     </div>
   </aside>
 
@@ -302,7 +303,7 @@ input[type="checkbox"]{accent-color:var(--blue);width:15px;height:15px;cursor:po
           <div class="header-user-avatar">M</div>
           <div class="header-user-name">관리자</div>
         </div>
-        <button class="header-logout-btn" onclick="logout()">로그아웃</button>
+        <button class="header-logout-btn" onclick="adminLogout()">로그아웃</button>
       </div>
     </header>
 
@@ -684,8 +685,7 @@ input[type="checkbox"]{accent-color:var(--blue);width:15px;height:15px;cursor:po
 <div id="toast"><span id="toastMsg"></span></div>
 
 <script>
-(function(){ if(!sessionStorage.getItem('modulab_admin')) location.href='index.html'; })();
-function logout(e){ if(e)e.preventDefault(); sessionStorage.removeItem('modulab_admin'); location.href='index.html'; }
+const API_URL = 'https://modulab-production.up.railway.app';
 
 /* ── CONSTANTS ── */
 const CAT_LABEL = {excel:'엑셀 프로그램',sheets:'구글시트',short:'숏폼 템플릿',detail:'상세페이지',web:'홈페이지 제작',program:'프로그램 제작'};
@@ -730,15 +730,88 @@ let bannerImgData = '';
 let descImgData = [];
 
 /* ── LOAD / SAVE ── */
-function loadData() {
-  try { const s = localStorage.getItem('modulab_products'); products = s ? JSON.parse(s) : [...DEMO_PRODUCTS]; } catch { products = [...DEMO_PRODUCTS]; }
-  try { const s = localStorage.getItem('modulab_coupon_events'); couponEvents = s ? JSON.parse(s) : [...DEMO_COUPON_EVENTS]; } catch { couponEvents = [...DEMO_COUPON_EVENTS]; }
-  try { const s = localStorage.getItem('modulab_site_events'); siteEvents = s ? JSON.parse(s) : [...DEMO_SITE_EVENTS]; } catch { siteEvents = [...DEMO_SITE_EVENTS]; }
-  if (!localStorage.getItem('modulab_coupon_events')) localStorage.setItem('modulab_coupon_events', JSON.stringify(couponEvents));
-  if (!localStorage.getItem('modulab_site_events')) localStorage.setItem('modulab_site_events', JSON.stringify(siteEvents));
+async function loadData() {
+  try {
+    const [prodRes, couponRes, siteRes] = await Promise.all([
+      fetch(`${API_URL}/api/admin/products`, { credentials: 'include' }),
+      fetch(`${API_URL}/api/admin/events/coupons`, { credentials: 'include' }),
+      fetch(`${API_URL}/api/admin/events/sites`, { credentials: 'include' }),
+    ]);
+    products = prodRes.ok ? (await prodRes.json()).map(p => ({ ...p, cat: p.category, price: p.price })) : [...DEMO_PRODUCTS];
+    couponEvents = couponRes.ok ? (await couponRes.json()).map(e => ({
+      ...e,
+      discountType: e.discount_type,
+      discountValue: e.discount_value,
+      startDate: e.start_date,
+      endDate: e.end_date,
+      appliedProducts: e.applied_products || [],
+    })) : [...DEMO_COUPON_EVENTS];
+    siteEvents = siteRes.ok ? (await siteRes.json()).map(e => ({
+      ...e,
+      startDate: e.start_date,
+      endDate: e.end_date,
+      eventType: e.event_type,
+      discountValue: e.discount_value,
+      bundleCount: e.bundle_count,
+      bundleRate: e.bundle_rate,
+      otherDesc: e.other_desc,
+      bannerImg: e.banner_img,
+      descImages: e.desc_images || [],
+      appliedProducts: e.applied_products || [],
+    })) : [...DEMO_SITE_EVENTS];
+  } catch(e) {
+    console.warn('[events] loadData error:', e);
+    products = [...DEMO_PRODUCTS];
+    couponEvents = [...DEMO_COUPON_EVENTS];
+    siteEvents = [...DEMO_SITE_EVENTS];
+  }
 }
-function saveCouponEvents() { localStorage.setItem('modulab_coupon_events', JSON.stringify(couponEvents)); }
-function saveSiteEventsStore() { localStorage.setItem('modulab_site_events', JSON.stringify(siteEvents)); }
+
+async function saveCouponEvents(ev, isEdit) {
+  const payload = {
+    name: ev.name,
+    discount_type: ev.discountType,
+    discount_value: ev.discountValue,
+    start_date: ev.startDate,
+    end_date: ev.endDate,
+    note: ev.note || null,
+    applied_products: ev.appliedProducts || [],
+  };
+  const url = isEdit ? `${API_URL}/api/admin/events/coupons/${ev.id}` : `${API_URL}/api/admin/events/coupons`;
+  const res = await fetch(url, {
+    method: isEdit ? 'PUT' : 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) { const d = await res.json(); throw new Error(d.error || '오류'); }
+  return res.json();
+}
+
+async function saveSiteEventsStore(ev, isEdit) {
+  const payload = {
+    name: ev.name,
+    banner_img: ev.bannerImg || null,
+    desc_images: ev.descImages || [],
+    start_date: ev.startDate,
+    end_date: ev.endDate,
+    event_type: ev.eventType,
+    discount_value: ev.discountValue || 0,
+    bundle_count: ev.bundleCount || 0,
+    bundle_rate: ev.bundleRate || 0,
+    other_desc: ev.otherDesc || null,
+    applied_products: ev.appliedProducts || [],
+  };
+  const url = isEdit ? `${API_URL}/api/admin/events/sites/${ev.id}` : `${API_URL}/api/admin/events/sites`;
+  const res = await fetch(url, {
+    method: isEdit ? 'PUT' : 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) { const d = await res.json(); throw new Error(d.error || '오류'); }
+  return res.json();
+}
 
 /* ── TAB ── */
 function switchTab(tab) {
@@ -829,7 +902,7 @@ function updateCouponAssignUI() {
   document.getElementById('couponAssignPreview').textContent = names.join(', ') + more;
 }
 
-function saveCouponEvent() {
+async function saveCouponEvent() {
   const name = document.getElementById('couponName').value.trim();
   const val = parseFloat(document.getElementById('couponValue').value);
   const start = document.getElementById('couponStartDate').value;
@@ -840,8 +913,9 @@ function saveCouponEvent() {
   if (!start || !end) return showToast('기간을 설정해주세요.', 'error');
   if (start > end) return showToast('종료일이 시작일보다 앞설 수 없습니다.', 'error');
 
+  const isEdit = !!currentEditCouponId;
   const ev = {
-    id: currentEditCouponId || ('cev-' + Date.now().toString(36)),
+    id: currentEditCouponId || null,
     name,
     discountType: currentDiscountType,
     discountValue: val,
@@ -849,29 +923,31 @@ function saveCouponEvent() {
     endDate: end,
     appliedProducts: [...couponAssignedProducts],
     note: document.getElementById('couponNote').value.trim(),
-    createdAt: currentEditCouponId ? (couponEvents.find(e => e.id === currentEditCouponId)?.createdAt || new Date().toISOString()) : new Date().toISOString(),
   };
 
-  if (currentEditCouponId) {
-    const idx = couponEvents.findIndex(e => e.id === currentEditCouponId);
-    if (idx >= 0) couponEvents[idx] = ev;
-  } else {
-    couponEvents.unshift(ev);
+  try {
+    const saved = await saveCouponEvents(ev, isEdit);
+    await loadData();
+    closeCouponForm();
+    renderCouponTable();
+    updateStats();
+    showToast(isEdit ? '쿠폰 이벤트가 수정되었습니다.' : '쿠폰 이벤트가 등록되었습니다.', 'success');
+  } catch(e) {
+    showToast(e.message || '저장 중 오류가 발생했습니다.', 'error');
   }
-  saveCouponEvents();
-  closeCouponForm();
-  renderCouponTable();
-  updateStats();
-  showToast(currentEditCouponId ? '쿠폰 이벤트가 수정되었습니다.' : '쿠폰 이벤트가 등록되었습니다.', 'success');
 }
 
-function deleteCouponEvent(id) {
+async function deleteCouponEvent(id) {
   if (!confirm('이 쿠폰 이벤트를 삭제할까요?')) return;
-  couponEvents = couponEvents.filter(e => e.id !== id);
-  saveCouponEvents();
-  renderCouponTable();
-  updateStats();
-  showToast('삭제되었습니다.');
+  try {
+    await fetch(`${API_URL}/api/admin/events/coupons/${id}`, { method: 'DELETE', credentials: 'include' });
+    await loadData();
+    renderCouponTable();
+    updateStats();
+    showToast('삭제되었습니다.');
+  } catch(e) {
+    showToast('삭제 중 오류가 발생했습니다.', 'error');
+  }
 }
 
 function renderCouponTable() {
@@ -1021,7 +1097,7 @@ function updateSiteAssignUI() {
   document.getElementById('siteAssignPreview').textContent = names.join(', ') + more;
 }
 
-function saveSiteEvent() {
+async function saveSiteEvent() {
   const name = document.getElementById('siteName').value.trim();
   const start = document.getElementById('siteStartDate').value;
   const end = document.getElementById('siteEndDate').value;
@@ -1033,8 +1109,9 @@ function saveSiteEvent() {
     if (!v || v <= 0) return showToast('할인율을 입력해주세요.', 'error');
   }
 
+  const isEdit = !!currentEditSiteId;
   const ev = {
-    id: currentEditSiteId || ('sev-' + Date.now().toString(36)),
+    id: currentEditSiteId || null,
     name,
     bannerImg: bannerImgData,
     descImages: [...descImgData],
@@ -1046,29 +1123,31 @@ function saveSiteEvent() {
     bundleRate: parseInt(document.getElementById('bundleRate').value) || 0,
     otherDesc: document.getElementById('siteOtherDesc').value.trim(),
     appliedProducts: [...siteAssignedProducts],
-    createdAt: currentEditSiteId ? (siteEvents.find(e => e.id === currentEditSiteId)?.createdAt || new Date().toISOString()) : new Date().toISOString(),
   };
 
-  if (currentEditSiteId) {
-    const idx = siteEvents.findIndex(e => e.id === currentEditSiteId);
-    if (idx >= 0) siteEvents[idx] = ev;
-  } else {
-    siteEvents.unshift(ev);
+  try {
+    await saveSiteEventsStore(ev, isEdit);
+    await loadData();
+    closeSiteForm();
+    renderSiteTable();
+    updateStats();
+    showToast(isEdit ? '사이트 이벤트가 수정되었습니다.' : '사이트 이벤트가 등록되었습니다.', 'success');
+  } catch(e) {
+    showToast(e.message || '저장 중 오류가 발생했습니다.', 'error');
   }
-  saveSiteEventsStore();
-  closeSiteForm();
-  renderSiteTable();
-  updateStats();
-  showToast(currentEditSiteId ? '사이트 이벤트가 수정되었습니다.' : '사이트 이벤트가 등록되었습니다.', 'success');
 }
 
-function deleteSiteEvent(id) {
+async function deleteSiteEvent(id) {
   if (!confirm('이 사이트 이벤트를 삭제할까요?')) return;
-  siteEvents = siteEvents.filter(e => e.id !== id);
-  saveSiteEventsStore();
-  renderSiteTable();
-  updateStats();
-  showToast('삭제되었습니다.');
+  try {
+    await fetch(`${API_URL}/api/admin/events/sites/${id}`, { method: 'DELETE', credentials: 'include' });
+    await loadData();
+    renderSiteTable();
+    updateStats();
+    showToast('삭제되었습니다.');
+  } catch(e) {
+    showToast('삭제 중 오류가 발생했습니다.', 'error');
+  }
 }
 
 function renderSiteTable() {
@@ -1203,8 +1282,8 @@ function showToast(msg, type = 'success') {
 }
 
 /* ── INIT ── */
-(function init() {
-  loadData();
+(async function init() {
+  await loadData();
   renderCouponTable();
   renderSiteTable();
   updateStats();

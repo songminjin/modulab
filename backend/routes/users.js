@@ -105,4 +105,33 @@ router.delete('/me', authenticate, async (req, res) => {
   res.json({ message: '회원 탈퇴가 완료됐습니다.' });
 });
 
+// GET /api/users/me/export — 개인정보 내려받기 (GDPR/개인정보보호법)
+router.get('/me/export', authenticate, async (req, res) => {
+  try {
+    const [userRes, ordersRes, downloadsRes, reviewsRes, pointsRes] = await Promise.all([
+      db.query('SELECT id, email, name, nickname, phone, provider, points, created_at, last_login_at FROM users WHERE id=$1', [req.user.id]),
+      db.query(`SELECT o.id, o.final_amount, o.status, o.paid_at, o.created_at,
+                json_agg(json_build_object('name', p.name, 'price', oi.price)) as items
+                FROM orders o JOIN order_items oi ON oi.order_id=o.id JOIN products p ON p.id=oi.product_id
+                WHERE o.user_id=$1 GROUP BY o.id ORDER BY o.created_at DESC`, [req.user.id]),
+      db.query('SELECT p.name, d.download_count, d.last_downloaded_at, d.created_at FROM downloads d JOIN products p ON p.id=d.product_id WHERE d.user_id=$1', [req.user.id]),
+      db.query('SELECT p.name, r.rating, r.content, r.created_at FROM reviews r JOIN products p ON p.id=r.product_id WHERE r.user_id=$1', [req.user.id]),
+      db.query('SELECT type, amount, description, created_at FROM point_history WHERE user_id=$1 ORDER BY created_at DESC', [req.user.id]),
+    ]);
+    const exportData = {
+      exported_at: new Date().toISOString(),
+      profile: userRes.rows[0],
+      orders: ordersRes.rows,
+      downloads: downloadsRes.rows,
+      reviews: reviewsRes.rows,
+      point_history: pointsRes.rows,
+    };
+    res.setHeader('Content-Disposition', 'attachment; filename="modulab_my_data.json"');
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    res.json(exportData);
+  } catch (err) {
+    res.status(500).json({ error: '데이터 내보내기 중 오류가 발생했습니다.' });
+  }
+});
+
 module.exports = router;

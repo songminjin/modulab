@@ -6,6 +6,7 @@ const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const passport = require('passport');
 const rateLimit = require('express-rate-limit');
+const db = require('./config/db');
 
 const app = express();
 
@@ -51,6 +52,24 @@ app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: '서버 오류가 발생했습니다.' });
 });
+
+// ── 휴면 계정 자동 처리 (매일 자정) ──
+async function checkDormantAccounts() {
+  try {
+    const { rowCount } = await db.query(
+      `UPDATE users SET is_dormant=true, dormant_at=NOW()
+       WHERE is_dormant=false AND is_active=true AND last_login_at IS NOT NULL
+       AND last_login_at < NOW() - INTERVAL '1 year'`
+    );
+    if (rowCount > 0) console.log(`[휴면 계정] ${rowCount}개 계정이 휴면 처리됐습니다.`);
+  } catch (err) {
+    console.error('[휴면 계정 체크 오류]', err);
+  }
+}
+
+checkDormantAccounts();
+const DORMANT_CHECK_INTERVAL = 24 * 60 * 60 * 1000;
+setInterval(checkDormantAccounts, DORMANT_CHECK_INTERVAL);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`ModuLab 서버 실행 중: http://localhost:${PORT}`));

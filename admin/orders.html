@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>주문 관리 — ModuLab 관리자</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="admin-auth.js"></script>
 <style>
 :root {
   --blue: #2563EB; --blue-dark: #1D4ED8; --blue-light: #EFF6FF; --blue-mid: #BFDBFE;
@@ -323,7 +324,7 @@ input[type="checkbox"] { accent-color:var(--blue); width:15px; height:15px; curs
       </ul>
     </div>
     <div class="sidebar-bottom">
-      <a href="index.html" onclick="logout(event)"><span class="nav-icon">🚪</span>로그아웃</a>
+      <a href="index.html" onclick="adminLogout(event)"><span class="nav-icon">🚪</span>로그아웃</a>
     </div>
   </aside>
 
@@ -343,7 +344,7 @@ input[type="checkbox"] { accent-color:var(--blue); width:15px; height:15px; curs
           <div class="header-user-avatar">M</div>
           <div class="header-user-name">관리자</div>
         </div>
-        <button class="header-logout-btn" onclick="logout()">로그아웃</button>
+        <button class="header-logout-btn" onclick="adminLogout()">로그아웃</button>
       </div>
     </header>
 
@@ -493,9 +494,6 @@ input[type="checkbox"] { accent-color:var(--blue); width:15px; height:15px; curs
 <div id="toast"><span id="toastMsg"></span></div>
 
 <script>
-/* ── AUTH ── */
-(function(){ if(!sessionStorage.getItem('modulab_admin')) location.href='index.html'; })();
-function logout(e){ if(e)e.preventDefault(); sessionStorage.removeItem('modulab_admin'); location.href='index.html'; }
 
 /* ── MOCK DATA ── */
 const MOCK_ORDERS = [

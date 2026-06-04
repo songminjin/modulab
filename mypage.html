@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>마이페이지 — ModuLab</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.mypage-wrap { max-width: 900px; margin: 40px auto; padding: 0 20px 60px; }
+.mypage-title { font-size: 24px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+.mypage-sub { font-size: 14px; color: var(--text3); margin-bottom: 28px; }
+
+/* Tabs */
+.mp-tabs { display: flex; gap: 4px; border-bottom: 2px solid var(--border); margin-bottom: 28px; }
+.mp-tab {
+  padding: 10px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+  border: none; background: none; color: var(--text3); font-family: inherit;
+  border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all .15s;
+}
+.mp-tab:hover { color: var(--text2); }
+.mp-tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+
+.mp-section { display: none; }
+.mp-section.active { display: block; }
+
+/* Cards */
+.mp-card {
+  background: white; border: 1px solid var(--border); border-radius: 12px;
+  padding: 24px; margin-bottom: 20px;
+}
+.mp-card-title {
+  font-size: 15px; font-weight: 700; color: var(--text);
+  margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+}
+
+/* Form fields */
+.mp-field { margin-bottom: 16px; }
+.mp-label { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; display: block; }
+.mp-input {
+  width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px;
+  font-size: 14px; font-family: inherit; color: var(--text); background: white;
+  outline: none; transition: border-color .15s;
+}
+.mp-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
+.mp-input:read-only { background: var(--slate-light); color: var(--text3); cursor: default; }
+.mp-input::placeholder { color: var(--text3); }
+
+.mp-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 600px) { .mp-row { grid-template-columns: 1fr; } }
+
+/* Buttons */
+.mp-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600;
+  cursor: pointer; font-family: inherit; border: none; transition: all .15s;
+}
+.mp-btn-primary { background: var(--blue); color: white; }
+.mp-btn-primary:hover { background: #1D4ED8; }
+.mp-btn-outline { background: white; color: var(--text2); border: 1px solid var(--border); }
+.mp-btn-outline:hover { background: var(--slate-light); }
+.mp-btn-danger { background: #FEF2F2; color: #DC2626; border: 1px solid #FCA5A5; }
+.mp-btn-danger:hover { background: #DC2626; color: white; }
+
+/* Order list */
+.order-card {
+  border: 1px solid var(--border); border-radius: 10px; margin-bottom: 14px;
+  overflow: hidden;
+}
+.order-card-head {
+  background: var(--slate-light); padding: 12px 16px;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  flex-wrap: wrap;
+}
+.order-id { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text3); }
+.order-date { font-size: 12px; color: var(--text3); }
+.order-status {
+  font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 12px;
+}
+.s-paid { background: #DCFCE7; color: #16A34A; }
+.s-pending { background: #FEE2E2; color: #DC2626; }
+.s-cancelled { background: var(--slate-light); color: var(--text3); border: 1px solid var(--border); }
+.s-refunded { background: #FEF3C7; color: #D97706; }
+.order-card-body { padding: 14px 16px; }
+.order-item-row { display: flex; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid #F8FAFC; }
+.order-item-row:last-child { border-bottom: none; }
+.order-item-name { font-size: 13px; font-weight: 500; flex: 1; }
+.order-item-price { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text2); }
+.order-total { text-align: right; padding-top: 10px; font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 700; color: var(--blue); }
+
+/* Download list */
+.dl-item {
+  display: flex; align-items: center; gap: 14px; padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+.dl-item:last-child { border-bottom: none; }
+.dl-emoji { width: 44px; height: 44px; background: var(--slate-light); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+.dl-info { flex: 1; }
+.dl-name { font-size: 14px; font-weight: 600; color: var(--text); }
+.dl-meta { font-size: 12px; color: var(--text3); margin-top: 2px; font-family: 'JetBrains Mono', monospace; }
+
+/* Privacy section */
+.privacy-info-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.privacy-info-row:last-child { border-bottom: none; }
+.privacy-key { font-size: 13px; font-weight: 600; color: var(--text2); }
+.privacy-val { font-size: 13px; color: var(--text); font-family: 'JetBrains Mono', monospace; }
+
+/* Empty state */
+.mp-empty { text-align: center; padding: 48px 20px; color: var(--text3); }
+.mp-empty-icon { font-size: 36px; margin-bottom: 10px; }
+.mp-empty-msg { font-size: 14px; }
+
+/* Toast */
+#mp-toast {
+  position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(80px);
+  background: var(--navy); color: white; padding: 13px 24px; border-radius: 10px;
+  font-size: 14px; font-weight: 500; box-shadow: 0 8px 24px rgba(0,0,0,.25);
+  transition: transform .3s ease, opacity .3s ease; opacity: 0; z-index: 9000; white-space: nowrap;
+}
+#mp-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+/* Alert box */
+.mp-alert { padding: 12px 16px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; }
+.mp-alert-info { background: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE; }
+.mp-alert-warn { background: #FFFBEB; color: #B45309; border: 1px solid #FDE68A; }
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-left">
+      <div class="hamburger" onclick="openDrawer()">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+    <div class="nav-center">
+      <a href="index.html" class="nav-logo">
+        <div class="logo-mark"></div>
+        Modu<span>Lab</span>
+      </a>
+    </div>
+    <div class="nav-right">
+      <div id="nav-auth" style="display:flex;align-items:center;gap:8px;">
+        <button class="nav-btn nav-btn-ghost" onclick="location.href='login.html'">로그인</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- DRAWER -->
+<div class="drawer-overlay" id="drawerOverlay">
+  <div class="drawer-backdrop" onclick="closeDrawer()"></div>
+  <div class="drawer-panel">
+    <div class="drawer-header">
+      <div class="drawer-logo">
+        <div class="logo-mark" style="width:28px;height:28px;"></div>
+        Modu<span>Lab</span>
+      </div>
+      <button class="drawer-close" onclick="closeDrawer()">✕</button>
+    </div>
+    <div id="drawer-auth" style="display:flex;gap:8px;padding:16px 20px;border-bottom:1px solid var(--border);">
+      <button class="nav-btn nav-btn-ghost" onclick="location.href='login.html'" style="flex:1;justify-content:center;">로그인</button>
+      <button class="nav-btn nav-btn-primary" onclick="location.href='register.html'" style="flex:1;justify-content:center;">회원가입</button>
+    </div>
+  </div>
+</div>
+
+<div class="mypage-wrap">
+  <div class="mypage-title">마이페이지</div>
+  <div class="mypage-sub">내 정보, 구매 이력, 다운로드, 개인정보를 관리합니다.</div>
+
+  <!-- Tabs -->
+  <div class="mp-tabs">
+    <button class="mp-tab active" onclick="switchTab('profile')">내 정보</button>
+    <button class="mp-tab" onclick="switchTab('orders')">구매 이력</button>
+    <button class="mp-tab" onclick="switchTab('downloads')">내 다운로드</button>
+    <button class="mp-tab" onclick="switchTab('privacy')">개인정보 관리</button>
+  </div>
+
+  <!-- ─── Tab: 내 정보 ─── -->
+  <div class="mp-section active" id="tab-profile">
+
+    <div class="mp-card">
+      <div class="mp-card-title">👤 프로필 정보</div>
+      <div class="mp-row">
+        <div class="mp-field">
+          <label class="mp-label">이름</label>
+          <input type="text" class="mp-input" id="profileName" placeholder="이름">
+        </div>
+        <div class="mp-field">
+          <label class="mp-label">닉네임</label>
+          <input type="text" class="mp-input" id="profileNickname" placeholder="닉네임">
+        </div>
+      </div>
+      <div class="mp-row">
+        <div class="mp-field">
+          <label class="mp-label">이메일</label>
+          <input type="email" class="mp-input" id="profileEmail" readonly>
+        </div>
+        <div class="mp-field">
+          <label class="mp-label">휴대폰</label>
+          <input type="tel" class="mp-input" id="profilePhone" placeholder="010-0000-0000">
+        </div>
+      </div>
+      <button class="mp-btn mp-btn-primary" onclick="saveProfile()">저장</button>
+    </div>
+
+    <div class="mp-card" id="pwCard">
+      <div class="mp-card-title">🔑 비밀번호 변경</div>
+      <div class="mp-field">
+        <label class="mp-label">현재 비밀번호</label>
+        <input type="password" class="mp-input" id="currentPw" placeholder="현재 비밀번호" autocomplete="current-password">
+      </div>
+      <div class="mp-row">
+        <div class="mp-field">
+          <label class="mp-label">새 비밀번호</label>
+          <input type="password" class="mp-input" id="newPw" placeholder="8자 이상" autocomplete="new-password">
+        </div>
+        <div class="mp-field">
+          <label class="mp-label">새 비밀번호 확인</label>
+          <input type="password" class="mp-input" id="newPwConfirm" placeholder="새 비밀번호 확인" autocomplete="new-password">
+        </div>
+      </div>
+      <button class="mp-btn mp-btn-outline" onclick="changePassword()">비밀번호 변경</button>
+    </div>
+
+  </div>
+
+  <!-- ─── Tab: 구매 이력 ─── -->
+  <div class="mp-section" id="tab-orders">
+    <div id="ordersList">
+      <div class="mp-empty"><div class="mp-empty-icon">🧾</div><div class="mp-empty-msg">로딩 중...</div></div>
+    </div>
+  </div>
+
+  <!-- ─── Tab: 내 다운로드 ─── -->
+  <div class="mp-section" id="tab-downloads">
+    <div class="mp-card">
+      <div class="mp-card-title">📂 다운로드 가능 상품</div>
+      <div id="downloadsList">
+        <div class="mp-empty"><div class="mp-empty-icon">📂</div><div class="mp-empty-msg">로딩 중...</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Tab: 개인정보 관리 ─── -->
+  <div class="mp-section" id="tab-privacy">
+
+    <div class="mp-card">
+      <div class="mp-card-title">📋 수집된 개인정보</div>
+      <div class="mp-alert mp-alert-info">
+        모듈랩은 서비스 제공을 위해 아래 정보를 수집·이용합니다. 자세한 내용은 <a href="privacy.html" style="font-weight:700;text-decoration:underline;">개인정보 처리방침</a>을 확인하세요.
+      </div>
+      <div id="privacyInfo">
+        <div class="mp-empty"><div class="mp-empty-icon">📋</div><div class="mp-empty-msg">로딩 중...</div></div>
+      </div>
+    </div>
+
+    <div class="mp-card">
+      <div class="mp-card-title">⬇️ 내 데이터 내려받기</div>
+      <p style="font-size:14px;color:var(--text2);margin-bottom:16px;line-height:1.7;">
+        개인정보보호법에 따라 수집된 모든 개인 데이터를 JSON 파일로 다운로드할 수 있습니다.
+        구매 이력, 다운로드 이력, 리뷰, 포인트 내역이 포함됩니다.
+      </p>
+      <button class="mp-btn mp-btn-outline" onclick="exportMyData()">⬇️ 내 데이터 다운로드</button>
+    </div>
+
+    <div class="mp-card" style="border-color:#FCA5A5;">
+      <div class="mp-card-title" style="color:#DC2626;">⚠️ 회원 탈퇴</div>
+      <div class="mp-alert mp-alert-warn" style="margin-bottom:16px;">
+        탈퇴 시 모든 구매 이력, 다운로드 권한, 포인트가 삭제되며 복구할 수 없습니다.
+      </div>
+      <button class="mp-btn mp-btn-danger" onclick="deleteAccount()">회원 탈퇴</button>
+    </div>
+
+  </div>
+</div>
+
+<div id="mp-toast"></div>
+
+<script src="auth.js"></script>
+<script>
+const API = 'https://modulab-production.up.railway.app';
+let currentUser = null;
+
+// ── Auth check ──
+(async function init() {
+  try {
+    const r = await fetch(`${API}/api/auth/me`, { credentials: 'include' });
+    if (!r.ok) { location.href = 'login.html'; return; }
+    const data = await r.json();
+    currentUser = data.user || data;
+    if (!currentUser) { location.href = 'login.html'; return; }
+    populateProfile(currentUser);
+    // Hide password card for social login users
+    if (currentUser.provider && currentUser.provider !== 'local') {
+      const pwCard = document.getElementById('pwCard');
+      if (pwCard) pwCard.style.display = 'none';
+    }
+  } catch(e) {
+    location.href = 'login.html';
+  }
+})();
+
+// ── Tab switching ──
+const tabBtns = document.querySelectorAll('.mp-tab');
+const tabSections = document.querySelectorAll('.mp-section');
+
+function switchTab(tabName) {
+  tabBtns.forEach(btn => btn.classList.remove('active'));
+  tabSections.forEach(s => s.classList.remove('active'));
+
+  const idx = ['profile','orders','downloads','privacy'].indexOf(tabName);
+  if (tabBtns[idx]) tabBtns[idx].classList.add('active');
+  const section = document.getElementById('tab-' + tabName);
+  if (section) section.classList.add('active');
+
+  if (tabName === 'orders') loadOrders();
+  if (tabName === 'downloads') loadDownloads();
+  if (tabName === 'privacy') loadPrivacy();
+}
+
+// ── Profile ──
+function populateProfile(user) {
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+  set('profileName', user.name);
+  set('profileNickname', user.nickname);
+  set('profileEmail', user.email);
+  set('profilePhone', user.phone);
+}
+
+async function saveProfile() {
+  const name = document.getElementById('profileName').value.trim();
+  const nickname = document.getElementById('profileNickname').value.trim();
+  const phone = document.getElementById('profilePhone').value.trim();
+  if (!name) { showToast('이름을 입력해주세요.'); return; }
+  try {
+    const res = await fetch(`${API}/api/users/me`, {
+      method: 'PUT',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, nickname, phone }),
+    });
+    if (!res.ok) throw new Error();
+    showToast('프로필이 저장되었습니다.');
+  } catch(e) {
+    showToast('저장에 실패했습니다.');
+  }
+}
+
+async function changePassword() {
+  const currentPw = document.getElementById('currentPw').value;
+  const newPw = document.getElementById('newPw').value;
+  const newPwConfirm = document.getElementById('newPwConfirm').value;
+  if (!currentPw || !newPw) { showToast('비밀번호를 입력해주세요.'); return; }
+  if (newPw.length < 8) { showToast('새 비밀번호는 8자 이상이어야 합니다.'); return; }
+  if (newPw !== newPwConfirm) { showToast('새 비밀번호가 일치하지 않습니다.'); return; }
+  try {
+    const res = await fetch(`${API}/api/users/password`, {
+      method: 'PUT',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ currentPassword: currentPw, newPassword: newPw }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || '변경 실패');
+    showToast('비밀번호가 변경되었습니다.');
+    document.getElementById('currentPw').value = '';
+    document.getElementById('newPw').value = '';
+    document.getElementById('newPwConfirm').value = '';
+  } catch(e) {
+    showToast(e.message || '비밀번호 변경에 실패했습니다.');
+  }
+}
+
+// ── Orders ──
+async function loadOrders() {
+  const container = document.getElementById('ordersList');
+  try {
+    const res = await fetch(`${API}/api/users/orders`, { credentials: 'include' });
+    if (!res.ok) throw new Error();
+    const orders = await res.json();
+    if (!orders.length) {
+      container.innerHTML = '<div class="mp-empty"><div class="mp-empty-icon">🧾</div><div class="mp-empty-msg">구매 이력이 없습니다.</div></div>';
+      return;
+    }
+    const statusMap = { paid: '결제완료', pending: '대기중', cancelled: '취소됨', refunded: '환불됨' };
+    const statusCls = { paid: 's-paid', pending: 's-pending', cancelled: 's-cancelled', refunded: 's-refunded' };
+    container.innerHTML = orders.map(o => {
+      const items = Array.isArray(o.items) ? o.items : [];
+      return `<div class="order-card">
+        <div class="order-card-head">
+          <div>
+            <div class="order-id">#${o.id.slice(0,8).toUpperCase()}</div>
+            <div class="order-date">${new Date(o.created_at).toLocaleDateString('ko-KR')}</div>
+          </div>
+          <span class="order-status ${statusCls[o.status] || ''}">${statusMap[o.status] || o.status}</span>
+        </div>
+        <div class="order-card-body">
+          ${items.map(item => `
+            <div class="order-item-row">
+              <div class="order-item-name">${item.name || '-'}</div>
+              <div class="order-item-price">₩${Number(item.price || 0).toLocaleString('ko-KR')}</div>
+            </div>`).join('')}
+          <div class="order-total">합계: ₩${Number(o.final_amount || 0).toLocaleString('ko-KR')}</div>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    container.innerHTML = '<div class="mp-empty"><div class="mp-empty-icon">⚠️</div><div class="mp-empty-msg">불러오기에 실패했습니다.</div></div>';
+  }
+}
+
+// ── Downloads ──
+async function loadDownloads() {
+  const container = document.getElementById('downloadsList');
+  try {
+    const res = await fetch(`${API}/api/users/downloads`, { credentials: 'include' });
+    if (!res.ok) throw new Error();
+    const downloads = await res.json();
+    if (!downloads.length) {
+      container.innerHTML = '<div class="mp-empty"><div class="mp-empty-icon">📂</div><div class="mp-empty-msg">다운로드 가능한 상품이 없습니다.</div></div>';
+      return;
+    }
+    container.innerHTML = downloads.map(d => `
+      <div class="dl-item">
+        <div class="dl-emoji">${d.emoji || '📦'}</div>
+        <div class="dl-info">
+          <div class="dl-name">${d.name}</div>
+          <div class="dl-meta">다운로드 ${d.download_count || 0}회 · ${d.last_downloaded_at ? '최근: ' + new Date(d.last_downloaded_at).toLocaleDateString('ko-KR') : '미다운로드'}</div>
+        </div>
+        <button class="mp-btn mp-btn-outline" style="font-size:13px;padding:7px 14px;" onclick="downloadFile('${d.product_id}')">다시 다운로드</button>
+      </div>`).join('');
+  } catch(e) {
+    container.innerHTML = '<div class="mp-empty"><div class="mp-empty-icon">⚠️</div><div class="mp-empty-msg">불러오기에 실패했습니다.</div></div>';
+  }
+}
+
+async function downloadFile(productId) {
+  try {
+    const res = await fetch(`${API}/api/products/${productId}/download`, { credentials: 'include' });
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    if (data.url) { window.open(data.url, '_blank'); showToast('다운로드를 시작합니다.'); }
+    else throw new Error();
+  } catch(e) {
+    showToast('다운로드에 실패했습니다. 관리자에게 문의해주세요.');
+  }
+}
+
+// ── Privacy ──
+async function loadPrivacy() {
+  const container = document.getElementById('privacyInfo');
+  if (!currentUser) return;
+  const rows = [
+    { key: '이름', val: currentUser.name || '-' },
+    { key: '이메일', val: currentUser.email || '-' },
+    { key: '휴대폰', val: currentUser.phone || '미등록' },
+    { key: '닉네임', val: currentUser.nickname || '미등록' },
+    { key: '가입 방식', val: currentUser.provider === 'local' ? '이메일' : (currentUser.provider || '-') },
+    { key: '가입일', val: currentUser.created_at ? new Date(currentUser.created_at).toLocaleDateString('ko-KR') : '-' },
+    { key: '포인트', val: (currentUser.points || 0) + 'P' },
+  ];
+  container.innerHTML = rows.map(r => `
+    <div class="privacy-info-row">
+      <span class="privacy-key">${r.key}</span>
+      <span class="privacy-val">${r.val}</span>
+    </div>`).join('');
+}
+
+async function exportMyData() {
+  try {
+    const res = await fetch(`${API}/api/users/me/export`, { credentials: 'include' });
+    if (!res.ok) throw new Error();
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'modulab_my_data.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('데이터 다운로드가 시작됩니다.');
+  } catch(e) {
+    showToast('데이터 내보내기에 실패했습니다.');
+  }
+}
+
+async function deleteAccount() {
+  if (!confirm('정말로 탈퇴하시겠습니까?\n\n모든 구매 이력, 다운로드 권한, 포인트가 삭제되며 복구할 수 없습니다.')) return;
+  if (!confirm('탈퇴 후에는 동일 이메일로 재가입 시 이전 데이터를 복구할 수 없습니다.\n계속하시겠습니까?')) return;
+  try {
+    const res = await fetch(`${API}/api/users/me`, { method: 'DELETE', credentials: 'include' });
+    if (!res.ok) throw new Error();
+    showToast('회원 탈퇴가 완료되었습니다.');
+    setTimeout(() => { location.href = 'index.html'; }, 1500);
+  } catch(e) {
+    showToast('탈퇴 처리에 실패했습니다. 다시 시도해주세요.');
+  }
+}
+
+// ── Toast ──
+function showToast(msg) {
+  const t = document.getElementById('mp-toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+// ── Drawer ──
+function openDrawer() { document.getElementById('drawerOverlay')?.classList.add('open'); }
+function closeDrawer() { document.getElementById('drawerOverlay')?.classList.remove('open'); }
+</script>
+</body>
+</html>

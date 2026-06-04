@@ -31,11 +31,17 @@
       ? `<a href="${getAdminUrl()}" class="nav-btn nav-btn-ghost" style="flex:1;justify-content:center;">⚙️ 관리자</a>`
       : '';
 
+    const mypageUrl = location.pathname.includes('/admin/') ? '../mypage.html' : 'mypage.html';
+    const mypageBtn = `<a href="${mypageUrl}" class="nav-btn nav-btn-ghost">마이페이지</a>`;
+    const drawerMypageBtn = `<a href="${mypageUrl}" class="nav-btn nav-btn-ghost" style="flex:1;justify-content:center;">마이페이지</a>`;
+
     if (navAuth) navAuth.innerHTML =
       `<span style="font-size:13px;color:var(--text2);white-space:nowrap;">${escHtml(user.name)}님</span>` +
+      mypageBtn +
       adminBtn +
       `<button class="nav-btn nav-btn-ghost" onclick="window.__moduLogout()">로그아웃</button>`;
     if (drawerAuth) drawerAuth.innerHTML =
+      drawerMypageBtn +
       drawerAdminBtn +
       `<button class="nav-btn nav-btn-ghost" onclick="window.__moduLogout()" style="flex:1;justify-content:center;">로그아웃</button>`;
   }

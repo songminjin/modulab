@@ -54,6 +54,8 @@ const handleSocialLogin = async (profile, provider, done) => {
         [provider, providerId, user.id]);
     }
 
+    await db.query('UPDATE users SET last_login_at = NOW(), is_dormant = false WHERE id = $1', [user.id]);
+
     return done(null, user);
   } catch (err) {
     return done(err);
@@ -119,6 +121,8 @@ router.post('/login', async (req, res) => {
 
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) return res.status(401).json({ error: '이메일 또는 비밀번호가 올바르지 않습니다.' });
+
+    await db.query('UPDATE users SET last_login_at = NOW(), is_dormant = false WHERE id = $1', [user.id]);
 
     const token = createToken(user);
     setTokenCookie(res, token);

@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>상품 목록 — ModuLab 관리자</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="admin-auth.js"></script>
 <style>
 :root {
   --blue:#2563EB; --blue-dark:#1D4ED8; --blue-light:#EFF6FF; --blue-mid:#BFDBFE;
@@ -158,7 +159,7 @@ input[type="checkbox"]{accent-color:var(--blue);width:15px;height:15px;cursor:po
       <div class="sidebar-section-label">바로가기</div>
       <ul class="sidebar-nav"><li><a href="../index.html" target="_blank"><span class="nav-icon">🌐</span>쇼핑몰 보기</a></li></ul>
     </div>
-    <div class="sidebar-bottom"><a href="index.html" onclick="logout(event)"><span class="nav-icon">🚪</span>로그아웃</a></div>
+    <div class="sidebar-bottom"><a href="index.html" onclick="adminLogout(event)"><span class="nav-icon">🚪</span>로그아웃</a></div>
   </aside>
 
   <div class="main-wrap">
@@ -170,7 +171,7 @@ input[type="checkbox"]{accent-color:var(--blue);width:15px;height:15px;cursor:po
       <div class="header-right">
         <button class="header-noti-btn">🔔<span class="noti-dot"></span></button>
         <div class="header-user"><div class="header-user-avatar">M</div><div class="header-user-name">관리자</div></div>
-        <button class="header-logout-btn" onclick="logout()">로그아웃</button>
+        <button class="header-logout-btn" onclick="adminLogout()">로그아웃</button>
       </div>
     </header>
 
@@ -237,21 +238,8 @@ input[type="checkbox"]{accent-color:var(--blue);width:15px;height:15px;cursor:po
 <div id="toast"><span id="toastMsg"></span></div>
 
 <script>
-(function(){ if(!sessionStorage.getItem('modulab_admin')) location.href='index.html'; })();
-function logout(e){ if(e)e.preventDefault(); sessionStorage.removeItem('modulab_admin'); location.href='index.html'; }
 
-const DEMO = [
-  {id:'excel-pm',  name:'프로젝트 관리 자동화', cat:'excel',  price:19900, discount:0,     type:'file',    visible:true,  emoji:'📊', date:'2026-05-10'},
-  {id:'excel-hh',  name:'가계부 자동화',         cat:'excel',  price:9900,  discount:0,     type:'file',    visible:true,  emoji:'💰', date:'2026-05-12'},
-  {id:'excel-pay', name:'급여 관리 자동화',       cat:'excel',  price:29900, discount:24900, type:'file',    visible:true,  emoji:'👥', date:'2026-05-14'},
-  {id:'excel-margin',name:'마진 계산기',          cat:'excel',  price:9900,  discount:0,     type:'file',    visible:true,  emoji:'📈', date:'2026-05-15'},
-  {id:'sheets-pm', name:'구글시트 프로젝트 관리', cat:'sheets', price:19900, discount:0,     type:'file',    visible:true,  emoji:'🔧', date:'2026-05-20'},
-  {id:'sheets-crm',name:'구글시트 CRM 자동화',   cat:'sheets', price:29900, discount:0,     type:'file',    visible:true,  emoji:'⚙️', date:'2026-05-22'},
-  {id:'short-pack',name:'숏폼 편집 템플릿 Pack', cat:'short',  price:0,     discount:0,     type:'inquiry', visible:true,  emoji:'🎬', date:'2026-05-25'},
-  {id:'detail-01', name:'상세페이지 맞춤 제작',   cat:'detail', price:0,     discount:0,     type:'inquiry', visible:true,  emoji:'🖼️', date:'2026-05-28'},
-  {id:'web-01',    name:'홈페이지 맞춤 제작',     cat:'web',    price:0,     discount:0,     type:'inquiry', visible:false, emoji:'🌐', date:'2026-06-01'},
-  {id:'prog-01',   name:'맞춤 프로그램 제작',     cat:'program',price:0,     discount:0,     type:'inquiry', visible:true,  emoji:'⚙️', date:'2026-06-01'},
-];
+const API_URL = 'https://modulab-production.up.railway.app';
 
 const catLabel  = {excel:'엑셀 프로그램',sheets:'구글시트',short:'숏폼 템플릿',detail:'상세페이지',web:'홈페이지 제작',program:'프로그램 제작'};
 const catCls    = {excel:'cat-excel',sheets:'cat-sheets',short:'cat-short',detail:'cat-detail',web:'cat-web',program:'cat-program'};
@@ -261,23 +249,24 @@ let products = [];
 let filterCat = 'all';
 let selected = new Set();
 
-function load(){
-  const saved = localStorage.getItem('modulab_products');
-  let seeded = false;
-  if(saved){ try{ const arr=JSON.parse(saved); products=arr.length?arr:DEMO; }catch{products=[...DEMO];} }
-  else { products=[...DEMO]; seeded=true; }
-  // DEMO 상품을 localStorage에 시드해서 수정 기능이 동작하도록 함
-  if(seeded || !saved){
-    const normalized = products.map(p=>({
-      id:p.id, name:p.name, cat:p.cat, type:p.type, emoji:p.emoji,
-      discount:p.discount, visible:p.visible, date:p.date,
-      productId:p.id, productName:p.name, category:p.cat, saleType:p.type,
-      price:p.price, discountPrice:p.discount||0, selectedEmoji:p.emoji, visibility:p.visible,
-      productDesc:p.productDesc||'', productDetail:p.productDetail||'',
-      fileUrl:p.fileUrl||'', fileName:p.fileName||'', fileType:p.fileType||'',
-      newBadge:true, bestBadge:false, detailImages:[], createdAt:(p.date||'2026-05-01')+'T00:00:00.000Z',
+async function load(){
+  try {
+    const res = await fetch(`${API_URL}/api/admin/products`, { credentials: 'include' });
+    if (!res.ok) throw new Error('API error');
+    products = await res.json();
+    // normalize backend fields to match UI expectations
+    products = products.map(p => ({
+      ...p,
+      cat: p.category,
+      type: p.sale_type || 'file',
+      emoji: p.emoji || '📦',
+      discount: p.discount_price || 0,
+      visible: p.is_active,
+      date: p.created_at ? p.created_at.slice(0,10) : '',
     }));
-    localStorage.setItem('modulab_products', JSON.stringify(normalized));
+  } catch(e) {
+    console.warn('[products] API error:', e.message);
+    products = [];
   }
   render();
 }
@@ -331,17 +320,35 @@ function render(){
     </tr>`).join('');
 }
 
-function toggleVisible(id, cb){
-  const p = products.find(p=>p.id===id);
-  if(p){ p.visible=cb.checked; localStorage.setItem('modulab_products',JSON.stringify(products)); showToast(p.visible?'상품을 노출했습니다':'상품을 숨겼습니다'); }
+async function toggleVisible(id, cb){
+  const isActive = cb.checked;
+  try {
+    const res = await fetch(`${API_URL}/api/admin/products/${id}`, {
+      method: 'PUT',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ is_active: isActive })
+    });
+    if (!res.ok) throw new Error();
+    const p = products.find(p=>p.id===id);
+    if(p){ p.visible=isActive; p.is_active=isActive; }
+    showToast(isActive?'상품을 노출했습니다':'상품을 숨겼습니다');
+  } catch(e) {
+    cb.checked = !isActive;
+    showToast('변경에 실패했습니다.', true);
+  }
 }
 function toggleSel(id,cb){ if(cb.checked)selected.add(id); else selected.delete(id); }
 function toggleAll(cb){ products.forEach(p=>{if(cb.checked)selected.add(p.id);else selected.delete(p.id);}); render(); }
-function deleteProduct(id){
+async function deleteProduct(id){
   if(!confirm('이 상품을 삭제할까요?')) return;
-  products=products.filter(p=>p.id!==id);
-  localStorage.setItem('modulab_products',JSON.stringify(products));
-  render(); showToast('상품이 삭제되었습니다');
+  try {
+    await fetch(`${API_URL}/api/admin/products/${id}`, { method: 'DELETE', credentials: 'include' });
+    products = products.filter(p=>p.id!==id);
+    render(); showToast('상품이 삭제되었습니다');
+  } catch(e) {
+    showToast('삭제에 실패했습니다.', true);
+  }
 }
 function exportCSV(){
   const rows=[['ID','상품명','카테고리','판매가','할인가','판매유형','노출','등록일']];
@@ -351,7 +358,7 @@ function exportCSV(){
   a.download='modulab_products_'+new Date().toISOString().slice(0,10)+'.csv'; a.click();
   showToast('CSV 다운로드 완료');
 }
-function showToast(msg){ const t=document.getElementById('toast'); document.getElementById('toastMsg').textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
+function showToast(msg, isError){ const t=document.getElementById('toast'); document.getElementById('toastMsg').textContent=msg; t.classList.add('show'); if(isError) t.style.background='#DC2626'; else t.style.background=''; setTimeout(()=>{ t.classList.remove('show'); t.style.background=''; },3000); }
 load();
 </script>
 </body>

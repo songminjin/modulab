@@ -96,8 +96,12 @@ body {
   <div class="login-error" id="loginError">비밀번호가 올바르지 않습니다.</div>
 
   <div class="field">
+    <label class="field-label" for="adminEmail">이메일</label>
+    <input type="email" class="field-input" id="adminEmail" placeholder="관리자 이메일" autocomplete="username">
+  </div>
+  <div class="field">
     <label class="field-label" for="adminPw">비밀번호</label>
-    <input type="password" class="field-input" id="adminPw" placeholder="관리자 비밀번호를 입력하세요" onkeydown="if(event.key==='Enter')doLogin()">
+    <input type="password" class="field-input" id="adminPw" placeholder="비밀번호" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
   </div>
   <button class="login-btn" onclick="doLogin()">로그인</button>
 
@@ -107,20 +111,52 @@ body {
 </div>
 
 <script>
-(function() {
-  if (sessionStorage.getItem('modulab_admin')) location.href = 'dashboard.html';
+const API = 'https://modulab-production.up.railway.app';
+
+// If already authed as admin, redirect
+(async function() {
+  try {
+    const r = await fetch(`${API}/api/auth/me`, { credentials: 'include' });
+    if (r.ok) {
+      const data = await r.json();
+      const user = data.user || data;
+      if (user && user.role === 'admin') location.href = 'dashboard.html';
+    }
+  } catch {}
 })();
 
-function doLogin() {
+async function doLogin() {
+  const email = document.getElementById('adminEmail').value.trim();
   const pw = document.getElementById('adminPw').value;
-  const ADMIN_PW = localStorage.getItem('modulab_admin_pw') || 'admin1234';
-  if (pw === ADMIN_PW) {
-    sessionStorage.setItem('modulab_admin', 'true');
+  const errEl = document.getElementById('loginError');
+  const btn = document.querySelector('.login-btn');
+
+  errEl.style.display = 'none';
+  if (!email || !pw) { errEl.textContent = '이메일과 비밀번호를 입력해주세요.'; errEl.style.display = 'block'; return; }
+
+  btn.disabled = true;
+  btn.textContent = '로그인 중...';
+
+  try {
+    const res = await fetch(`${API}/api/auth/login`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: pw })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || '로그인 실패');
+    const user = data.user || data;
+    if (user.role !== 'admin') throw new Error('관리자 계정이 아닙니다.');
     location.href = 'dashboard.html';
-  } else {
-    document.getElementById('loginError').style.display = 'block';
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.style.display = 'block';
     document.getElementById('adminPw').value = '';
     document.getElementById('adminPw').focus();
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '로그인';
   }
 }
 </script>
