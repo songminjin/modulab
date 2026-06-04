@@ -461,6 +461,42 @@ function submitInquiry() {
     }
   });
   if (!valid) { alert('필수 항목을 모두 입력해 주세요.'); return; }
+
+  const typeMap = {
+    '주문 / 결제 문의': 'refund',
+    '상품 이용 문의': 'usage',
+    '환불 / 취소 문의': 'refund',
+    '오류 / 버그 신고': 'etc',
+    '맞춤 제작 문의': 'custom',
+    '기타': 'etc'
+  };
+
+  const now = new Date();
+  const dateStr = now.getFullYear() + '-' +
+    String(now.getMonth()+1).padStart(2,'0') + '-' +
+    String(now.getDate()).padStart(2,'0') + ' ' +
+    String(now.getHours()).padStart(2,'0') + ':' +
+    String(now.getMinutes()).padStart(2,'0');
+
+  const typeVal = inputs[0].value;
+  const inquiry = {
+    id: 'CS' + Date.now(),
+    name: inputs[1].value.trim(),
+    email: inputs[2].value.trim(),
+    orderId: inputs[3].value.trim(),
+    subject: inputs[4].value.trim(),
+    body: inputs[5].value.trim(),
+    type: typeMap[typeVal] || 'etc',
+    answered: false,
+    answer: '',
+    date: dateStr
+  };
+
+  const saved = localStorage.getItem('modulab_cs');
+  const list = saved ? JSON.parse(saved) : [];
+  list.unshift(inquiry);
+  localStorage.setItem('modulab_cs', JSON.stringify(list));
+
   alert('문의가 접수되었습니다.\n등록하신 이메일로 1 영업일 이내 답변 드리겠습니다.');
   inputs.forEach(inp => inp.value = '');
 }
