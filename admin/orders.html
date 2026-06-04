@@ -846,16 +846,18 @@ async function confirmAction(){
     showToast(`📨 ${ids.length}건 재발송 완료`);
     selectedIds.clear();
   } else if(type==='refund'){
-    if(TOSS_ENDPOINT){
-      try{
-        await fetch(TOSS_ENDPOINT+'/refund', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({orderId:id}) });
-      } catch(e){ showToast('토스 API 연동 실패: '+e.message); return; }
-    }
+    await updateStatus(id, 'refund');
     const o = orders.find(o=>o.id===id);
     if(o) o.status='refund';
     showToast('환불 처리가 완료되었습니다');
   } else if(type==='bulkRefund'){
-    ids.forEach(i=>{ const o=orders.find(o=>o.id===i); if(o&&o.status!=='done'&&o.status!=='refund') o.status='refund'; });
+    for(const i of ids){
+      const o = orders.find(o=>o.id===i);
+      if(o && o.status!=='done' && o.status!=='refund'){
+        await updateStatus(i, 'refund');
+        o.status='refund';
+      }
+    }
     showToast(`${ids.length}건 환불 처리 완료`);
     selectedIds.clear();
   }

@@ -387,8 +387,8 @@ async function loadOrders() {
       container.innerHTML = '<div class="mp-empty"><div class="mp-empty-icon">🧾</div><div class="mp-empty-msg">구매 이력이 없습니다.</div></div>';
       return;
     }
-    const statusMap = { paid: '결제완료', pending: '대기중', cancelled: '취소됨', refunded: '환불됨' };
-    const statusCls = { paid: 's-paid', pending: 's-pending', cancelled: 's-cancelled', refunded: 's-refunded' };
+    const statusMap = { paid: '결제완료', vbank_pending: '입금대기', pending: '대기중', cancelled: '취소됨', refund: '환불처리됨', refunded: '환불됨' };
+    const statusCls = { paid: 's-paid', vbank_pending: 's-pending', pending: 's-pending', cancelled: 's-cancelled', refund: 's-cancelled', refunded: 's-refunded' };
     container.innerHTML = orders.map(o => {
       const items = Array.isArray(o.items) ? o.items : [];
       return `<div class="order-card">
