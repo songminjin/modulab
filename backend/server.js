@@ -55,6 +55,37 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: '서버 오류가 발생했습니다.' });
 });
 
+// ── DB 마이그레이션 (기동 시 실행) ──
+async function runMigrations() {
+  const migrations = [
+    `CREATE TABLE IF NOT EXISTS reviews (
+       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+       product_id VARCHAR(100) NOT NULL,
+       user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+       reviewer_name VARCHAR(50),
+       rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+       content TEXT NOT NULL,
+       likes_count INTEGER DEFAULT 0,
+       created_at TIMESTAMP DEFAULT NOW()
+     )`,
+    `CREATE TABLE IF NOT EXISTS review_likes (
+       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+       review_id UUID REFERENCES reviews(id) ON DELETE CASCADE,
+       fingerprint VARCHAR(100) NOT NULL,
+       created_at TIMESTAMP DEFAULT NOW(),
+       UNIQUE(review_id, fingerprint)
+     )`,
+    `ALTER TABLE reviews ADD COLUMN IF NOT EXISTS likes_count INTEGER DEFAULT 0`,
+    `CREATE INDEX IF NOT EXISTS idx_reviews_product_id ON reviews(product_id)`,
+    `CREATE INDEX IF NOT EXISTS idx_reviews_created_at ON reviews(created_at)`,
+  ];
+  for (const sql of migrations) {
+    try { await db.query(sql); } catch (err) { console.error('[migration error]', err.message); }
+  }
+  console.log('[migrations] 완료');
+}
+runMigrations();
+
 // ── 휴면 계정 자동 처리 (매일 자정) ──
 async function checkDormantAccounts() {
   try {
