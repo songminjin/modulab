@@ -1253,9 +1253,14 @@ async function submitProduct() {
   const data = collectFormData();
   const isEdit = !!EDIT_ID;
 
-  // 수정 모드에서는 판매 파일 링크 필수 검증 완화
-  const err = validateForm(data);
-  if (err && !(isEdit && err.includes('파일 링크'))) { showToast(err, 'error'); return; }
+  // 수정 모드: 상품명·카테고리만 필수, 나머지 완화
+  if (isEdit) {
+    if (!data.productName.trim()) { showToast('상품명을 입력해주세요.', 'error'); return; }
+    if (!data.category) { showToast('카테고리를 선택해주세요.', 'error'); return; }
+  } else {
+    const err = validateForm(data);
+    if (err) { showToast(err, 'error'); return; }
+  }
 
   const GAS_ENDPOINT = localStorage.getItem('modulab_gas_endpoint') || '';
 
@@ -1269,7 +1274,7 @@ async function submitProduct() {
     emoji: data.selectedEmoji,
     discount: parseInt(data.discountPrice) || 0,
     visible: data.visibility,
-    date: isEdit ? (editingOriginalId ? undefined : new Date().toISOString().slice(0,10)) : new Date().toISOString().slice(0,10),
+    date: new Date().toISOString().slice(0,10),
 
     // 상세 필드
     productId: savedId,
