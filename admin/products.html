@@ -320,7 +320,10 @@ function render(){
   tbody.innerHTML = list.map(p=>`
     <tr>
       <td><input type="checkbox" ${selected.has(p.id)?'checked':''} onchange="toggleSel('${p.id}',this)"></td>
-      <td><div class="thumb-cell" style="background:${catColors[p.cat]||'#F1F5F9'}">${p.emoji}</div></td>
+      <td>${p.thumbUrl
+        ? `<div class="thumb-cell" style="padding:0;overflow:hidden;"><img src="${p.thumbUrl}" style="width:100%;height:100%;object-fit:cover;" alt=""></div>`
+        : `<div class="thumb-cell" style="background:${catColors[p.cat]||'#F1F5F9'}">${p.emoji}</div>`
+      }</td>
       <td>
         <div class="product-name-cell">${p.name}</div>
         <div class="product-sub">${p.id}</div>

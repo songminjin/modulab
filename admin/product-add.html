@@ -1254,9 +1254,31 @@ async function submitProduct() {
   }
 
   const savedId = editingOriginalId || generateProductId();
+  const token = GhSync.ghToken();
 
-  // products.json에 저장할 표준 형식
+  // 기존 상품 데이터 (수정 시 views/downloads 등 유지)
+  const existingProducts = JSON.parse(localStorage.getItem('modulab_products') || '[]');
+  const existing = existingProducts.find(p => (p.id || p.productId) === savedId) || {};
+
+  // 이미지 업로드 (GitHub에 파일로 업로드 → URL 저장)
+  let thumbUrl = existing.thumbUrl || '';
+  let detailImageUrls = existing.detailImageUrls || [];
+
+  if (token) {
+    const thumbImgEl = document.getElementById('thumbImg');
+    const thumbDataUrl = thumbImgEl?.src?.startsWith('data:') ? thumbImgEl.src : '';
+    try {
+      const imgResult = await GhSync.uploadProductImages(savedId, thumbDataUrl, detailImages, token, showToast);
+      if (imgResult.thumbUrl) thumbUrl = imgResult.thumbUrl;
+      if (imgResult.detailImageUrls.length) detailImageUrls = imgResult.detailImageUrls;
+    } catch (e) { console.warn('이미지 업로드 실패:', e); }
+  } else {
+    showToast('⚠️ GitHub 토큰 미설정 — 이미지는 저장되지 않습니다.', 'error');
+  }
+
+  // products.json 표준 형식
   const normalized = {
+    ...existing,
     id: savedId,
     name: data.productName,
     cat: data.category,
@@ -1272,35 +1294,24 @@ async function submitProduct() {
     fileType: data.fileType || '',
     fileUrl: data.fileUrl || '',
     fileName: data.fileName || '',
-    date: new Date().toISOString().slice(0, 10),
-    detailImages: detailImages,
-    views: 0,
-    downloads: 0,
+    thumbUrl,
+    detailImageUrls,
+    date: existing.date || new Date().toISOString().slice(0, 10),
+    views: existing.views || 0,
+    downloads: existing.downloads || 0,
   };
 
   // localStorage 업데이트
-  const products = JSON.parse(localStorage.getItem('modulab_products') || '[]');
-  const idx = products.findIndex(p => (p.id || p.productId) === savedId);
+  const idx = existingProducts.findIndex(p => (p.id || p.productId) === savedId);
   if (idx >= 0) {
-    products[idx] = { ...products[idx], ...normalized };
+    existingProducts[idx] = normalized;
   } else {
-    products.push(normalized);
+    existingProducts.push(normalized);
   }
-  localStorage.setItem('modulab_products', JSON.stringify(products));
+  localStorage.setItem('modulab_products', JSON.stringify(existingProducts));
   localStorage.removeItem('modulab_product_draft');
 
   showToast(isEdit ? '✓ 상품이 수정되었습니다!' : '✓ 상품이 등록되었습니다!', 'success');
-
-  // GitHub products.json 동기화 (Railway API는 선택사항)
-  try {
-    await fetch(`${API_URL}/api/admin/products${isEdit ? '/' + EDIT_ID : ''}`, {
-      method: isEdit ? 'PUT' : 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(normalized),
-    });
-  } catch {}
-
   GhSync.syncAll(showToast);
 
   setTimeout(() => {

@@ -581,8 +581,10 @@ const product = {
   fileType: lsP.fileType   || demo.fileType || '',
   newBadge: lsP.newBadge !== undefined ? lsP.newBadge : true,
   bestBadge:lsP.bestBadge || false,
+  thumbUrl: lsP.thumbUrl || '',
+  detailImageUrls: lsP.detailImageUrls || [],
   detailImages: lsP.detailImages || [],
-  views:    demo.views || 0,
+  views:    lsP.views || demo.views || 0,
   downloads:demo.downloads || 0,
   date:     lsP.date || lsP.createdAt?.slice(0,10) || demo.date || '',
 };
@@ -650,20 +652,35 @@ function renderThumbs() {
   const strip = document.getElementById('thumbStrip');
   strip.innerHTML = '';
 
-  // Emoji thumb (main)
-  const emojiThumb = document.createElement('div');
-  emojiThumb.className = 'prod-thumb active';
-  emojiThumb.style.background = CAT_BG2[product.cat] || '#DBEAFE';
-  emojiThumb.textContent = product.emoji;
-  emojiThumb.onclick = () => { showEmoji(); setActiveThumb(emojiThumb); };
-  strip.appendChild(emojiThumb);
+  // 썸네일: thumbUrl(실제 이미지) 또는 이모지
+  const mainThumb = document.createElement('div');
+  mainThumb.className = 'prod-thumb active';
+  if (product.thumbUrl) {
+    mainThumb.innerHTML = `<img src="${product.thumbUrl}" alt="${product.name}">`;
+    // 메인 이미지도 thumbUrl로 표시
+    showDetailImg(product.thumbUrl);
+  } else {
+    mainThumb.style.background = CAT_BG2[product.cat] || '#DBEAFE';
+    mainThumb.textContent = product.emoji;
+  }
+  mainThumb.onclick = () => {
+    if (product.thumbUrl) showDetailImg(product.thumbUrl);
+    else showEmoji();
+    setActiveThumb(mainThumb);
+  };
+  strip.appendChild(mainThumb);
 
-  // Detail image thumbs
-  product.detailImages.forEach((img, i) => {
+  // 상세 이미지: detailImageUrls(GitHub URL) 우선, 없으면 detailImages(base64)
+  const imgs = product.detailImageUrls.length
+    ? product.detailImageUrls.map(url => ({ src: url }))
+    : product.detailImages.map(img => ({ src: img.dataUrl || img }));
+
+  imgs.forEach((img) => {
+    if (!img.src) return;
     const t = document.createElement('div');
     t.className = 'prod-thumb';
-    t.innerHTML = `<img src="${img.dataUrl}" alt="">`;
-    t.onclick = () => { showDetailImg(img.dataUrl); setActiveThumb(t); };
+    t.innerHTML = `<img src="${img.src}" alt="">`;
+    t.onclick = () => { showDetailImg(img.src); setActiveThumb(t); };
     strip.appendChild(t);
   });
 }

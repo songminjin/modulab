@@ -22,10 +22,13 @@
     const origStr = p.discount ? `<span style="text-decoration:line-through;color:#94A3B8;font-size:12px;">₩${p.price.toLocaleString()}</span> ` : '';
     const href = `product.html?id=${p.id}&cat=${p.cat}&name=${encodeURIComponent(p.name)}&price=${p.price}&emoji=${encodeURIComponent(p.emoji)}`;
     const badge = p.newBadge ? '<span class="mkt-badge mkt-badge-new">NEW</span>' : (p.bestBadge ? '<span class="mkt-badge mkt-badge-best">BEST</span>' : '<span class="mkt-badge">판매중</span>');
+    const thumbInner = p.thumbUrl
+      ? `<img src="${p.thumbUrl}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">`
+      : `<div style="background:${bg2};width:75%;height:65%;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:52px;">${p.emoji}</div>`;
     return `
       <a href="${href}" class="mkt-card" data-price="${p.price}" data-name="${p.name}">
         <div class="mkt-card-img" style="background:${bg1};">
-          <div style="background:${bg2}; width:75%; height:65%; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:52px;">${p.emoji}</div>
+          ${thumbInner}
           ${badge}
         </div>
         <div class="mkt-card-body">
@@ -51,7 +54,9 @@
     return `
       <a href="${href}" class="product-card">
         <div class="product-img" style="background:${bg1};">
-          <div class="product-img-inner" style="background:${bg2};">${p.emoji}</div>
+          ${p.thumbUrl
+            ? `<img src="${p.thumbUrl}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;">`
+            : `<div class="product-img-inner" style="background:${bg2};">${p.emoji}</div>`}
         </div>
         <div class="product-body">
           <div class="product-name">${p.name}</div>
