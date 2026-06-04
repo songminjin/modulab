@@ -141,6 +141,13 @@ input[type="checkbox"]{accent-color:var(--blue);width:15px;height:15px;cursor:po
             <li><a href="product-add.html">상품 등록</a></li>
           </ul>
         </li>
+        <li>
+          <a href="events.html"><span class="nav-icon">🎪</span>이벤트 관리</a>
+          <ul class="sidebar-sub sidebar-nav">
+            <li><a href="events.html?tab=coupon">쿠폰 이벤트</a></li>
+            <li><a href="events.html?tab=site">사이트 이벤트</a></li>
+          </ul>
+        </li>
         <li><a href="orders.html"><span class="nav-icon">🛒</span>주문 관리</a></li>
         <li><a href="returns.html"><span class="nav-icon">🔄</span>반품 · 교환</a></li>
         <li><a href="cs.html"><span class="nav-icon">💬</span>CS 관리</a></li>
@@ -256,8 +263,22 @@ let selected = new Set();
 
 function load(){
   const saved = localStorage.getItem('modulab_products');
-  if(saved){ try{ const arr=JSON.parse(saved); products=arr.length?arr:DEMO; }catch{products=DEMO;} }
-  else products=[...DEMO];
+  let seeded = false;
+  if(saved){ try{ const arr=JSON.parse(saved); products=arr.length?arr:DEMO; }catch{products=[...DEMO];} }
+  else { products=[...DEMO]; seeded=true; }
+  // DEMO 상품을 localStorage에 시드해서 수정 기능이 동작하도록 함
+  if(seeded || !saved){
+    const normalized = products.map(p=>({
+      id:p.id, name:p.name, cat:p.cat, type:p.type, emoji:p.emoji,
+      discount:p.discount, visible:p.visible, date:p.date,
+      productId:p.id, productName:p.name, category:p.cat, saleType:p.type,
+      price:p.price, discountPrice:p.discount||0, selectedEmoji:p.emoji, visibility:p.visible,
+      productDesc:p.productDesc||'', productDetail:p.productDetail||'',
+      fileUrl:p.fileUrl||'', fileName:p.fileName||'', fileType:p.fileType||'',
+      newBadge:true, bestBadge:false, detailImages:[], createdAt:(p.date||'2026-05-01')+'T00:00:00.000Z',
+    }));
+    localStorage.setItem('modulab_products', JSON.stringify(normalized));
+  }
   render();
 }
 

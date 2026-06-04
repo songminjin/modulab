@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>이벤트 관리 — ModuLab 관리자</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --blue:#2563EB;--blue-dark:#1D4ED8;--blue-light:#EFF6FF;--blue-mid:#BFDBFE;
+  --navy:#0F172A;--navy2:#1E293B;--navy3:#334155;
+  --green:#16A34A;--green-light:#F0FDF4;
+  --red:#DC2626;--red-light:#FEF2F2;
+  --yellow:#F59E0B;--yellow-light:#FFFBEB;
+  --purple:#7C3AED;--purple-light:#F5F3FF;--purple-mid:#DDD6FE;
+  --orange:#EA580C;--orange-light:#FFF7ED;
+  --slate:#64748B;--slate-light:#F1F5F9;
+  --border:#E2E8F0;--white:#FFFFFF;
+  --text:#0F172A;--text2:#475569;--text3:#94A3B8;
+  --sidebar-w:220px;--header-h:64px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Noto Sans KR',sans-serif;color:var(--text);background:#F8FAFC;line-height:1.6;}
+a{text-decoration:none;color:inherit;}
+.mobile-guard{display:none;position:fixed;inset:0;z-index:9999;background:var(--navy);flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:32px;}
+.mobile-guard-icon{font-size:48px;}.mobile-guard-title{font-family:'Bebas Neue',sans-serif;font-size:32px;color:white;letter-spacing:.02em;}
+.mobile-guard-desc{font-size:14px;color:#94A3B8;line-height:1.7;}
+@media(max-width:768px){.mobile-guard{display:flex;}}
+.admin-layout{display:flex;min-height:100vh;}
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--navy);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100;}
+.sidebar-logo{padding:20px 20px 16px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px;}
+.logo-mark{width:32px;height:32px;background:var(--blue);border-radius:7px;position:relative;overflow:hidden;flex-shrink:0;}
+.logo-mark::before{content:'';position:absolute;top:4px;left:4px;width:13px;height:13px;background:rgba(255,255,255,.3);border-radius:2px;}
+.logo-mark::after{content:'';position:absolute;bottom:4px;right:4px;width:13px;height:13px;background:#16A34A;border-radius:2px;}
+.sidebar-logo-text{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.04em;color:white;}
+.sidebar-logo-text span{color:var(--blue);}
+.sidebar-admin-badge{font-size:9px;font-weight:700;letter-spacing:.08em;color:#64748B;padding:2px 6px;border:1px solid #334155;border-radius:3px;display:block;margin-top:2px;}
+.sidebar-section{padding:20px 12px 8px;}
+.sidebar-section-label{font-size:10px;font-weight:700;letter-spacing:.1em;color:#475569;text-transform:uppercase;padding:0 8px;margin-bottom:6px;}
+.sidebar-nav{list-style:none;}
+.sidebar-nav li a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;font-size:13px;font-weight:500;color:#94A3B8;transition:all .15s;cursor:pointer;}
+.sidebar-nav li a:hover{background:rgba(255,255,255,.06);color:white;}
+.sidebar-nav li a.active{background:rgba(37,99,235,.2);color:#93C5FD;}
+.sidebar-nav li a.active .nav-icon{color:var(--blue);}
+.nav-icon{font-size:15px;width:18px;text-align:center;flex-shrink:0;}
+.sidebar-sub{margin-left:28px;margin-top:2px;}
+.sidebar-sub li a{font-size:12px;padding:6px 10px;color:#64748B;border-radius:6px;}
+.sidebar-sub li a:hover{color:#94A3B8;background:rgba(255,255,255,.04);}
+.sidebar-sub li a.active{color:#93C5FD;background:rgba(37,99,235,.15);}
+.sidebar-bottom{margin-top:auto;padding:16px 12px;border-top:1px solid rgba(255,255,255,.06);}
+.sidebar-bottom a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;font-size:13px;color:#64748B;transition:all .15s;}
+.sidebar-bottom a:hover{background:rgba(255,255,255,.06);color:#94A3B8;}
+.main-wrap{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh;}
+.admin-header{position:sticky;top:0;z-index:50;height:var(--header-h);background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 32px;gap:16px;}
+.header-breadcrumb{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text3);}
+.header-breadcrumb a{color:var(--text3);transition:color .15s;}.header-breadcrumb a:hover{color:var(--blue);}
+.header-breadcrumb .sep{color:var(--border);}.header-breadcrumb .current{color:var(--text);font-weight:600;}
+.header-right{display:flex;align-items:center;gap:10px;}
+.header-noti-btn{width:36px;height:36px;border-radius:8px;border:1px solid var(--border);background:none;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;position:relative;transition:background .15s;}
+.header-noti-btn:hover{background:var(--slate-light);}
+.noti-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;background:var(--red);border-radius:50%;border:1.5px solid white;}
+.header-logout-btn{padding:7px 16px;border-radius:8px;border:1px solid var(--border);background:none;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;font-family:inherit;transition:all .15s;}
+.header-logout-btn:hover{background:var(--red-light);border-color:#FCA5A5;color:var(--red);}
+.header-user{display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:8px;background:var(--slate-light);border:1px solid var(--border);}
+.header-user-avatar{width:28px;height:28px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;color:white;font-weight:700;flex-shrink:0;}
+.header-user-name{font-size:13px;font-weight:500;color:var(--text2);}
+.page-content{padding:32px;flex:1;}
+.page-title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;gap:16px;flex-wrap:wrap;}
+.page-title{font-size:22px;font-weight:700;color:var(--text);}
+.page-title-sub{font-size:13px;color:var(--text3);margin-top:2px;}
+.title-btns{display:flex;gap:8px;}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;border:none;transition:all .15s;white-space:nowrap;}
+.btn-primary{background:var(--blue);color:white;}.btn-primary:hover{background:var(--blue-dark);}
+.btn-outline{background:var(--white);color:var(--text2);border:1px solid var(--border);}.btn-outline:hover{background:var(--slate-light);}
+.btn-ghost{background:none;color:var(--text3);}.btn-ghost:hover{color:var(--text2);background:var(--slate-light);}
+.btn-sm{padding:7px 14px;font-size:13px;}
+.btn-xs{padding:4px 10px;font-size:12px;}
+.btn-danger{background:var(--red-light);color:var(--red);border:1px solid #FCA5A5;}.btn-danger:hover{background:var(--red);color:white;}
+.btn-success{background:var(--green);color:white;}.btn-success:hover{background:#15803D;}
+.btn-purple{background:var(--purple-light);color:var(--purple);border:1px solid var(--purple-mid);}.btn-purple:hover{background:var(--purple);color:white;}
+.card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px;}
+.card-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.card-title-icon{width:28px;height:28px;background:var(--blue-light);border:1px solid var(--blue-mid);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.field{margin-bottom:18px;}.field:last-child{margin-bottom:0;}
+.field-label{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--text);margin-bottom:7px;}
+.field-label .required{color:var(--red);font-size:12px;}
+.field-hint{font-size:11px;color:var(--text3);margin-top:5px;line-height:1.5;}
+.field-input,.field-select,.field-textarea{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;color:var(--text);background:var(--white);outline:none;transition:border-color .15s,box-shadow .15s;}
+.field-input:focus,.field-select:focus,.field-textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1);}
+.field-input::placeholder,.field-textarea::placeholder{color:var(--text3);}
+.field-select{cursor:pointer;}
+.field-textarea{resize:vertical;min-height:80px;line-height:1.6;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.field-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+.input-with-unit{position:relative;display:flex;align-items:center;}
+.input-with-unit .field-input{padding-right:40px;}
+.input-unit{position:absolute;right:12px;font-size:13px;font-weight:500;color:var(--text3);pointer-events:none;}
+.toggle-group{display:flex;gap:8px;}
+.toggle-option{flex:1;padding:9px 14px;border-radius:8px;border:1.5px solid var(--border);background:var(--slate-light);font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;text-align:center;transition:all .15s;user-select:none;}
+.toggle-option:hover{border-color:var(--blue-mid);color:var(--blue);}
+.toggle-option.selected{border-color:var(--blue);background:var(--blue-light);color:var(--blue);font-weight:700;}
+.toggle-option.selected-purple{border-color:var(--purple);background:var(--purple-light);color:var(--purple);font-weight:700;}
+.toggle-option.selected-green{border-color:var(--green);background:var(--green-light);color:var(--green);font-weight:700;}
+.upload-zone{border:2px dashed var(--border);border-radius:10px;background:var(--slate-light);padding:24px 20px;text-align:center;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
+.upload-zone:hover{border-color:var(--blue);background:var(--blue-light);}
+.upload-zone.dragging{border-color:var(--blue);background:var(--blue-light);}
+.upload-zone input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;}
+.upload-icon{font-size:24px;margin-bottom:6px;}
+.upload-title{font-size:13px;font-weight:600;color:var(--text2);margin-bottom:2px;}
+.upload-sub{font-size:11px;color:var(--text3);}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;}
+.badge-active{background:#DCFCE7;color:#15803D;}
+.badge-upcoming{background:var(--blue-light);color:var(--blue);}
+.badge-ended{background:var(--slate-light);color:var(--text3);}
+.badge-coupon{background:var(--yellow-light);color:#92400E;}
+.badge-site{background:var(--purple-light);color:var(--purple);}
+table{width:100%;border-collapse:collapse;}
+thead tr{background:var(--slate-light);}
+thead th{padding:10px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.05em;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap;}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:#FAFBFF;}
+td{padding:12px 16px;font-size:13px;vertical-align:middle;}
+.action-btns{display:flex;gap:6px;}
+.divider{height:1px;background:var(--border);margin:20px 0;}
+#toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--navy);color:white;padding:13px 24px;border-radius:10px;font-size:14px;font-weight:500;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);transition:transform .3s ease,opacity .3s ease;opacity:0;z-index:9000;white-space:nowrap;}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+
+/* ── TABS ── */
+.tab-bar{display:flex;gap:4px;background:var(--white);border:1px solid var(--border);border-radius:12px;padding:6px;margin-bottom:24px;width:fit-content;}
+.tab-btn{padding:9px 22px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;background:none;color:var(--text3);font-family:inherit;transition:all .15s;display:flex;align-items:center;gap:7px;}
+.tab-btn:hover{color:var(--text2);}
+.tab-btn.active{background:var(--blue);color:white;}
+.tab-section{display:none;}
+.tab-section.active{display:block;}
+
+/* ── EVENT FORM PANEL ── */
+.form-panel{background:var(--white);border:1px solid var(--blue-mid);border-radius:12px;padding:28px;margin-bottom:24px;display:none;animation:slideDown .2s ease;}
+.form-panel.open{display:block;}
+@keyframes slideDown{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
+.form-panel-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:24px;display:flex;align-items:center;gap:10px;}
+.form-panel-grid{display:grid;grid-template-columns:1fr 320px;gap:24px;align-items:start;}
+
+/* ── TABLE WRAP ── */
+.table-wrap{background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px;}
+.table-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);}
+.table-count{font-size:13px;color:var(--text3);}
+.table-count strong{color:var(--text);font-weight:700;}
+.empty-state{text-align:center;padding:48px 20px;}
+.empty-icon{font-size:36px;margin-bottom:10px;}
+.empty-title{font-size:14px;font-weight:600;color:var(--text2);margin-bottom:4px;}
+.empty-desc{font-size:13px;color:var(--text3);}
+.event-name-cell{font-weight:600;color:var(--text);}
+.event-sub{font-size:11px;color:var(--text3);margin-top:1px;font-family:'JetBrains Mono',monospace;}
+
+/* ── PRODUCT ASSIGN BOX ── */
+.assign-box{background:var(--slate-light);border:1px solid var(--border);border-radius:10px;padding:16px;}
+.assign-box-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.assign-count-badge{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--blue);color:white;font-size:11px;font-weight:700;}
+.assign-preview{font-size:12px;color:var(--text3);margin-bottom:10px;line-height:1.6;min-height:36px;}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;display:none;align-items:flex-start;justify-content:center;overflow-y:auto;padding:40px 20px;}
+.modal-overlay.open{display:flex;}
+.modal-box{background:var(--white);border-radius:16px;width:100%;max-width:760px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.2);animation:modalIn .2s ease;margin:auto;}
+@keyframes modalIn{from{opacity:0;transform:scale(.96);}to{opacity:1;transform:scale(1);}}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border);}
+.modal-title{font-size:16px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px;}
+.modal-close{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:none;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--text3);transition:all .15s;}
+.modal-close:hover{background:var(--red-light);border-color:#FCA5A5;color:var(--red);}
+.modal-body{padding:20px 24px;}
+.modal-footer{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-top:1px solid var(--border);background:var(--slate-light);}
+.modal-selected-info{font-size:13px;color:var(--text2);}
+.modal-selected-info strong{color:var(--blue);font-weight:700;}
+
+/* ── FILTER BAR (modal) ── */
+.filter-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px;}
+.filter-grid-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;align-items:end;}
+.filter-label{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:5px;}
+.filter-range{display:grid;grid-template-columns:1fr 28px 1fr;gap:4px;align-items:center;}
+.filter-range-sep{text-align:center;font-size:13px;color:var(--text3);}
+
+/* ── PRODUCT LIST IN MODAL ── */
+.product-list-wrap{border:1px solid var(--border);border-radius:8px;overflow:hidden;max-height:340px;overflow-y:auto;}
+.product-list-header{display:grid;grid-template-columns:32px 44px 1fr 80px 80px;gap:10px;padding:8px 14px;background:var(--slate-light);border-bottom:1px solid var(--border);}
+.product-list-header span{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.04em;}
+.product-list-item{display:grid;grid-template-columns:32px 44px 1fr 80px 80px;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);align-items:center;transition:background .1s;}
+.product-list-item:last-child{border-bottom:none;}
+.product-list-item:hover{background:#FAFBFF;}
+.product-list-item.selected{background:var(--blue-light);}
+.product-thumb{width:36px;height:26px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.product-name-wrap .pname{font-size:13px;font-weight:500;color:var(--text);}
+.product-name-wrap .pid{font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace;}
+.price-mono{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text2);}
+.cat-chip{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;}
+.cat-excel{background:#DCFCE7;color:#15803D;}.cat-sheets{background:#FEF9C3;color:#A16207;}
+.cat-short{background:#EDE9FE;color:#6D28D9;}.cat-detail{background:#FFE4E6;color:#B91C1C;}
+.cat-web{background:#DBEAFE;color:#1D4ED8;}.cat-program{background:#F1F5F9;color:#475569;}
+input[type="checkbox"]{accent-color:var(--blue);width:15px;height:15px;cursor:pointer;}
+
+/* ── BANNER PREVIEW ── */
+.banner-preview{width:100%;aspect-ratio:3/1;border-radius:8px;border:1px solid var(--border);overflow:hidden;background:var(--slate-light);display:flex;align-items:center;justify-content:center;position:relative;margin-top:8px;}
+.banner-preview img{width:100%;height:100%;object-fit:cover;display:block;}
+.banner-preview .no-img{color:var(--text3);font-size:13px;}
+.img-preview-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px;}
+.img-preview-item{position:relative;aspect-ratio:1/1;border-radius:6px;overflow:hidden;border:1px solid var(--border);}
+.img-preview-item img{width:100%;height:100%;object-fit:cover;display:block;}
+.img-preview-remove{position:absolute;top:4px;right:4px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,.65);color:white;border:none;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+
+/* ── BUNDLE CONFIG ── */
+.bundle-config{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;padding:12px;background:var(--slate-light);border-radius:8px;margin-top:8px;}
+.bundle-config-sep{font-size:13px;color:var(--text3);text-align:center;padding-top:20px;}
+.bundle-config label{font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:4px;}
+
+/* ── STATUS DOT ── */
+.status-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:4px;}
+.status-dot.active{background:var(--green);}
+.status-dot.upcoming{background:var(--blue);}
+.status-dot.ended{background:#CBD5E1;}
+
+/* ── SUMMARY STATS ── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+.stat-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px 20px;}
+.stat-label{font-size:12px;color:var(--text3);margin-bottom:4px;}
+.stat-value{font-size:22px;font-weight:700;color:var(--text);font-family:'JetBrains Mono',monospace;}
+.stat-sub{font-size:11px;margin-top:3px;}
+.stat-blue{color:var(--blue);}
+.stat-green{color:var(--green);}
+.stat-yellow{color:var(--yellow);}
+.stat-purple{color:var(--purple);}
+</style>
+</head>
+<body>
+
+<div class="mobile-guard">
+  <div class="mobile-guard-icon">🖥️</div>
+  <div class="mobile-guard-title">PC에서 접속해주세요</div>
+  <div class="mobile-guard-desc">관리자 페이지는 PC 환경에서만<br>정상적으로 이용할 수 있습니다.</div>
+</div>
+
+<div class="admin-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark"></div>
+      <div>
+        <div class="sidebar-logo-text">Modu<span>Lab</span></div>
+        <span class="sidebar-admin-badge">ADMIN SCM</span>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">메인 메뉴</div>
+      <ul class="sidebar-nav">
+        <li><a href="dashboard.html"><span class="nav-icon">📊</span>대시보드</a></li>
+        <li>
+          <a href="products.html"><span class="nav-icon">📦</span>상품 관리</a>
+          <ul class="sidebar-sub sidebar-nav">
+            <li><a href="products.html">상품 목록</a></li>
+            <li><a href="product-add.html">상품 등록</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="events.html" class="active"><span class="nav-icon">🎪</span>이벤트 관리</a>
+          <ul class="sidebar-sub sidebar-nav">
+            <li><a href="events.html?tab=coupon" id="sidebarCouponLink">쿠폰 이벤트</a></li>
+            <li><a href="events.html?tab=site" id="sidebarSiteLink">사이트 이벤트</a></li>
+          </ul>
+        </li>
+        <li><a href="orders.html"><span class="nav-icon">🛒</span>주문 관리</a></li>
+        <li><a href="returns.html"><span class="nav-icon">🔄</span>반품 · 교환</a></li>
+        <li><a href="cs.html"><span class="nav-icon">💬</span>CS 관리</a></li>
+        <li><a href="settlement.html"><span class="nav-icon">💰</span>정산 현황판</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">바로가기</div>
+      <ul class="sidebar-nav">
+        <li><a href="../index.html" target="_blank"><span class="nav-icon">🌐</span>쇼핑몰 보기</a></li>
+        <li><a href="../event.html" target="_blank"><span class="nav-icon">🎪</span>이벤트 페이지</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-bottom">
+      <a href="index.html" onclick="logout(event)"><span class="nav-icon">🚪</span>로그아웃</a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-wrap">
+
+    <!-- HEADER -->
+    <header class="admin-header">
+      <div class="header-breadcrumb">
+        <a href="dashboard.html">홈</a>
+        <span class="sep">›</span>
+        <span class="current">이벤트 관리</span>
+      </div>
+      <div class="header-right">
+        <button class="header-noti-btn">🔔<span class="noti-dot"></span></button>
+        <div class="header-user">
+          <div class="header-user-avatar">M</div>
+          <div class="header-user-name">관리자</div>
+        </div>
+        <button class="header-logout-btn" onclick="logout()">로그아웃</button>
+      </div>
+    </header>
+
+    <!-- PAGE CONTENT -->
+    <div class="page-content">
+      <div class="page-title-row">
+        <div>
+          <div class="page-title">이벤트 관리</div>
+          <div class="page-title-sub">쿠폰 이벤트와 사이트 이벤트를 등록하고 상품에 일괄 적용합니다</div>
+        </div>
+        <div class="title-btns">
+          <button class="btn btn-outline" id="btnNewCoupon" onclick="openCouponForm()">🎫 쿠폰 이벤트 추가</button>
+          <button class="btn btn-primary" id="btnNewSite" onclick="openSiteForm()" style="display:none;">🎪 사이트 이벤트 추가</button>
+        </div>
+      </div>
+
+      <!-- STATS -->
+      <div class="stats-row" id="statsRow">
+        <div class="stat-card">
+          <div class="stat-label">쿠폰 이벤트</div>
+          <div class="stat-value stat-yellow" id="statCouponTotal">0</div>
+          <div class="stat-sub" style="color:var(--text3);">등록된 전체</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">진행 중 쿠폰</div>
+          <div class="stat-value stat-green" id="statCouponActive">0</div>
+          <div class="stat-sub" style="color:var(--green);">현재 활성</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">사이트 이벤트</div>
+          <div class="stat-value stat-purple" id="statSiteTotal">0</div>
+          <div class="stat-sub" style="color:var(--text3);">등록된 전체</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">진행 중 이벤트</div>
+          <div class="stat-value stat-blue" id="statSiteActive">0</div>
+          <div class="stat-sub" style="color:var(--blue);">현재 활성</div>
+        </div>
+      </div>
+
+      <!-- TABS -->
+      <div class="tab-bar">
+        <button class="tab-btn active" id="tabCouponBtn" onclick="switchTab('coupon')">🎫 쿠폰 이벤트</button>
+        <button class="tab-btn" id="tabSiteBtn" onclick="switchTab('site')">🎪 사이트 이벤트</button>
+      </div>
+
+      <!-- ─── COUPON EVENTS TAB ─── -->
+      <div class="tab-section active" id="tabCoupon">
+
+        <!-- Create/Edit Form -->
+        <div class="form-panel" id="couponFormPanel">
+          <div class="form-panel-title">
+            <span id="couponFormIcon">🎫</span>
+            <span id="couponFormTitle">새 쿠폰 이벤트 등록</span>
+            <button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="closeCouponForm()">✕ 닫기</button>
+          </div>
+          <div class="form-panel-grid">
+            <div>
+              <div class="field">
+                <label class="field-label">이벤트명 <span class="required">*</span></label>
+                <input type="text" class="field-input" id="couponName" placeholder="예: 6월 특별 할인 쿠폰" maxlength="50">
+              </div>
+              <div class="field">
+                <label class="field-label">할인 유형 <span class="required">*</span></label>
+                <div class="toggle-group" id="discountTypeGroup">
+                  <div class="toggle-option selected" data-value="percent" onclick="selectDiscountType('percent')">% 비율 할인</div>
+                  <div class="toggle-option" data-value="amount" onclick="selectDiscountType('amount')">원 금액 할인</div>
+                </div>
+              </div>
+              <div class="field">
+                <label class="field-label">할인 값 <span class="required">*</span></label>
+                <div class="input-with-unit">
+                  <input type="number" class="field-input" id="couponValue" placeholder="20" min="1">
+                  <span class="input-unit" id="couponValueUnit">%</span>
+                </div>
+                <div class="field-hint" id="couponValueHint">0~100 사이의 할인율을 입력하세요</div>
+              </div>
+              <div class="field-row">
+                <div class="field">
+                  <label class="field-label">시작일 <span class="required">*</span></label>
+                  <input type="date" class="field-input" id="couponStartDate">
+                </div>
+                <div class="field">
+                  <label class="field-label">종료일 <span class="required">*</span></label>
+                  <input type="date" class="field-input" id="couponEndDate">
+                </div>
+              </div>
+              <div class="field">
+                <label class="field-label">비고</label>
+                <input type="text" class="field-input" id="couponNote" placeholder="내부 메모 (선택사항)" maxlength="100">
+              </div>
+            </div>
+            <div>
+              <div class="assign-box">
+                <div class="assign-box-title">
+                  상품 일괄 적용
+                  <span class="assign-count-badge" id="couponAssignCount">0</span>
+                </div>
+                <div class="assign-preview" id="couponAssignPreview">적용된 상품이 없습니다.<br>아래 버튼으로 상품을 선택해주세요.</div>
+                <button class="btn btn-outline" style="width:100%;justify-content:center;" onclick="openProductModal('coupon')">
+                  📦 상품 선택하기
+                </button>
+                <div class="field-hint" style="margin-top:8px;">카테고리·가격·키워드 필터로 여러 상품을 한번에 선택할 수 있습니다.</div>
+              </div>
+              <div style="height:16px;"></div>
+              <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="saveCouponEvent()">
+                💾 쿠폰 이벤트 저장
+              </button>
+              <div style="height:8px;"></div>
+              <button class="btn btn-outline" style="width:100%;justify-content:center;" onclick="closeCouponForm()">취소</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Events Table -->
+        <div class="table-wrap">
+          <div class="table-header">
+            <div class="table-count">전체 <strong id="couponCount">0</strong>개</div>
+          </div>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>이벤트명</th>
+                  <th>할인 유형</th>
+                  <th>할인</th>
+                  <th>기간</th>
+                  <th>적용 상품</th>
+                  <th>상태</th>
+                  <th>관리</th>
+                </tr>
+              </thead>
+              <tbody id="couponTbody"></tbody>
+            </table>
+          </div>
+          <div id="couponEmpty" class="empty-state" style="display:none;">
+            <div class="empty-icon">🎫</div>
+            <div class="empty-title">등록된 쿠폰 이벤트가 없습니다</div>
+            <div class="empty-desc">위의 <strong>쿠폰 이벤트 추가</strong> 버튼을 눌러 첫 이벤트를 만들어보세요.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── SITE EVENTS TAB ─── -->
+      <div class="tab-section" id="tabSite">
+
+        <!-- Create/Edit Form -->
+        <div class="form-panel" id="siteFormPanel">
+          <div class="form-panel-title">
+            <span>🎪</span>
+            <span id="siteFormTitle">새 사이트 이벤트 등록</span>
+            <button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="closeSiteForm()">✕ 닫기</button>
+          </div>
+
+          <div class="form-panel-grid">
+            <div>
+              <div class="field">
+                <label class="field-label">이벤트명 <span class="required">*</span></label>
+                <input type="text" class="field-input" id="siteName" placeholder="예: 여름 특가 이벤트" maxlength="50">
+              </div>
+
+              <div class="field-row">
+                <div class="field">
+                  <label class="field-label">시작일 <span class="required">*</span></label>
+                  <input type="date" class="field-input" id="siteStartDate">
+                </div>
+                <div class="field">
+                  <label class="field-label">종료일 <span class="required">*</span></label>
+                  <input type="date" class="field-input" id="siteEndDate">
+                </div>
+              </div>
+
+              <div class="field">
+                <label class="field-label">배너 이미지</label>
+                <div class="upload-zone" id="bannerZone" onclick="document.getElementById('bannerFile').click()">
+                  <div class="upload-icon">🖼️</div>
+                  <div class="upload-title">배너 이미지 업로드</div>
+                  <div class="upload-sub">JPG, PNG, WebP / 최대 3MB / 권장 비율 3:1</div>
+                  <input type="file" id="bannerFile" accept="image/*" style="display:none;" onchange="previewBanner(this)">
+                </div>
+                <div class="banner-preview" id="bannerPreview" style="display:none;">
+                  <img id="bannerImg" src="" alt="">
+                  <button type="button" onclick="removeBanner()" style="position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.65);color:white;border:none;font-size:14px;cursor:pointer;">✕</button>
+                </div>
+              </div>
+
+              <div class="field">
+                <label class="field-label">이벤트 설명 이미지</label>
+                <div class="upload-zone" id="descImgZone" onclick="document.getElementById('descImgFiles').click()">
+                  <div class="upload-icon">🗂️</div>
+                  <div class="upload-title">이벤트 상세 이미지 추가</div>
+                  <div class="upload-sub">여러 장 가능 / 장당 최대 5MB</div>
+                  <input type="file" id="descImgFiles" accept="image/*" multiple style="display:none;" onchange="addDescImages(this)">
+                </div>
+                <div class="img-preview-grid" id="descImgGrid"></div>
+              </div>
+
+              <div class="field">
+                <label class="field-label">이벤트 유형 <span class="required">*</span></label>
+                <div class="toggle-group" id="siteEventTypeGroup">
+                  <div class="toggle-option selected" data-value="discount" onclick="selectSiteEventType('discount')">💸 가격 할인</div>
+                  <div class="toggle-option" data-value="bundle" onclick="selectSiteEventType('bundle')">📦 묶음 상품</div>
+                  <div class="toggle-option" data-value="other" onclick="selectSiteEventType('other')">✏️ 직접 입력</div>
+                </div>
+              </div>
+
+              <!-- 가격 할인 config -->
+              <div id="siteDiscountConfig" class="field">
+                <label class="field-label">할인율</label>
+                <div class="input-with-unit">
+                  <input type="number" class="field-input" id="siteDiscountValue" placeholder="15" min="1" max="99">
+                  <span class="input-unit">%</span>
+                </div>
+                <div class="field-hint">이벤트 기간 동안 적용되는 할인율입니다.</div>
+              </div>
+
+              <!-- 묶음 상품 config -->
+              <div id="siteBundleConfig" class="field" style="display:none;">
+                <label class="field-label">묶음 구매 혜택</label>
+                <div class="bundle-config">
+                  <div>
+                    <label>구매 수량</label>
+                    <div class="input-with-unit">
+                      <input type="number" class="field-input" id="bundleCount" placeholder="2" min="2" max="99">
+                      <span class="input-unit">개</span>
+                    </div>
+                  </div>
+                  <div class="bundle-config-sep">이상 구매 시</div>
+                  <div>
+                    <label>추가 할인율</label>
+                    <div class="input-with-unit">
+                      <input type="number" class="field-input" id="bundleRate" placeholder="30" min="1" max="99">
+                      <span class="input-unit">%</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="field-hint" style="margin-top:8px;">예: 2개 이상 구매 시 30% 추가 할인</div>
+              </div>
+
+              <!-- 직접 입력 config -->
+              <div id="siteOtherConfig" class="field" style="display:none;">
+                <label class="field-label">이벤트 내용</label>
+                <textarea class="field-textarea" id="siteOtherDesc" placeholder="이벤트 혜택 내용을 자유롭게 입력하세요.&#10;예: 구매 시 사은품 증정, 추첨 이벤트 등"></textarea>
+              </div>
+            </div>
+
+            <div>
+              <div class="assign-box">
+                <div class="assign-box-title">
+                  상품 일괄 적용
+                  <span class="assign-count-badge" id="siteAssignCount">0</span>
+                </div>
+                <div class="assign-preview" id="siteAssignPreview">적용된 상품이 없습니다.<br>아래 버튼으로 상품을 선택해주세요.</div>
+                <button class="btn btn-outline" style="width:100%;justify-content:center;" onclick="openProductModal('site')">
+                  📦 상품 선택하기
+                </button>
+                <div class="field-hint" style="margin-top:8px;">카테고리·가격·키워드 필터로 여러 상품을 한번에 선택할 수 있습니다.</div>
+              </div>
+              <div style="height:16px;"></div>
+              <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="saveSiteEvent()">
+                💾 사이트 이벤트 저장
+              </button>
+              <div style="height:8px;"></div>
+              <button class="btn btn-outline" style="width:100%;justify-content:center;" onclick="closeSiteForm()">취소</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Events Table -->
+        <div class="table-wrap">
+          <div class="table-header">
+            <div class="table-count">전체 <strong id="siteCount">0</strong>개</div>
+          </div>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>이벤트명</th>
+                  <th>유형</th>
+                  <th>혜택</th>
+                  <th>기간</th>
+                  <th>적용 상품</th>
+                  <th>상태</th>
+                  <th>관리</th>
+                </tr>
+              </thead>
+              <tbody id="siteTbody"></tbody>
+            </table>
+          </div>
+          <div id="siteEmpty" class="empty-state" style="display:none;">
+            <div class="empty-icon">🎪</div>
+            <div class="empty-title">등록된 사이트 이벤트가 없습니다</div>
+            <div class="empty-desc">위의 <strong>사이트 이벤트 추가</strong> 버튼을 눌러 첫 이벤트를 만들어보세요.</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /page-content -->
+  </div><!-- /main-wrap -->
+</div><!-- /admin-layout -->
+
+<!-- ─── BULK PRODUCT MODAL ─── -->
+<div class="modal-overlay" id="productModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-title">📦 상품 일괄 선택</div>
+      <button class="modal-close" onclick="closeProductModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <!-- Filters -->
+      <div style="background:var(--slate-light);border-radius:10px;padding:16px;margin-bottom:16px;">
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;">필터 조건</div>
+        <div class="filter-grid">
+          <div>
+            <div class="filter-label">카테고리</div>
+            <select class="field-select" id="filterCat" style="font-size:13px;">
+              <option value="">전체</option>
+              <option value="excel">엑셀 프로그램</option>
+              <option value="sheets">구글시트 자동화</option>
+              <option value="short">숏폼 템플릿</option>
+              <option value="detail">상세페이지 제작</option>
+              <option value="web">홈페이지 제작</option>
+              <option value="program">프로그램 제작</option>
+            </select>
+          </div>
+          <div>
+            <div class="filter-label">가격 범위 (원)</div>
+            <div class="filter-range">
+              <input type="number" class="field-input" id="filterPriceMin" placeholder="최솟값" min="0" style="font-size:13px;">
+              <div class="filter-range-sep">~</div>
+              <input type="number" class="field-input" id="filterPriceMax" placeholder="최댓값" min="0" style="font-size:13px;">
+            </div>
+          </div>
+          <div>
+            <div class="filter-label">상품명 키워드</div>
+            <input type="text" class="field-input" id="filterKeyword" placeholder="예: 자동화, 관리" style="font-size:13px;">
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px;">
+          <button class="btn btn-ghost btn-sm" onclick="resetFilters()">초기화</button>
+          <button class="btn btn-primary btn-sm" onclick="applyFilters()">🔍 필터 적용</button>
+        </div>
+      </div>
+
+      <!-- Product List -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div style="font-size:13px;color:var(--text2);">
+          조건에 맞는 상품: <strong id="filteredProductCount">0</strong>개
+        </div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-outline btn-xs" onclick="selectAllFiltered()">전체 선택</button>
+          <button class="btn btn-outline btn-xs" onclick="deselectAll()">선택 해제</button>
+        </div>
+      </div>
+
+      <div class="product-list-wrap">
+        <div class="product-list-header">
+          <span></span>
+          <span></span>
+          <span>상품명</span>
+          <span>카테고리</span>
+          <span>판매가</span>
+        </div>
+        <div id="productListBody"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <div class="modal-selected-info">
+        선택된 상품: <strong id="selectedCountDisplay">0</strong>개
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-outline" onclick="closeProductModal()">취소</button>
+        <button class="btn btn-primary" onclick="applyProductSelection()">✓ 선택 완료</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"><span id="toastMsg"></span></div>
+
+<script>
+(function(){ if(!sessionStorage.getItem('modulab_admin')) location.href='index.html'; })();
+function logout(e){ if(e)e.preventDefault(); sessionStorage.removeItem('modulab_admin'); location.href='index.html'; }
+
+/* ── CONSTANTS ── */
+const CAT_LABEL = {excel:'엑셀 프로그램',sheets:'구글시트',short:'숏폼 템플릿',detail:'상세페이지',web:'홈페이지 제작',program:'프로그램 제작'};
+const CAT_COLORS = {excel:'#EFF6FF',sheets:'#FEFCE8',short:'#F5F3FF',detail:'#FFF1F2',web:'#EFF6FF',program:'#F8FAFC'};
+const DEMO_PRODUCTS = [
+  {id:'excel-pm',  name:'프로젝트 관리 자동화', cat:'excel',  price:19900, discount:0,     type:'file',    visible:true,  emoji:'📊', date:'2026-05-10'},
+  {id:'excel-hh',  name:'가계부 자동화',         cat:'excel',  price:9900,  discount:0,     type:'file',    visible:true,  emoji:'💰', date:'2026-05-12'},
+  {id:'excel-pay', name:'급여 관리 자동화',       cat:'excel',  price:29900, discount:24900, type:'file',    visible:true,  emoji:'👥', date:'2026-05-14'},
+  {id:'excel-margin',name:'마진 계산기',          cat:'excel',  price:9900,  discount:0,     type:'file',    visible:true,  emoji:'📈', date:'2026-05-15'},
+  {id:'sheets-pm', name:'구글시트 프로젝트 관리', cat:'sheets', price:19900, discount:0,     type:'file',    visible:true,  emoji:'🔧', date:'2026-05-20'},
+  {id:'sheets-crm',name:'구글시트 CRM 자동화',   cat:'sheets', price:29900, discount:0,     type:'file',    visible:true,  emoji:'⚙️', date:'2026-05-22'},
+  {id:'short-pack',name:'숏폼 편집 템플릿 Pack', cat:'short',  price:0,     discount:0,     type:'inquiry', visible:true,  emoji:'🎬', date:'2026-05-25'},
+  {id:'detail-01', name:'상세페이지 맞춤 제작',   cat:'detail', price:0,     discount:0,     type:'inquiry', visible:true,  emoji:'🖼️', date:'2026-05-28'},
+  {id:'web-01',    name:'홈페이지 맞춤 제작',     cat:'web',    price:0,     discount:0,     type:'inquiry', visible:false, emoji:'🌐', date:'2026-06-01'},
+  {id:'prog-01',   name:'맞춤 프로그램 제작',     cat:'program',price:0,     discount:0,     type:'inquiry', visible:true,  emoji:'⚙️', date:'2026-06-01'},
+];
+
+const DEMO_COUPON_EVENTS = [
+  {id:'cev-001',name:'신규가입 환영 쿠폰',discountType:'percent',discountValue:20,startDate:'2026-01-01',endDate:'2026-12-31',appliedProducts:['excel-pm','excel-hh','excel-margin'],note:'신규 회원 전용',createdAt:'2026-05-01T00:00:00'},
+  {id:'cev-002',name:'6월 여름 특가 쿠폰',discountType:'percent',discountValue:15,startDate:'2026-06-01',endDate:'2026-06-30',appliedProducts:['excel-pm','sheets-pm','sheets-crm'],note:'',createdAt:'2026-05-20T00:00:00'},
+  {id:'cev-003',name:'번들 구매 추가 할인',discountType:'percent',discountValue:30,startDate:'2026-06-01',endDate:'2026-07-31',appliedProducts:['excel-pm','excel-pay','excel-hh','excel-margin'],note:'2개 이상 구매 시',createdAt:'2026-05-25T00:00:00'},
+];
+const DEMO_SITE_EVENTS = [
+  {id:'sev-001',name:'여름 특별 기획전',bannerImg:'',descImages:[],startDate:'2026-06-01',endDate:'2026-06-30',eventType:'discount',discountValue:15,bundleCount:0,bundleRate:0,otherDesc:'',appliedProducts:['excel-pm','sheets-pm'],createdAt:'2026-05-20T00:00:00'},
+  {id:'sev-002',name:'번들 묶음 행사',bannerImg:'',descImages:[],startDate:'2026-06-15',endDate:'2026-07-15',eventType:'bundle',discountValue:0,bundleCount:2,bundleRate:25,otherDesc:'',appliedProducts:['excel-pay','excel-margin','sheets-crm'],createdAt:'2026-05-28T00:00:00'},
+];
+
+/* ── STATE ── */
+let couponEvents = [];
+let siteEvents = [];
+let products = [];
+let currentEditCouponId = null;
+let currentEditSiteId = null;
+let currentDiscountType = 'percent';
+let currentSiteEventType = 'discount';
+let couponAssignedProducts = [];
+let siteAssignedProducts = [];
+let modalTarget = 'coupon'; // 'coupon' | 'site'
+let tempSelectedProducts = [];
+let filteredProducts = [];
+let bannerImgData = '';
+let descImgData = [];
+
+/* ── LOAD / SAVE ── */
+function loadData() {
+  try { const s = localStorage.getItem('modulab_products'); products = s ? JSON.parse(s) : [...DEMO_PRODUCTS]; } catch { products = [...DEMO_PRODUCTS]; }
+  try { const s = localStorage.getItem('modulab_coupon_events'); couponEvents = s ? JSON.parse(s) : [...DEMO_COUPON_EVENTS]; } catch { couponEvents = [...DEMO_COUPON_EVENTS]; }
+  try { const s = localStorage.getItem('modulab_site_events'); siteEvents = s ? JSON.parse(s) : [...DEMO_SITE_EVENTS]; } catch { siteEvents = [...DEMO_SITE_EVENTS]; }
+  if (!localStorage.getItem('modulab_coupon_events')) localStorage.setItem('modulab_coupon_events', JSON.stringify(couponEvents));
+  if (!localStorage.getItem('modulab_site_events')) localStorage.setItem('modulab_site_events', JSON.stringify(siteEvents));
+}
+function saveCouponEvents() { localStorage.setItem('modulab_coupon_events', JSON.stringify(couponEvents)); }
+function saveSiteEventsStore() { localStorage.setItem('modulab_site_events', JSON.stringify(siteEvents)); }
+
+/* ── TAB ── */
+function switchTab(tab) {
+  document.getElementById('tabCoupon').classList.toggle('active', tab === 'coupon');
+  document.getElementById('tabSite').classList.toggle('active', tab === 'site');
+  document.getElementById('tabCouponBtn').classList.toggle('active', tab === 'coupon');
+  document.getElementById('tabSiteBtn').classList.toggle('active', tab === 'site');
+  document.getElementById('btnNewCoupon').style.display = tab === 'coupon' ? '' : 'none';
+  document.getElementById('btnNewSite').style.display = tab === 'site' ? '' : 'none';
+}
+
+/* ── STATS ── */
+function updateStats() {
+  const today = new Date().toISOString().slice(0,10);
+  const cActive = couponEvents.filter(e => e.startDate <= today && today <= e.endDate).length;
+  const sActive = siteEvents.filter(e => e.startDate <= today && today <= e.endDate).length;
+  document.getElementById('statCouponTotal').textContent = couponEvents.length;
+  document.getElementById('statCouponActive').textContent = cActive;
+  document.getElementById('statSiteTotal').textContent = siteEvents.length;
+  document.getElementById('statSiteActive').textContent = sActive;
+}
+
+/* ── EVENT STATUS ── */
+function getEventStatus(start, end) {
+  const today = new Date().toISOString().slice(0,10);
+  if (today < start) return {label:'예정',cls:'badge-upcoming',dotCls:'upcoming'};
+  if (today > end)   return {label:'종료',cls:'badge-ended',dotCls:'ended'};
+  return {label:'진행중',cls:'badge-active',dotCls:'active'};
+}
+
+/* ── COUPON FORM ── */
+function openCouponForm(id) {
+  const panel = document.getElementById('couponFormPanel');
+  panel.classList.add('open');
+  panel.scrollIntoView({ behavior:'smooth', block:'start' });
+  currentEditCouponId = id || null;
+  if (id) {
+    const ev = couponEvents.find(e => e.id === id);
+    if (!ev) return;
+    document.getElementById('couponFormTitle').textContent = '쿠폰 이벤트 수정';
+    document.getElementById('couponName').value = ev.name;
+    document.getElementById('couponValue').value = ev.discountValue;
+    document.getElementById('couponStartDate').value = ev.startDate;
+    document.getElementById('couponEndDate').value = ev.endDate;
+    document.getElementById('couponNote').value = ev.note || '';
+    selectDiscountType(ev.discountType);
+    couponAssignedProducts = [...(ev.appliedProducts || [])];
+    updateCouponAssignUI();
+  } else {
+    document.getElementById('couponFormTitle').textContent = '새 쿠폰 이벤트 등록';
+    document.getElementById('couponName').value = '';
+    document.getElementById('couponValue').value = '';
+    document.getElementById('couponStartDate').value = '';
+    document.getElementById('couponEndDate').value = '';
+    document.getElementById('couponNote').value = '';
+    selectDiscountType('percent');
+    couponAssignedProducts = [];
+    updateCouponAssignUI();
+  }
+}
+function closeCouponForm() {
+  document.getElementById('couponFormPanel').classList.remove('open');
+  currentEditCouponId = null;
+}
+
+function selectDiscountType(type) {
+  currentDiscountType = type;
+  document.querySelectorAll('#discountTypeGroup .toggle-option').forEach(el => {
+    el.className = 'toggle-option';
+    if (el.dataset.value === type) el.classList.add('selected');
+  });
+  document.getElementById('couponValueUnit').textContent = type === 'percent' ? '%' : '원';
+  document.getElementById('couponValueHint').textContent = type === 'percent' ? '0~100 사이의 할인율을 입력하세요' : '할인 금액을 원 단위로 입력하세요';
+}
+
+function updateCouponAssignUI() {
+  const count = couponAssignedProducts.length;
+  document.getElementById('couponAssignCount').textContent = count;
+  if (count === 0) {
+    document.getElementById('couponAssignPreview').innerHTML = '적용된 상품이 없습니다.<br>아래 버튼으로 상품을 선택해주세요.';
+    return;
+  }
+  const names = couponAssignedProducts.slice(0, 3).map(id => {
+    const p = products.find(p => p.id === id);
+    return p ? p.name : id;
+  });
+  const more = count > 3 ? ` 외 ${count - 3}개` : '';
+  document.getElementById('couponAssignPreview').textContent = names.join(', ') + more;
+}
+
+function saveCouponEvent() {
+  const name = document.getElementById('couponName').value.trim();
+  const val = parseFloat(document.getElementById('couponValue').value);
+  const start = document.getElementById('couponStartDate').value;
+  const end = document.getElementById('couponEndDate').value;
+  if (!name) return showToast('이벤트명을 입력해주세요.', 'error');
+  if (!val || val <= 0) return showToast('할인 값을 입력해주세요.', 'error');
+  if (currentDiscountType === 'percent' && val > 100) return showToast('할인율은 100%를 초과할 수 없습니다.', 'error');
+  if (!start || !end) return showToast('기간을 설정해주세요.', 'error');
+  if (start > end) return showToast('종료일이 시작일보다 앞설 수 없습니다.', 'error');
+
+  const ev = {
+    id: currentEditCouponId || ('cev-' + Date.now().toString(36)),
+    name,
+    discountType: currentDiscountType,
+    discountValue: val,
+    startDate: start,
+    endDate: end,
+    appliedProducts: [...couponAssignedProducts],
+    note: document.getElementById('couponNote').value.trim(),
+    createdAt: currentEditCouponId ? (couponEvents.find(e => e.id === currentEditCouponId)?.createdAt || new Date().toISOString()) : new Date().toISOString(),
+  };
+
+  if (currentEditCouponId) {
+    const idx = couponEvents.findIndex(e => e.id === currentEditCouponId);
+    if (idx >= 0) couponEvents[idx] = ev;
+  } else {
+    couponEvents.unshift(ev);
+  }
+  saveCouponEvents();
+  closeCouponForm();
+  renderCouponTable();
+  updateStats();
+  showToast(currentEditCouponId ? '쿠폰 이벤트가 수정되었습니다.' : '쿠폰 이벤트가 등록되었습니다.', 'success');
+}
+
+function deleteCouponEvent(id) {
+  if (!confirm('이 쿠폰 이벤트를 삭제할까요?')) return;
+  couponEvents = couponEvents.filter(e => e.id !== id);
+  saveCouponEvents();
+  renderCouponTable();
+  updateStats();
+  showToast('삭제되었습니다.');
+}
+
+function renderCouponTable() {
+  const tbody = document.getElementById('couponTbody');
+  const empty = document.getElementById('couponEmpty');
+  document.getElementById('couponCount').textContent = couponEvents.length;
+  if (!couponEvents.length) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  tbody.innerHTML = couponEvents.map(ev => {
+    const st = getEventStatus(ev.startDate, ev.endDate);
+    const discountLabel = ev.discountType === 'percent' ? `${ev.discountValue}% 할인` : `${ev.discountValue.toLocaleString()}원 할인`;
+    const typeLabel = ev.discountType === 'percent' ? '비율 할인' : '금액 할인';
+    return `<tr>
+      <td>
+        <div class="event-name-cell">${ev.name}</div>
+        ${ev.note ? `<div class="event-sub">${ev.note}</div>` : ''}
+      </td>
+      <td><span class="badge badge-coupon">${typeLabel}</span></td>
+      <td style="font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--red);">${discountLabel}</td>
+      <td style="font-size:12px;color:var(--text2);">${ev.startDate} ~ ${ev.endDate}</td>
+      <td><span style="font-size:13px;font-weight:600;color:var(--text);">${ev.appliedProducts.length}</span><span style="font-size:11px;color:var(--text3);">개 상품</span></td>
+      <td><span class="badge ${st.cls}"><span class="status-dot ${st.dotCls}"></span>${st.label}</span></td>
+      <td><div class="action-btns">
+        <button class="btn btn-outline btn-sm" onclick="openCouponForm('${ev.id}')">수정</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteCouponEvent('${ev.id}')">삭제</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+/* ── SITE FORM ── */
+function openSiteForm(id) {
+  const panel = document.getElementById('siteFormPanel');
+  panel.classList.add('open');
+  panel.scrollIntoView({ behavior:'smooth', block:'start' });
+  currentEditSiteId = id || null;
+  if (id) {
+    const ev = siteEvents.find(e => e.id === id);
+    if (!ev) return;
+    document.getElementById('siteFormTitle').textContent = '사이트 이벤트 수정';
+    document.getElementById('siteName').value = ev.name;
+    document.getElementById('siteStartDate').value = ev.startDate;
+    document.getElementById('siteEndDate').value = ev.endDate;
+    document.getElementById('siteDiscountValue').value = ev.discountValue || '';
+    document.getElementById('bundleCount').value = ev.bundleCount || '';
+    document.getElementById('bundleRate').value = ev.bundleRate || '';
+    document.getElementById('siteOtherDesc').value = ev.otherDesc || '';
+    selectSiteEventType(ev.eventType || 'discount');
+    bannerImgData = ev.bannerImg || '';
+    descImgData = [...(ev.descImages || [])];
+    renderBannerPreview();
+    renderDescImgGrid();
+    siteAssignedProducts = [...(ev.appliedProducts || [])];
+    updateSiteAssignUI();
+  } else {
+    document.getElementById('siteFormTitle').textContent = '새 사이트 이벤트 등록';
+    document.getElementById('siteName').value = '';
+    document.getElementById('siteStartDate').value = '';
+    document.getElementById('siteEndDate').value = '';
+    document.getElementById('siteDiscountValue').value = '';
+    document.getElementById('bundleCount').value = '';
+    document.getElementById('bundleRate').value = '';
+    document.getElementById('siteOtherDesc').value = '';
+    selectSiteEventType('discount');
+    bannerImgData = '';
+    descImgData = [];
+    renderBannerPreview();
+    renderDescImgGrid();
+    siteAssignedProducts = [];
+    updateSiteAssignUI();
+  }
+}
+function closeSiteForm() {
+  document.getElementById('siteFormPanel').classList.remove('open');
+  currentEditSiteId = null;
+}
+
+function selectSiteEventType(type) {
+  currentSiteEventType = type;
+  document.querySelectorAll('#siteEventTypeGroup .toggle-option').forEach(el => {
+    el.className = 'toggle-option';
+    if (el.dataset.value === type) el.classList.add('selected');
+  });
+  document.getElementById('siteDiscountConfig').style.display = type === 'discount' ? '' : 'none';
+  document.getElementById('siteBundleConfig').style.display = type === 'bundle' ? '' : 'none';
+  document.getElementById('siteOtherConfig').style.display = type === 'other' ? '' : 'none';
+}
+
+function previewBanner(input) {
+  if (!input.files || !input.files[0]) return;
+  const file = input.files[0];
+  if (file.size > 3 * 1024 * 1024) { showToast('배너 이미지는 3MB 이하로 업로드해주세요.', 'error'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    bannerImgData = e.target.result;
+    renderBannerPreview();
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
+function renderBannerPreview() {
+  const zone = document.getElementById('bannerZone');
+  const preview = document.getElementById('bannerPreview');
+  if (bannerImgData) {
+    zone.style.display = 'none';
+    document.getElementById('bannerImg').src = bannerImgData;
+    preview.style.display = 'flex';
+  } else {
+    zone.style.display = 'block';
+    preview.style.display = 'none';
+  }
+}
+function removeBanner() { bannerImgData = ''; renderBannerPreview(); }
+
+function addDescImages(input) {
+  if (!input.files || !input.files.length) return;
+  Array.from(input.files).forEach(file => {
+    if (file.size > 5 * 1024 * 1024) { showToast(file.name + ' — 5MB 초과', 'error'); return; }
+    const reader = new FileReader();
+    reader.onload = e => { descImgData.push(e.target.result); renderDescImgGrid(); };
+    reader.readAsDataURL(file);
+  });
+  input.value = '';
+}
+function renderDescImgGrid() {
+  const grid = document.getElementById('descImgGrid');
+  grid.innerHTML = descImgData.map((src, i) => `
+    <div class="img-preview-item">
+      <img src="${src}" alt="">
+      <button class="img-preview-remove" onclick="removeDescImg(${i})" type="button">✕</button>
+    </div>`).join('');
+}
+function removeDescImg(i) { descImgData.splice(i, 1); renderDescImgGrid(); }
+
+function updateSiteAssignUI() {
+  const count = siteAssignedProducts.length;
+  document.getElementById('siteAssignCount').textContent = count;
+  if (count === 0) {
+    document.getElementById('siteAssignPreview').innerHTML = '적용된 상품이 없습니다.<br>아래 버튼으로 상품을 선택해주세요.';
+    return;
+  }
+  const names = siteAssignedProducts.slice(0, 3).map(id => {
+    const p = products.find(p => p.id === id);
+    return p ? p.name : id;
+  });
+  const more = count > 3 ? ` 외 ${count - 3}개` : '';
+  document.getElementById('siteAssignPreview').textContent = names.join(', ') + more;
+}
+
+function saveSiteEvent() {
+  const name = document.getElementById('siteName').value.trim();
+  const start = document.getElementById('siteStartDate').value;
+  const end = document.getElementById('siteEndDate').value;
+  if (!name) return showToast('이벤트명을 입력해주세요.', 'error');
+  if (!start || !end) return showToast('기간을 설정해주세요.', 'error');
+  if (start > end) return showToast('종료일이 시작일보다 앞설 수 없습니다.', 'error');
+  if (currentSiteEventType === 'discount') {
+    const v = parseFloat(document.getElementById('siteDiscountValue').value);
+    if (!v || v <= 0) return showToast('할인율을 입력해주세요.', 'error');
+  }
+
+  const ev = {
+    id: currentEditSiteId || ('sev-' + Date.now().toString(36)),
+    name,
+    bannerImg: bannerImgData,
+    descImages: [...descImgData],
+    startDate: start,
+    endDate: end,
+    eventType: currentSiteEventType,
+    discountValue: parseFloat(document.getElementById('siteDiscountValue').value) || 0,
+    bundleCount: parseInt(document.getElementById('bundleCount').value) || 0,
+    bundleRate: parseInt(document.getElementById('bundleRate').value) || 0,
+    otherDesc: document.getElementById('siteOtherDesc').value.trim(),
+    appliedProducts: [...siteAssignedProducts],
+    createdAt: currentEditSiteId ? (siteEvents.find(e => e.id === currentEditSiteId)?.createdAt || new Date().toISOString()) : new Date().toISOString(),
+  };
+
+  if (currentEditSiteId) {
+    const idx = siteEvents.findIndex(e => e.id === currentEditSiteId);
+    if (idx >= 0) siteEvents[idx] = ev;
+  } else {
+    siteEvents.unshift(ev);
+  }
+  saveSiteEventsStore();
+  closeSiteForm();
+  renderSiteTable();
+  updateStats();
+  showToast(currentEditSiteId ? '사이트 이벤트가 수정되었습니다.' : '사이트 이벤트가 등록되었습니다.', 'success');
+}
+
+function deleteSiteEvent(id) {
+  if (!confirm('이 사이트 이벤트를 삭제할까요?')) return;
+  siteEvents = siteEvents.filter(e => e.id !== id);
+  saveSiteEventsStore();
+  renderSiteTable();
+  updateStats();
+  showToast('삭제되었습니다.');
+}
+
+function renderSiteTable() {
+  const tbody = document.getElementById('siteTbody');
+  const empty = document.getElementById('siteEmpty');
+  document.getElementById('siteCount').textContent = siteEvents.length;
+  if (!siteEvents.length) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  const typeLabel = { discount:'💸 가격할인', bundle:'📦 묶음상품', other:'✏️ 직접입력' };
+  tbody.innerHTML = siteEvents.map(ev => {
+    const st = getEventStatus(ev.startDate, ev.endDate);
+    let benefit = '';
+    if (ev.eventType === 'discount') benefit = `${ev.discountValue}% 할인`;
+    else if (ev.eventType === 'bundle') benefit = `${ev.bundleCount}개↑ 구매 시 ${ev.bundleRate}% 할인`;
+    else benefit = (ev.otherDesc || '').slice(0, 20) + ((ev.otherDesc || '').length > 20 ? '…' : '');
+    return `<tr>
+      <td>
+        <div class="event-name-cell">${ev.name}</div>
+        ${ev.bannerImg ? `<div class="event-sub">배너 이미지 있음</div>` : ''}
+      </td>
+      <td><span class="badge badge-site">${typeLabel[ev.eventType] || ev.eventType}</span></td>
+      <td style="font-size:12px;color:var(--text2);">${benefit}</td>
+      <td style="font-size:12px;color:var(--text2);">${ev.startDate} ~ ${ev.endDate}</td>
+      <td><span style="font-size:13px;font-weight:600;color:var(--text);">${ev.appliedProducts.length}</span><span style="font-size:11px;color:var(--text3);">개 상품</span></td>
+      <td><span class="badge ${st.cls}"><span class="status-dot ${st.dotCls}"></span>${st.label}</span></td>
+      <td><div class="action-btns">
+        <button class="btn btn-outline btn-sm" onclick="openSiteForm('${ev.id}')">수정</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteSiteEvent('${ev.id}')">삭제</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+/* ── BULK PRODUCT MODAL ── */
+function openProductModal(target) {
+  modalTarget = target;
+  tempSelectedProducts = target === 'coupon' ? [...couponAssignedProducts] : [...siteAssignedProducts];
+  resetFilters();
+  applyFilters();
+  document.getElementById('productModal').classList.add('open');
+}
+function closeProductModal() {
+  document.getElementById('productModal').classList.remove('open');
+}
+
+function resetFilters() {
+  document.getElementById('filterCat').value = '';
+  document.getElementById('filterPriceMin').value = '';
+  document.getElementById('filterPriceMax').value = '';
+  document.getElementById('filterKeyword').value = '';
+}
+
+function applyFilters() {
+  const cat = document.getElementById('filterCat').value;
+  const pMin = parseInt(document.getElementById('filterPriceMin').value) || 0;
+  const pMax = parseInt(document.getElementById('filterPriceMax').value) || Infinity;
+  const kw = document.getElementById('filterKeyword').value.trim().toLowerCase();
+
+  filteredProducts = products.filter(p => {
+    if (cat && p.cat !== cat) return false;
+    if (p.price < pMin) return false;
+    if (p.price > pMax) return false;
+    if (kw && !p.name.toLowerCase().includes(kw) && !p.id.toLowerCase().includes(kw)) return false;
+    return true;
+  });
+  document.getElementById('filteredProductCount').textContent = filteredProducts.length;
+  renderProductList();
+}
+
+function renderProductList() {
+  const container = document.getElementById('productListBody');
+  if (!filteredProducts.length) {
+    container.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text3);font-size:13px;">조건에 맞는 상품이 없습니다.</div>';
+    return;
+  }
+  container.innerHTML = filteredProducts.map(p => {
+    const checked = tempSelectedProducts.includes(p.id);
+    const catCls = 'cat-' + p.cat;
+    return `<div class="product-list-item${checked ? ' selected' : ''}" onclick="toggleProductSelect('${p.id}')">
+      <input type="checkbox" ${checked ? 'checked' : ''} onclick="event.stopPropagation();toggleProductSelect('${p.id}')" id="pcheck_${p.id}">
+      <div class="product-thumb" style="background:${CAT_COLORS[p.cat]||'#F1F5F9'}">${p.emoji}</div>
+      <div class="product-name-wrap">
+        <div class="pname">${p.name}</div>
+        <div class="pid">${p.id}</div>
+      </div>
+      <span class="cat-chip ${catCls}">${CAT_LABEL[p.cat]||p.cat}</span>
+      <span class="price-mono">${p.price ? '₩'+p.price.toLocaleString() : '가격협의'}</span>
+    </div>`;
+  }).join('');
+  updateSelectedDisplay();
+}
+
+function toggleProductSelect(id) {
+  const idx = tempSelectedProducts.indexOf(id);
+  if (idx >= 0) tempSelectedProducts.splice(idx, 1);
+  else tempSelectedProducts.push(id);
+  renderProductList();
+}
+
+function selectAllFiltered() {
+  filteredProducts.forEach(p => { if (!tempSelectedProducts.includes(p.id)) tempSelectedProducts.push(p.id); });
+  renderProductList();
+}
+function deselectAll() {
+  const filteredIds = filteredProducts.map(p => p.id);
+  tempSelectedProducts = tempSelectedProducts.filter(id => !filteredIds.includes(id));
+  renderProductList();
+}
+function updateSelectedDisplay() {
+  document.getElementById('selectedCountDisplay').textContent = tempSelectedProducts.length;
+}
+
+function applyProductSelection() {
+  if (modalTarget === 'coupon') {
+    couponAssignedProducts = [...tempSelectedProducts];
+    updateCouponAssignUI();
+  } else {
+    siteAssignedProducts = [...tempSelectedProducts];
+    updateSiteAssignUI();
+  }
+  closeProductModal();
+  showToast(`${tempSelectedProducts.length}개 상품에 적용되었습니다.`);
+}
+
+/* ── TOAST ── */
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.style.background = type === 'error' ? 'var(--red)' : 'var(--navy)';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+/* ── INIT ── */
+(function init() {
+  loadData();
+  renderCouponTable();
+  renderSiteTable();
+  updateStats();
+
+  // URL param for initial tab
+  const params = new URLSearchParams(location.search);
+  const tab = params.get('tab');
+  if (tab === 'site') switchTab('site');
+
+  // Set today as default start date
+  const today = new Date().toISOString().slice(0,10);
+  document.getElementById('couponStartDate').value = today;
+  document.getElementById('siteStartDate').value = today;
+})();
+</script>
+</body>
+</html>

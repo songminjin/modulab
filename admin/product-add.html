@@ -544,6 +544,13 @@ a { text-decoration: none; color: inherit; }
             <li><a href="product-add.html" class="active">상품 등록</a></li>
           </ul>
         </li>
+        <li>
+          <a href="events.html"><span class="nav-icon">🎪</span>이벤트 관리</a>
+          <ul class="sidebar-sub sidebar-nav">
+            <li><a href="events.html?tab=coupon">쿠폰 이벤트</a></li>
+            <li><a href="events.html?tab=site">사이트 이벤트</a></li>
+          </ul>
+        </li>
         <li><a href="orders.html"><span class="nav-icon">🛒</span>주문 관리</a></li>
         <li><a href="returns.html"><span class="nav-icon">🔄</span>반품 · 교환</a></li>
         <li><a href="cs.html"><span class="nav-icon">💬</span>CS 관리</a></li>
@@ -770,27 +777,33 @@ a { text-decoration: none; color: inherit; }
             </div>
 
             <!-- 쿠폰 / 할인 설정 -->
+            <!-- 쿠폰 이벤트 적용 -->
             <div class="card">
               <div class="card-title">
-                <div class="card-title-icon">🎁</div>
-                쿠폰 / 할인 적용
+                <div class="card-title-icon">🎫</div>
+                쿠폰 이벤트 적용
               </div>
-              <div class="field-hint" style="margin-bottom:12px;">이 상품에 적용 가능한 쿠폰을 선택하세요.</div>
+              <div class="field-hint" style="margin-bottom:12px;">이 상품에 적용할 쿠폰 이벤트를 선택하세요. 진행 중인 이벤트만 표시됩니다.</div>
+              <div id="couponEventList">
+                <div style="text-align:center;padding:16px;color:var(--text3);font-size:13px;">로딩 중...</div>
+              </div>
+              <div style="margin-top:10px;">
+                <a href="events.html?tab=coupon" style="font-size:12px;color:var(--blue);font-weight:500;">+ 쿠폰 이벤트 관리하기</a>
+              </div>
+            </div>
 
-              <div class="coupon-item">
-                <div class="coupon-check"><input type="checkbox" id="coupon1"></div>
-                <label class="coupon-name" for="coupon1">신규가입 쿠폰 (첫 구매 20% 할인)</label>
-                <span class="coupon-rate">-20%</span>
+            <!-- 사이트 이벤트 적용 -->
+            <div class="card">
+              <div class="card-title">
+                <div class="card-title-icon">🎪</div>
+                사이트 이벤트 적용
               </div>
-              <div class="coupon-item">
-                <div class="coupon-check"><input type="checkbox" id="coupon2"></div>
-                <label class="coupon-name" for="coupon2">번들 이벤트 (2개 이상 구매 30% 추가 할인)</label>
-                <span class="coupon-rate">-30%</span>
+              <div class="field-hint" style="margin-bottom:12px;">이 상품을 포함할 사이트 이벤트를 선택하세요.</div>
+              <div id="siteEventList">
+                <div style="text-align:center;padding:16px;color:var(--text3);font-size:13px;">로딩 중...</div>
               </div>
-              <div class="coupon-item">
-                <div class="coupon-check"><input type="checkbox" id="coupon3"></div>
-                <label class="coupon-name" for="coupon3">리뷰 작성 적립 포인트 사용 허용</label>
-                <span class="coupon-rate" style="color:var(--blue);">500P</span>
+              <div style="margin-top:10px;">
+                <a href="events.html?tab=site" style="font-size:12px;color:var(--blue);font-weight:500;">+ 사이트 이벤트 관리하기</a>
               </div>
             </div>
 
@@ -940,6 +953,10 @@ function logout(e) {
   location.href = 'index.html';
 }
 
+/* ── EDIT MODE SETUP ── */
+const EDIT_ID = new URLSearchParams(location.search).get('edit');
+let editingOriginalId = null;
+
 /* ── SALE TYPE TOGGLE ── */
 let saleType = 'file';
 function selectSaleType(type) {
@@ -1080,6 +1097,7 @@ function updatePreview() {
 
 /* ── GENERATE PRODUCT ID ── */
 function generateProductId() {
+  if (editingOriginalId) return editingOriginalId;
   const cat = document.getElementById('category').value || 'prod';
   const ts = Date.now().toString(36).toUpperCase();
   return cat.toUpperCase() + '-' + ts;
@@ -1233,37 +1251,53 @@ function validateForm(data) {
 /* ── SUBMIT ── */
 async function submitProduct() {
   const data = collectFormData();
+  const isEdit = !!EDIT_ID;
+
+  // 수정 모드에서는 판매 파일 링크 필수 검증 완화
   const err = validateForm(data);
-  if (err) { showToast(err, 'error'); return; }
+  if (err && !(isEdit && err.includes('파일 링크'))) { showToast(err, 'error'); return; }
 
-  const submitBtn = document.querySelector('.btn-success') || document.querySelector('.btn-primary[onclick="submitProduct()"]');
-
-  // Google Sheets 자동 기록 (GAS_ENDPOINT 설정 필요)
   const GAS_ENDPOINT = localStorage.getItem('modulab_gas_endpoint') || '';
 
+  const savedId = editingOriginalId || data.productId;
   const payload = {
-    action: 'addProduct',
-    productId: data.productId,
+    // 표준화된 키 (product.html, products.html 공통 사용)
+    id: savedId,
+    name: data.productName,
+    cat: data.category,
+    type: data.saleType,
+    emoji: data.selectedEmoji,
+    discount: parseInt(data.discountPrice) || 0,
+    visible: data.visibility,
+    date: isEdit ? (editingOriginalId ? undefined : new Date().toISOString().slice(0,10)) : new Date().toISOString().slice(0,10),
+
+    // 상세 필드
+    productId: savedId,
     productName: data.productName,
     category: data.category,
     saleType: data.saleType,
-    price: parseInt(data.price),
+    productDesc: data.productDesc,
+    productDetail: data.productDetail,
+    price: parseInt(data.price) || 0,
     discountPrice: parseInt(data.discountPrice) || 0,
     fileUrl: data.fileUrl || '',
     fileName: data.fileName || '',
     fileType: data.fileType || '',
     visibility: data.visibility,
+    newBadge: data.newBadge,
+    bestBadge: data.bestBadge,
     selectedEmoji: data.selectedEmoji,
+    detailImages: detailImages,
     createdAt: data.createdAt,
   };
 
   if (GAS_ENDPOINT) {
     try {
-      showToast('Google Sheets에 등록 중...', 'success');
+      showToast('Google Sheets에 기록 중...', 'success');
       const res = await fetch(GAS_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ ...payload, action: isEdit ? 'updateProduct' : 'addProduct' }),
       });
       if (!res.ok) throw new Error('GAS 응답 오류');
     } catch(e) {
@@ -1272,21 +1306,31 @@ async function submitProduct() {
     }
   }
 
-  // 로컬 저장 (임시 상품 목록)
   const products = JSON.parse(localStorage.getItem('modulab_products') || '[]');
-  products.push(payload);
-  localStorage.setItem('modulab_products', JSON.stringify(products));
+  if (isEdit) {
+    const idx = products.findIndex(p => (p.id || p.productId) === EDIT_ID);
+    if (idx >= 0) {
+      products[idx] = { ...products[idx], ...payload, date: products[idx].date || payload.date };
+    } else {
+      products.push(payload);
+    }
+    localStorage.setItem('modulab_products', JSON.stringify(products));
+    showToast('✓ 상품이 수정되었습니다!');
+  } else {
+    products.push(payload);
+    localStorage.setItem('modulab_products', JSON.stringify(products));
+    localStorage.removeItem('modulab_product_draft');
+    showToast('✓ 상품이 등록되었습니다! (ID: ' + savedId + ')');
+  }
 
-  localStorage.removeItem('modulab_product_draft');
-
-  showToast('✓ 상품이 등록되었습니다! (ID: ' + data.productId + ')');
   setTimeout(() => {
     if (confirm('상품 목록 페이지로 이동할까요?')) location.href = 'products.html';
   }, 1200);
 }
 
-/* ── LOAD DRAFT ── */
+/* ── LOAD DRAFT (신규 등록 전용) ── */
 (function() {
+  if (EDIT_ID) return; // 수정 모드에서는 draft 무시
   const draft = localStorage.getItem('modulab_product_draft');
   if (!draft) return;
   try {
@@ -1306,6 +1350,166 @@ async function submitProduct() {
       calcPrice();
     }
   } catch(e) {}
+})();
+
+/* ── EDIT MODE INIT ── */
+(function() {
+  if (!EDIT_ID) return;
+
+  // UI 변경
+  document.title = '상품 수정 — ModuLab 관리자';
+  document.querySelector('.page-title').textContent = '상품 수정';
+  document.querySelector('.page-title-sub').textContent = '등록된 상품 정보를 수정합니다';
+  document.querySelector('.header-breadcrumb .current').textContent = '상품 수정';
+  document.querySelectorAll('[onclick="submitProduct()"]').forEach(btn => {
+    btn.innerHTML = btn.innerHTML.replace('등록 완료', '수정 완료').replace('상품 등록 완료', '상품 수정 완료');
+  });
+
+  // DEMO 시드 데이터 (localStorage에 없을 때 폴백)
+  const DEMO_SEED = [
+    {id:'excel-pm',  name:'프로젝트 관리 자동화', cat:'excel',  price:19900, discount:0,     type:'file',    visible:true,  emoji:'📊', date:'2026-05-10'},
+    {id:'excel-hh',  name:'가계부 자동화',         cat:'excel',  price:9900,  discount:0,     type:'file',    visible:true,  emoji:'💰', date:'2026-05-12'},
+    {id:'excel-pay', name:'급여 관리 자동화',       cat:'excel',  price:29900, discount:24900, type:'file',    visible:true,  emoji:'👥', date:'2026-05-14'},
+    {id:'excel-margin',name:'마진 계산기',          cat:'excel',  price:9900,  discount:0,     type:'file',    visible:true,  emoji:'📈', date:'2026-05-15'},
+    {id:'excel-crm', name:'CRM 고객관리 자동화',    cat:'excel',  price:29900, discount:0,     type:'file',    visible:true,  emoji:'🤝', date:'2026-05-18'},
+    {id:'excel-inv', name:'재고 관리 자동화',        cat:'excel',  price:19900, discount:0,     type:'file',    visible:true,  emoji:'📦', date:'2026-05-19'},
+    {id:'excel-attend',name:'근태 관리 자동화',     cat:'excel',  price:19900, discount:0,     type:'file',    visible:true,  emoji:'⏰', date:'2026-05-21'},
+    {id:'sheets-pm', name:'구글시트 프로젝트 관리', cat:'sheets', price:19900, discount:0,     type:'file',    visible:true,  emoji:'🔧', date:'2026-05-20'},
+    {id:'sheets-crm',name:'구글시트 CRM 자동화',   cat:'sheets', price:29900, discount:0,     type:'file',    visible:true,  emoji:'⚙️', date:'2026-05-22'},
+    {id:'short-pack',name:'숏폼 편집 템플릿 Pack', cat:'short',  price:0,     discount:0,     type:'inquiry', visible:true,  emoji:'🎬', date:'2026-05-25'},
+    {id:'detail-01', name:'상세페이지 맞춤 제작',   cat:'detail', price:0,     discount:0,     type:'inquiry', visible:true,  emoji:'🖼️', date:'2026-05-28'},
+    {id:'web-01',    name:'홈페이지 맞춤 제작',     cat:'web',    price:0,     discount:0,     type:'inquiry', visible:false, emoji:'🌐', date:'2026-06-01'},
+    {id:'prog-01',   name:'맞춤 프로그램 제작',     cat:'program',price:0,     discount:0,     type:'inquiry', visible:true,  emoji:'⚙️', date:'2026-06-01'},
+  ];
+
+  // localStorage에서 찾기, 없으면 DEMO에서 찾기
+  let products = JSON.parse(localStorage.getItem('modulab_products') || '[]');
+  let p = products.find(x => (x.id || x.productId) === EDIT_ID);
+
+  if (!p) {
+    // DEMO seed에서 찾아 localStorage에 저장
+    const seed = DEMO_SEED.find(x => x.id === EDIT_ID);
+    if (seed) {
+      const normalized = {
+        id: seed.id, name: seed.name, cat: seed.cat, type: seed.type,
+        emoji: seed.emoji, discount: seed.discount, visible: seed.visible, date: seed.date,
+        productId: seed.id, productName: seed.name, category: seed.cat, saleType: seed.type,
+        price: seed.price, discountPrice: seed.discount, selectedEmoji: seed.emoji, visibility: seed.visible,
+        productDesc: '', productDetail: '', fileUrl: '', fileName: '', fileType: '',
+        newBadge: true, bestBadge: false, detailImages: [], createdAt: seed.date + 'T00:00:00.000Z',
+      };
+      products.push(normalized);
+      localStorage.setItem('modulab_products', JSON.stringify(products));
+      p = normalized;
+    }
+  }
+
+  if (!p) {
+    showToast('상품을 찾을 수 없습니다.', 'error');
+    return;
+  }
+
+  editingOriginalId = p.id || p.productId;
+
+  // 폼 채우기
+  const set = (id, val) => { const el = document.getElementById(id); if (el && val !== undefined && val !== null) el.value = val; };
+  set('productName', p.productName || p.name);
+  set('category', p.category || p.cat);
+  set('productDesc', p.productDesc || '');
+  set('productDetail', p.productDetail || '');
+  set('price', p.price);
+  set('discountPrice', p.discountPrice || p.discount || 0);
+  set('fileUrl', p.fileUrl || '');
+  set('fileName', p.fileName || '');
+  set('fileType', p.fileType || '');
+  set('metaTitle', p.metaTitle || '');
+  set('metaDesc', p.metaDesc || '');
+
+  // 판매유형
+  selectSaleType(p.saleType || p.type || 'file');
+
+  // 이모지
+  const emojiSrc = p.selectedEmoji || p.emoji;
+  if (emojiSrc) {
+    const chip = document.querySelector(`.emoji-chip[data-emoji="${emojiSrc}"]`);
+    if (chip) selectEmoji(chip);
+  }
+
+  // 토글
+  const vis = document.getElementById('visibility');
+  if (vis) { vis.checked = p.visibility !== false && p.visible !== false; toggleVisibility(vis); }
+  const nb = document.getElementById('newBadge');
+  if (nb) nb.checked = p.newBadge !== false;
+  const bb = document.getElementById('bestBadge');
+  if (bb) bb.checked = !!p.bestBadge;
+
+  // 상세 이미지
+  if (p.detailImages && p.detailImages.length) {
+    detailImages = p.detailImages;
+    renderDetailImgGrid();
+  }
+
+  // char count 업데이트
+  ['productName','productDesc','productDetail','metaTitle','metaDesc'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const maxMap = {productName:80, productDesc:100, productDetail:2000, metaTitle:60, metaDesc:160};
+    const countId = id === 'productName' ? 'nameCount' : id === 'productDesc' ? 'descCount' : id === 'productDetail' ? 'detailCount' : id === 'metaTitle' ? 'metaTitleCount' : 'metaDescCount';
+    if (maxMap[id]) updateCharCount(el, countId, maxMap[id]);
+  });
+
+  calcPrice();
+  updatePreview();
+  showToast('상품 정보를 불러왔습니다.', 'success');
+})();
+
+/* ── LOAD COUPON & SITE EVENTS ── */
+(function loadEventLists() {
+  const today = new Date().toISOString().slice(0,10);
+
+  // Coupon events
+  let couponEvents = [];
+  try { couponEvents = JSON.parse(localStorage.getItem('modulab_coupon_events') || '[]'); } catch {}
+  const couponEl = document.getElementById('couponEventList');
+  if (!couponEl) return;
+
+  const activeCoupons = couponEvents.filter(e => e.startDate <= today && today <= e.endDate);
+  if (!activeCoupons.length) {
+    couponEl.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:8px 0;">현재 진행 중인 쿠폰 이벤트가 없습니다.</div>';
+  } else {
+    couponEl.innerHTML = activeCoupons.map(ev => {
+      const discLabel = ev.discountType === 'percent' ? `-${ev.discountValue}%` : `-${(ev.discountValue||0).toLocaleString()}원`;
+      return `<div class="coupon-item">
+        <div class="coupon-check"><input type="checkbox" id="cev_${ev.id}" data-evid="${ev.id}"></div>
+        <label class="coupon-name" for="cev_${ev.id}">${ev.name} <span style="font-size:11px;color:var(--text3);">(~${ev.endDate})</span></label>
+        <span class="coupon-rate">${discLabel}</span>
+      </div>`;
+    }).join('');
+  }
+
+  // Site events
+  let siteEvents = [];
+  try { siteEvents = JSON.parse(localStorage.getItem('modulab_site_events') || '[]'); } catch {}
+  const siteEl = document.getElementById('siteEventList');
+  if (!siteEl) return;
+
+  const activeSiteEvents = siteEvents.filter(e => e.startDate <= today && today <= e.endDate);
+  if (!activeSiteEvents.length) {
+    siteEl.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:8px 0;">현재 진행 중인 사이트 이벤트가 없습니다.</div>';
+  } else {
+    const typeLabel = { discount:'💸 가격할인', bundle:'📦 묶음상품', other:'✏️ 직접입력' };
+    siteEl.innerHTML = activeSiteEvents.map(ev => {
+      let benefit = '';
+      if (ev.eventType === 'discount') benefit = `${ev.discountValue}% 할인`;
+      else if (ev.eventType === 'bundle') benefit = `${ev.bundleCount}개↑ 구매 시 ${ev.bundleRate}% 할인`;
+      else benefit = (ev.otherDesc || '').slice(0, 30);
+      return `<div class="coupon-item">
+        <div class="coupon-check"><input type="checkbox" id="sev_${ev.id}" data-sevid="${ev.id}"></div>
+        <label class="coupon-name" for="sev_${ev.id}">${ev.name} <span style="font-size:11px;color:var(--text3);">${typeLabel[ev.eventType]||''}</span></label>
+        <span class="coupon-rate" style="color:var(--purple);">${benefit}</span>
+      </div>`;
+    }).join('');
+  }
 })();
 </script>
 </body>
