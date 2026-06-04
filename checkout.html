@@ -328,6 +328,16 @@
       <div class="checkout-section-title">결제 방법 선택</div>
 
       <div class="pm-grid">
+        <!-- 신용/체크카드 -->
+        <label class="pm-card" onclick="selectPM('card')">
+          <input type="radio" name="pm" value="card">
+          <div class="pm-icon" style="background:#F5F3FF;">💳</div>
+          <div class="pm-info">
+            <div class="pm-name">신용 · 체크카드</div>
+            <div class="pm-desc">모든 카드 · 할부 가능</div>
+          </div>
+        </label>
+
         <!-- 토스페이 -->
         <label class="pm-card" onclick="selectPM('toss')">
           <input type="radio" name="pm" value="toss">
@@ -358,6 +368,16 @@
           </div>
         </label>
 
+        <!-- 무통장입금 (가상계좌) -->
+        <label class="pm-card" onclick="selectPM('vbank')">
+          <input type="radio" name="pm" value="vbank">
+          <div class="pm-icon" style="background:#F1F5F9;">🏦</div>
+          <div class="pm-info">
+            <div class="pm-name">무통장입금</div>
+            <div class="pm-desc">가상계좌 발급 · 24시간 유효</div>
+          </div>
+        </label>
+
         <!-- PayPal -->
         <label class="pm-card" onclick="selectPM('paypal')">
           <input type="radio" name="pm" value="paypal">
@@ -365,16 +385,6 @@
           <div class="pm-info">
             <div class="pm-name">PayPal</div>
             <div class="pm-desc">해외 카드 / PayPal 계정</div>
-          </div>
-        </label>
-
-        <!-- 계좌이체 -->
-        <label class="pm-card" onclick="selectPM('vbank')">
-          <input type="radio" name="pm" value="vbank">
-          <div class="pm-icon" style="background:#F1F5F9;">🏦</div>
-          <div class="pm-info">
-            <div class="pm-name">가상계좌 이체</div>
-            <div class="pm-desc">무통장 입금 (24시간 유효)</div>
           </div>
         </label>
       </div>
@@ -633,6 +643,7 @@ async function startPayment() {
   if (!selectedPM || selectedPM === 'paypal') return;
 
   const channelMap = {
+    card:  { channelKey: CHANNEL_KEY_TOSS,  payMethod: 'CARD' },
     toss:  { channelKey: CHANNEL_KEY_TOSS,  payMethod: 'EASY_PAY',       easyPayProvider: 'TOSSPAY' },
     kakao: { channelKey: CHANNEL_KEY_KAKAO, payMethod: 'EASY_PAY',       easyPayProvider: 'KAKAOPAY' },
     naver: { channelKey: CHANNEL_KEY_NAVER, payMethod: 'EASY_PAY',       easyPayProvider: 'NAVERPAY' },
