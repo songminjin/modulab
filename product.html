@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="pageTitle">상품 상세 — 모듈랩</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.prod-wrap { max-width: 1280px; margin: 0 auto; padding: 28px 40px 80px; }
+.prod-layout { display: grid; grid-template-columns: 1fr 440px; gap: 48px; align-items: start; margin-bottom: 64px; }
+
+/* Gallery */
+.prod-gallery {}
+.prod-main-img {
+  aspect-ratio: 4/3; border-radius: 16px; border: 1px solid var(--border);
+  overflow: hidden; display: flex; align-items: center; justify-content: center;
+  background: #EFF6FF; margin-bottom: 12px; position: relative;
+}
+.prod-main-img img { width: 100%; height: 100%; object-fit: cover; display: none; }
+.prod-emoji-box { font-size: 96px; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
+.prod-thumb-strip { display: flex; gap: 8px; flex-wrap: wrap; }
+.prod-thumb {
+  width: 72px; height: 72px; border-radius: 8px;
+  border: 2px solid transparent; overflow: hidden;
+  cursor: pointer; transition: border-color .15s;
+  background: var(--slate-light);
+  display: flex; align-items: center; justify-content: center; font-size: 24px;
+}
+.prod-thumb:hover { border-color: var(--blue-mid); }
+.prod-thumb.active { border-color: var(--blue); }
+.prod-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+/* Info panel */
+.prod-info { position: sticky; top: 88px; }
+.prod-badge-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.badge-excel { background: #DCFCE7; color: #15803D; }
+.badge-sheets { background: #FEF9C3; color: #A16207; }
+.badge-short { background: #EDE9FE; color: #6D28D9; }
+.badge-detail { background: #FFE4E6; color: #B91C1C; }
+.badge-web { background: #DBEAFE; color: #1D4ED8; }
+.badge-program { background: #F1F5F9; color: #475569; }
+.prod-cat-badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 4px; letter-spacing: .04em; }
+.prod-new-badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 4px; background: var(--navy); color: white; }
+.prod-best-badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 4px; background: #F59E0B; color: white; }
+.prod-title { font-size: 24px; font-weight: 700; color: var(--text); line-height: 1.3; margin-bottom: 10px; }
+.prod-short-desc { font-size: 14px; color: var(--text2); line-height: 1.7; margin-bottom: 14px; }
+.prod-seller-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text3); margin-bottom: 8px; }
+.prod-seller-name { font-weight: 600; color: var(--text2); }
+.prod-rating-row { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }
+.prod-stars { color: #F59E0B; font-size: 14px; letter-spacing: -1px; }
+.prod-rating-num { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; color: var(--text); }
+.prod-review-count { font-size: 12px; color: var(--text3); }
+.prod-divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+/* Price */
+.prod-price-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 6px; }
+.prod-original { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--text3); text-decoration: line-through; }
+.prod-disc-badge { background: #FEE2E2; color: #DC2626; font-size: 13px; font-weight: 700; padding: 2px 8px; border-radius: 4px; }
+.prod-final { font-family: 'JetBrains Mono', monospace; font-size: 30px; font-weight: 700; color: var(--text); }
+.prod-final.inquiry { font-size: 20px; color: var(--blue); }
+.prod-savings { font-size: 12px; color: #DC2626; margin-bottom: 16px; }
+
+/* Meta rows */
+.prod-meta-list { margin-bottom: 20px; }
+.prod-meta-row { display: flex; align-items: flex-start; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+.prod-meta-row:last-child { border-bottom: none; }
+.prod-meta-label { font-weight: 600; color: var(--text3); width: 68px; flex-shrink: 0; }
+.prod-meta-val { color: var(--text2); flex: 1; }
+
+/* CTA */
+.prod-cta { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+.prod-btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; padding: 14px; border-radius: 10px;
+  font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; border: none; transition: all .15s;
+}
+.prod-btn-buy { background: var(--blue); color: white; }
+.prod-btn-buy:hover { background: var(--blue-dark); }
+.prod-btn-cart { background: var(--white); color: var(--blue); border: 1.5px solid var(--blue); }
+.prod-btn-cart:hover { background: var(--blue-light); }
+.prod-btn-inquiry { background: var(--green); color: white; }
+.prod-btn-inquiry:hover { background: #15803D; }
+.prod-btn-kakao { background: #FEE500; color: #000; }
+.prod-btn-kakao:hover { background: #F7DC00; }
+
+/* Trust */
+.prod-trust { background: var(--slate-light); border-radius: 10px; padding: 14px 16px; }
+.prod-trust-item { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--text2); padding: 4px 0; }
+
+/* Tabs */
+.prod-tabs-section { max-width: 1280px; margin: 0 auto; padding: 0 40px 60px; }
+.prod-tab-list { display: flex; border-bottom: 2px solid var(--border); margin-bottom: 32px; }
+.prod-tab-btn {
+  padding: 14px 24px; font-size: 14px; font-weight: 600; color: var(--text3);
+  border: none; background: none; cursor: pointer; font-family: inherit;
+  border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all .15s;
+}
+.prod-tab-btn:hover { color: var(--text); }
+.prod-tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); }
+.prod-tab-pane { display: none; }
+.prod-tab-pane.active { display: block; }
+
+/* Detail content */
+.prod-detail-wrap { max-width: 760px; }
+.prod-feature-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 32px; }
+.prod-feature-card {
+  background: var(--slate-light); border-radius: 10px; padding: 16px;
+  display: flex; align-items: flex-start; gap: 12px;
+}
+.prod-feature-icon {
+  width: 36px; height: 36px; border-radius: 8px; background: var(--blue-light);
+  border: 1px solid var(--blue-mid); display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0;
+}
+.prod-feature-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+.prod-feature-desc { font-size: 12px; color: var(--text3); line-height: 1.5; }
+.prod-detail-text {
+  font-size: 15px; line-height: 1.9; color: var(--text2);
+  border-top: 1px solid var(--border); padding-top: 24px;
+}
+.prod-detail-text p { margin-bottom: 12px; }
+.prod-detail-text strong { color: var(--text); font-weight: 700; }
+
+/* Review */
+.prod-review-summary {
+  display: flex; align-items: center; gap: 28px;
+  padding: 24px; background: var(--slate-light); border-radius: 12px; margin-bottom: 24px;
+}
+.prod-review-big { font-family: 'JetBrains Mono', monospace; font-size: 52px; font-weight: 700; color: var(--text); line-height: 1; }
+.prod-review-stars-big { font-size: 22px; color: #F59E0B; }
+.prod-review-count-txt { font-size: 13px; color: var(--text3); margin-top: 4px; }
+.prod-review-card { border: 1px solid var(--border); border-radius: 10px; padding: 18px; margin-bottom: 12px; }
+.prod-review-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.prod-reviewer-avatar {
+  width: 36px; height: 36px; border-radius: 50%; background: var(--blue); color: white;
+  display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; flex-shrink: 0;
+}
+.prod-reviewer-name { font-size: 13px; font-weight: 600; color: var(--text); }
+.prod-review-date { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.prod-review-stars { color: #F59E0B; font-size: 13px; }
+.prod-review-text { font-size: 14px; color: var(--text2); line-height: 1.7; }
+
+/* Related */
+.prod-related-section { max-width: 1280px; margin: 0 auto; padding: 0 40px 80px; border-top: 1px solid var(--border); padding-top: 40px; }
+.prod-related-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+.prod-related-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+/* Toast */
+#toast {
+  position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(80px);
+  background: var(--navy); color: white; padding: 13px 24px; border-radius: 10px;
+  font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.25);
+  transition: transform .3s ease, opacity .3s ease; opacity: 0; z-index: 9000; white-space: nowrap;
+}
+#toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+@media (max-width: 960px) {
+  .prod-layout { grid-template-columns: 1fr; gap: 28px; }
+  .prod-info { position: static; }
+  .prod-feature-grid { grid-template-columns: 1fr; }
+  .prod-related-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+  .prod-wrap { padding: 16px 20px 60px; }
+  .prod-tabs-section, .prod-related-section { padding-left: 20px; padding-right: 20px; }
+  .breadcrumb { padding: 12px 20px; }
+  .prod-related-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-left">
+      <div class="hamburger" onclick="openDrawer()"><span></span><span></span><span></span></div>
+    </div>
+    <div class="nav-center">
+      <a href="index.html" class="nav-logo"><div class="logo-mark"></div>Modu<span>Lab</span></a>
+    </div>
+    <div class="nav-right">
+      <div class="nav-search">
+        <span style="color:var(--text3);font-size:14px;">🔍</span>
+        <input type="text" placeholder="상품 검색...">
+      </div>
+      <div id="nav-auth" style="display:flex;align-items:center;gap:8px;">
+        <button class="nav-btn nav-btn-ghost" onclick="location.href='login.html'">로그인</button>
+        <button class="nav-btn nav-btn-primary" onclick="location.href='register.html'">회원가입</button>
+      </div>
+      <a href="cart.html" class="cart-btn">🛒<div class="cart-badge" id="cart-badge-nav">0</div></a>
+    </div>
+  </div>
+</nav>
+
+<!-- DRAWER -->
+<div class="drawer-overlay" id="drawerOverlay">
+  <div class="drawer-backdrop" onclick="closeDrawer()"></div>
+  <div class="drawer-panel">
+    <div class="drawer-header">
+      <div class="drawer-logo"><div class="logo-mark" style="width:28px;height:28px;"></div>Modu<span>Lab</span></div>
+      <button class="drawer-close" onclick="closeDrawer()">✕</button>
+    </div>
+    <div class="drawer-search">
+      <span style="color:var(--text3);">🔍</span>
+      <input type="text" placeholder="상품 검색...">
+    </div>
+    <div class="drawer-section-title">카테고리</div>
+    <ul class="drawer-nav">
+      <li><a href="index.html"><span class="cat-icon">🏠</span>전체 상품</a></li>
+      <li><a href="category-excel.html"><span class="cat-icon">📊</span>엑셀 프로그램</a></li>
+      <li><a href="category-sheets.html"><span class="cat-icon">🔧</span>구글시트 자동화</a></li>
+      <li><a href="category-short.html"><span class="cat-icon">🎬</span>숏폼 템플릿</a></li>
+      <li><a href="category-detail.html"><span class="cat-icon">🖼️</span>상세페이지 제작</a></li>
+      <li><a href="category-web.html"><span class="cat-icon">🌐</span>홈페이지 제작</a></li>
+      <li><a href="category-program.html"><span class="cat-icon">⚙️</span>프로그램 제작</a></li>
+      <li><a href="event.html" class="hot"><span class="cat-icon">🎁</span>이벤트</a></li>
+    </ul>
+    <div class="drawer-divider"></div>
+    <div class="drawer-section-title">내 계정</div>
+    <ul class="drawer-nav">
+      <li><a href="#"><span class="cat-icon">👤</span>마이페이지</a></li>
+      <li><a href="cart.html"><span class="cat-icon">🛒</span>장바구니</a></li>
+      <li><a href="cs.html"><span class="cat-icon">💬</span>문의하기</a></li>
+    </ul>
+    <div class="drawer-btns" id="drawer-auth">
+      <button class="nav-btn nav-btn-ghost" onclick="location.href='login.html'">로그인</button>
+      <button class="nav-btn nav-btn-primary" onclick="location.href='register.html'">회원가입</button>
+    </div>
+  </div>
+</div>
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb">
+  <a href="index.html">홈</a>
+  <span style="color:var(--border);">›</span>
+  <a id="breadCat" href="index.html">카테고리</a>
+  <span style="color:var(--border);">›</span>
+  <span id="breadProd">상품명</span>
+</div>
+
+<!-- PRODUCT SECTION -->
+<div class="prod-wrap">
+  <div class="prod-layout">
+
+    <!-- LEFT: Gallery -->
+    <div class="prod-gallery">
+      <div class="prod-main-img" id="mainImgBox">
+        <img id="mainImgTag" src="" alt="">
+        <div class="prod-emoji-box" id="emojiDisplay">📊</div>
+      </div>
+      <div class="prod-thumb-strip" id="thumbStrip"></div>
+    </div>
+
+    <!-- RIGHT: Info -->
+    <div class="prod-info">
+      <div class="prod-badge-row" id="badgeRow"></div>
+      <h1 class="prod-title" id="prodTitle">상품명</h1>
+      <p class="prod-short-desc" id="prodDesc"></p>
+      <div class="prod-seller-row">
+        <span>판매자</span>
+        <span class="prod-seller-name">모듈랩</span>
+      </div>
+      <div class="prod-rating-row">
+        <span class="prod-stars">★★★★★</span>
+        <span class="prod-rating-num">4.9</span>
+        <span class="prod-review-count" id="reviewCountLabel"></span>
+      </div>
+      <div class="prod-divider"></div>
+
+      <!-- Price -->
+      <div id="priceSection"></div>
+      <div class="prod-divider"></div>
+
+      <!-- Meta -->
+      <div class="prod-meta-list" id="metaList"></div>
+      <div class="prod-divider"></div>
+
+      <!-- CTA -->
+      <div class="prod-cta" id="ctaSection"></div>
+
+      <!-- Trust -->
+      <div class="prod-trust">
+        <div class="prod-trust-item"><span>⚡</span><span>결제 즉시 파일 다운로드</span></div>
+        <div class="prod-trust-item"><span>🛡️</span><span>오류 발생 시 무료 수정 지원</span></div>
+        <div class="prod-trust-item"><span>✅</span><span>6년 실무에서 직접 검증한 도구</span></div>
+        <div class="prod-trust-item"><span>💳</span><span>토스페이먼츠 안전 결제</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="prod-tabs-section">
+  <div class="prod-tab-list">
+    <button class="prod-tab-btn active" onclick="switchTab('detail', this)">상세 정보</button>
+    <button class="prod-tab-btn" onclick="switchTab('review', this)" id="reviewTabBtn">리뷰</button>
+    <button class="prod-tab-btn" onclick="switchTab('qa', this)">문의하기</button>
+  </div>
+
+  <!-- 상세정보 -->
+  <div class="prod-tab-pane active" id="tab-detail">
+    <div class="prod-detail-wrap">
+      <div class="prod-feature-grid" id="featureGrid"></div>
+      <div class="prod-detail-text" id="detailText"></div>
+    </div>
+  </div>
+
+  <!-- 리뷰 -->
+  <div class="prod-tab-pane" id="tab-review">
+    <div class="prod-review-summary">
+      <div>
+        <div class="prod-review-big">4.9</div>
+        <div class="prod-review-stars-big">★★★★★</div>
+        <div class="prod-review-count-txt" id="reviewSummaryCount"></div>
+      </div>
+      <div style="flex:1; display:grid; gap:6px;">
+        <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
+          <span style="color:var(--text3);width:20px;">5★</span>
+          <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;">
+            <div style="width:90%;height:100%;background:#F59E0B;border-radius:3px;"></div>
+          </div>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);">90%</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
+          <span style="color:var(--text3);width:20px;">4★</span>
+          <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;">
+            <div style="width:8%;height:100%;background:#F59E0B;border-radius:3px;"></div>
+          </div>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);">8%</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
+          <span style="color:var(--text3);width:20px;">3★</span>
+          <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;">
+            <div style="width:2%;height:100%;background:#F59E0B;border-radius:3px;"></div>
+          </div>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);">2%</span>
+        </div>
+      </div>
+    </div>
+    <div id="reviewList"></div>
+  </div>
+
+  <!-- 문의 -->
+  <div class="prod-tab-pane" id="tab-qa">
+    <div style="text-align:center;padding:48px 20px;">
+      <div style="font-size:44px;margin-bottom:16px;">💬</div>
+      <div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:8px;">궁금한 점이 있으신가요?</div>
+      <div style="font-size:14px;color:var(--text3);margin-bottom:28px;line-height:1.7;">
+        상품 관련 문의는 카카오톡 채널 또는 1:1 문의를 이용해주세요.<br>
+        평일 09:00–18:00 답변드립니다.
+      </div>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+        <a href="#" class="prod-btn prod-btn-kakao" style="width:auto;padding:12px 24px;border-radius:10px;font-size:14px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:8px;">💬 카카오톡 문의</a>
+        <a href="cs.html" class="prod-btn prod-btn-cart" style="width:auto;padding:12px 24px;border-radius:10px;font-size:14px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:8px;border:1.5px solid var(--blue);">✉️ 1:1 문의하기</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RELATED PRODUCTS -->
+<div class="prod-related-section">
+  <div class="prod-related-title">같은 카테고리 상품</div>
+  <div class="prod-related-grid" id="relatedGrid"></div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-cs-bar">
+    <div class="footer-cs-inner">
+      <div class="footer-cs-info">
+        <div class="footer-cs-label">CUSTOMER CENTER</div>
+        <div class="footer-cs-title">전화보다 빠른 상담</div>
+        <div class="footer-cs-sub">카카오채널로 문의하시면 빠르게 답변드립니다</div>
+        <div class="footer-cs-hours">평일 09:00 – 18:00 &nbsp;·&nbsp; 점심 12:00 – 13:00 &nbsp;·&nbsp; 주말/공휴일 휴무</div>
+      </div>
+      <div class="footer-cs-btns">
+        <a href="#" class="footer-cs-btn-kakao">💬 카카오톡 문의하기</a>
+        <a href="cs.html" class="footer-cs-btn-inquiry">✉️ 1:1 문의하기</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="logo-wrap"><div class="logo-mark"></div><div class="brand-name">Modu<span>Lab</span></div></div>
+      <p>혼자 일해도 팀처럼 돌아가는<br>업무 시스템을 만듭니다.</p>
+    </div>
+    <div class="footer-col">
+      <h4>카테고리</h4>
+      <ul>
+        <li><a href="category-excel.html">엑셀 프로그램</a></li>
+        <li><a href="category-sheets.html">구글시트 자동화</a></li>
+        <li><a href="category-short.html">숏폼 템플릿</a></li>
+        <li><a href="category-detail.html">상세페이지 제작</a></li>
+        <li><a href="category-web.html">홈페이지 제작</a></li>
+        <li><a href="category-program.html">프로그램 제작</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>빠른 링크</h4>
+      <ul>
+        <li><a href="index.html">홈</a></li>
+        <li><a href="event.html">이벤트</a></li>
+        <li><a href="guide.html">구매 가이드</a></li>
+        <li><a href="cs.html">고객센터</a></li>
+        <li><a href="cart.html">장바구니</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>정책 안내</h4>
+      <ul>
+        <li><a href="terms.html">이용약관</a></li>
+        <li><a href="privacy.html">개인정보처리방침</a></li>
+        <li><a href="#">라이선스 정책</a></li>
+        <li><a href="#">환불 정책</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 ModuLab. All rights reserved.</p>
+    <div class="footer-biz">사업자등록번호: 000-00-00000 · 통신판매업: 제0000-서울-0000호</div>
+  </div>
+</footer>
+
+<div id="toast"><span id="toastMsg"></span></div>
+
+<script src="auth.js"></script>
+<script>
+/* ── DRAWER ── */
+function openDrawer() {
+  const d = document.getElementById('drawerOverlay');
+  d.style.display = 'block';
+  setTimeout(() => d.classList.add('open'), 10);
+  document.body.style.overflow = 'hidden';
+}
+function closeDrawer() {
+  const d = document.getElementById('drawerOverlay');
+  d.classList.remove('open');
+  setTimeout(() => { d.style.display = 'none'; }, 260);
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+
+/* ── CONSTANTS ── */
+const CAT_LABEL = { excel:'엑셀 프로그램', sheets:'구글시트 자동화', short:'숏폼 템플릿', detail:'상세페이지 제작', web:'홈페이지 제작', program:'프로그램 제작' };
+const CAT_HREF  = { excel:'category-excel.html', sheets:'category-sheets.html', short:'category-short.html', detail:'category-detail.html', web:'category-web.html', program:'category-program.html' };
+const CAT_BG    = { excel:'#EFF6FF', sheets:'#FEFCE8', short:'#F5F3FF', detail:'#FFF1F2', web:'#EFF6FF', program:'#F8FAFC' };
+const CAT_BG2   = { excel:'#DBEAFE', sheets:'#FEF9C3', short:'#EDE9FE', detail:'#FFE4E6', web:'#BFDBFE', program:'#F1F5F9' };
+const CAT_BADGE_CLS  = { excel:'badge-excel', sheets:'badge-sheets', short:'badge-short', detail:'badge-detail', web:'badge-web', program:'badge-program' };
+const CAT_BADGE_TEXT = { excel:'EXCEL', sheets:'SHEETS', short:'SHORT FORM', detail:'DETAIL', web:'WEB', program:'PROGRAM' };
+const FILE_LABEL = { xlsx:'.xlsx (엑셀)', xlsm:'.xlsm (매크로 엑셀)', gsheet:'Google Sheets', zip:'.zip', pdf:'.pdf', capcut:'CapCut 템플릿', other:'기타' };
+
+/* ── DEMO PRODUCT DATA ── */
+const DEMO = {
+  'excel-pm': {
+    name:'프로젝트 관리 자동화', cat:'excel', emoji:'📊', price:19900, discount:0, type:'file',
+    desc:'업무 일정·진행률·담당자를 한눈에 관리. 자동 알림 & 상태 추적 기능 포함',
+    detail:'프로젝트 관리 자동화 툴은 6년간 실무에서 직접 검증한 엑셀 기반 도구입니다.\n\n**주요 기능**\n• 업무 일정 자동 관리 및 간트 차트 시각화\n• 진행률 자동 계산 — 셀 수정만으로 즉시 반영\n• 담당자별 업무 현황 대시보드\n• 마감 임박 자동 알림 (조건부 서식)\n• 상태 추적: 대기 / 진행 / 완료 / 보류\n\n**포함 내용**\n• 프로젝트 관리 엑셀 파일 (.xlsx)\n• 사용 설명서 PDF\n• 오류 발생 시 1:1 무료 지원\n\n**시스템 요구사항**\n• Microsoft Excel 2016 이상 또는 Office 365\n• Google Sheets 호환 (일부 기능 제한 가능)',
+    features:[{icon:'📅',t:'일정 자동 관리',d:'업무 일정을 자동으로 계산하고 간트 차트로 시각화'},{icon:'📊',t:'진행률 추적',d:'셀 수정만으로 전체 프로젝트 진행률이 즉시 반영'},{icon:'👥',t:'담당자 현황',d:'팀원별 업무 배분 및 현황을 한눈에 확인'},{icon:'🔔',t:'자동 알림',d:'마감 임박 항목을 색상으로 자동 표시'}],
+    fileType:'xlsx', views:248, downloads:31, date:'2026-05-10'
+  },
+  'excel-hh': {
+    name:'가계부 자동화', cat:'excel', emoji:'💰', price:9900, discount:0, type:'file',
+    desc:'수입·지출 자동 집계 및 월별/카테고리별 통계. 예산 초과 알림 기능',
+    detail:'가계부 자동화로 복잡한 가계 관리를 간단하게 해결하세요.\n\n**주요 기능**\n• 수입·지출 자동 집계\n• 월별 / 카테고리별 통계 차트\n• 예산 초과 자동 알림 (조건부 서식)\n• 연간 재정 요약 보고서 자동 생성\n\n**포함 내용**\n• 가계부 자동화 엑셀 파일 (.xlsx)\n• 사용 설명서 PDF',
+    features:[{icon:'💸',t:'수입·지출 집계',d:'입력하면 자동으로 집계되는 스마트 가계부'},{icon:'📈',t:'통계 차트',d:'월별·카테고리별 지출 패턴을 차트로 시각화'},{icon:'⚠️',t:'예산 알림',d:'예산 초과 시 자동으로 경고 표시'},{icon:'📋',t:'연간 요약',d:'연간 재정 현황을 한 페이지로 요약'}],
+    fileType:'xlsx', views:512, downloads:87, date:'2026-05-12'
+  },
+  'excel-pay': {
+    name:'급여 관리 자동화', cat:'excel', emoji:'👥', price:29900, discount:24900, type:'file',
+    desc:'급여·공제·세금 자동 계산. 직원별 명세서 자동 생성 및 연간 정산 기능',
+    detail:'급여 관리 자동화로 매달 반복되는 급여 계산 업무를 한 번에 해결하세요.\n\n**주요 기능**\n• 급여·공제·세금 자동 계산\n• 직원별 급여 명세서 자동 생성\n• 4대보험 공제액 자동 계산\n• 연간 급여 정산 및 원천징수 합계\n\n**포함 내용**\n• 급여 관리 자동화 엑셀 파일 (.xlsx)\n• 4대보험 요율표 (최신)\n• 사용 설명서 PDF',
+    features:[{icon:'💳',t:'급여 자동 계산',d:'기본급, 수당, 공제 항목을 자동으로 계산'},{icon:'📄',t:'명세서 자동 생성',d:'클릭 한 번으로 직원별 명세서 출력'},{icon:'🧾',t:'세금 계산',d:'소득세, 4대보험을 최신 요율로 자동 계산'},{icon:'📊',t:'연간 정산',d:'연말 정산을 위한 연간 급여 현황 자동 집계'}],
+    fileType:'xlsx', views:183, downloads:19, date:'2026-05-14'
+  },
+  'excel-margin': {
+    name:'마진 계산기', cat:'excel', emoji:'📈', price:9900, discount:0, type:'file',
+    desc:'단가·마진율·수익률 즉시 분석. 쇼핑몰·도매 사업자에게 최적화된 도구',
+    detail:'마진 계산기로 쇼핑몰 수익성을 정확하게 파악하세요.\n\n**주요 기능**\n• 단가·마진율·수익률 즉시 분석\n• 공급가/판매가 역산 기능\n• 배송비·수수료 포함 순이익 계산\n• 다채널(쿠팡, 네이버, 자사몰) 수익 비교\n\n**포함 내용**\n• 마진 계산기 엑셀 파일 (.xlsx)\n• 사용 설명서 PDF',
+    features:[{icon:'🧮',t:'마진율 계산',d:'단가와 판매가로 마진율을 즉시 계산'},{icon:'🔄',t:'역산 기능',d:'목표 마진율로 판매가를 역산'},{icon:'🚚',t:'원가 분석',d:'배송비·수수료 포함 실제 순이익 계산'},{icon:'📱',t:'다채널 비교',d:'채널별 수익성을 한눈에 비교'}],
+    fileType:'xlsx', views:341, downloads:56, date:'2026-05-15'
+  },
+  'excel-crm': {
+    name:'CRM 고객관리 자동화', cat:'excel', emoji:'🤝', price:29900, discount:0, type:'file',
+    desc:'고객 DB·영업 현황·팔로우업 일정을 한 곳에서. 6년 영업 노하우가 담긴 툴',
+    detail:'CRM 고객관리 자동화로 영업 관리를 체계화하세요.\n\n**주요 기능**\n• 고객 DB 통합 관리\n• 영업 현황 실시간 대시보드\n• 팔로우업 일정 자동 알림\n• 거래 이력 및 성과 분석',
+    features:[{icon:'👥',t:'고객 DB',d:'고객 정보를 체계적으로 관리'},{icon:'📊',t:'영업 대시보드',d:'영업 현황을 실시간으로 파악'},{icon:'🔔',t:'팔로우업 알림',d:'후속 연락 일정을 자동으로 알림'},{icon:'📈',t:'성과 분석',d:'팀원별, 기간별 영업 성과를 분석'}],
+    fileType:'xlsx', views:274, downloads:22, date:'2026-05-18'
+  },
+  'excel-inv': {
+    name:'재고 관리 자동화', cat:'excel', emoji:'📦', price:19900, discount:0, type:'file',
+    desc:'입출고·재고 현황·발주 알림을 자동화. 소규모 사업자에게 최적화된 도구',
+    detail:'재고 관리 자동화로 재고 관리를 간편하게.\n\n**주요 기능**\n• 입출고 자동 기록\n• 재고 현황 실시간 확인\n• 최소 재고 도달 시 자동 발주 알림\n• 월별 재고 회전율 분석',
+    features:[{icon:'📦',t:'재고 추적',d:'입출고 기록으로 실시간 재고 현황 파악'},{icon:'🔔',t:'발주 알림',d:'최소 재고 기준 이하 시 자동 알림'},{icon:'📊',t:'회전율 분석',d:'상품별 재고 회전율을 분석'},{icon:'📋',t:'발주서 생성',d:'발주서를 자동으로 생성'}],
+    fileType:'xlsx', views:197, downloads:28, date:'2026-05-19'
+  },
+  'excel-attend': {
+    name:'근태 관리 자동화', cat:'excel', emoji:'⏰', price:19900, discount:0, type:'file',
+    desc:'출퇴근·초과근무·휴가 자동 기록. 월간 근태 리포트 자동 생성',
+    detail:'근태 관리 자동화로 복잡한 근태 관리를 간단하게.\n\n**주요 기능**\n• 출퇴근 시간 자동 기록\n• 초과근무·야간근무 자동 계산\n• 휴가 관리 및 잔여 일수 추적\n• 월간 근태 리포트 자동 생성',
+    features:[{icon:'⏰',t:'출퇴근 기록',d:'출퇴근 시간을 자동으로 계산'},{icon:'⏱️',t:'초과근무 계산',d:'초과·야간 근무 시간을 자동 집계'},{icon:'🏖️',t:'휴가 관리',d:'연차 사용 및 잔여 일수 자동 관리'},{icon:'📋',t:'리포트 생성',d:'월간 근태 현황 리포트 자동 생성'}],
+    fileType:'xlsx', views:162, downloads:14, date:'2026-05-21'
+  },
+  'sheets-pm': {
+    name:'구글시트 프로젝트 관리', cat:'sheets', emoji:'🔧', price:19900, discount:0, type:'file',
+    desc:'어디서든 접근 가능한 클라우드 기반 프로젝트 관리. GAS 자동화 포함',
+    detail:'구글시트 프로젝트 관리로 팀 어디서든 실시간 협업하세요.\n\n**주요 기능**\n• 클라우드 기반 실시간 협업\n• GAS(Google Apps Script) 자동화\n• 카카오톡/이메일 알림 연동\n• 모바일에서도 바로 사용 가능',
+    features:[{icon:'☁️',t:'클라우드 협업',d:'어디서든 실시간으로 업무 현황 공유'},{icon:'⚙️',t:'GAS 자동화',d:'Google Apps Script로 업무 자동화'},{icon:'📱',t:'모바일 지원',d:'스마트폰에서도 바로 사용 가능'},{icon:'🔔',t:'알림 연동',d:'이메일·카카오톡으로 자동 알림 발송'}],
+    fileType:'gsheet', views:196, downloads:28, date:'2026-05-20'
+  },
+  'sheets-crm': {
+    name:'구글시트 CRM 자동화', cat:'sheets', emoji:'⚙️', price:29900, discount:0, type:'file',
+    desc:'고객 DB·영업 현황·팔로우업 자동화. 구글시트 기반 CRM',
+    detail:'구글시트 CRM 자동화로 영업 관리를 시스템화하세요.\n\n**주요 기능**\n• 고객 DB 자동 관리\n• 영업 현황 실시간 대시보드\n• 팔로우업 자동 알림 (GAS)\n• 이메일 자동 발송 연동',
+    features:[{icon:'👥',t:'고객 DB',d:'고객 정보를 클라우드에서 팀과 공유'},{icon:'📊',t:'영업 대시보드',d:'실시간 영업 현황 모니터링'},{icon:'📧',t:'이메일 자동화',d:'GAS로 팔로우업 이메일 자동 발송'},{icon:'📱',t:'모바일 지원',d:'이동 중에도 고객 정보 즉시 확인'}],
+    fileType:'gsheet', views:142, downloads:15, date:'2026-05-22'
+  },
+  'short-pack': {
+    name:'숏폼 편집 템플릿 Pack', cat:'short', emoji:'🎬', price:0, discount:0, type:'inquiry',
+    desc:'유튜브 쇼츠·틱톡·인스타릴스 전용 캡컷 편집 템플릿 패키지',
+    detail:'숏폼 편집 템플릿 Pack으로 전문가 수준의 숏폼 콘텐츠를 제작하세요.\n\n**주요 기능**\n• 캡컷(CapCut) 전용 편집 템플릿\n• 유튜브 쇼츠·틱톡·인스타릴스 최적화\n• 자막 자동 삽입 템플릿\n• 트렌딩 효과 및 전환 효과 포함',
+    features:[{icon:'🎬',t:'캡컷 템플릿',d:'CapCut 전용으로 제작된 고품질 템플릿'},{icon:'📱',t:'다채널 최적화',d:'쇼츠·틱톡·릴스 비율 모두 지원'},{icon:'✍️',t:'자막 템플릿',d:'트렌디한 자막 스타일 자동 적용'},{icon:'✨',t:'트렌딩 효과',d:'현재 인기 효과와 전환 효과 포함'}],
+    fileType:'capcut', views:287, downloads:0, date:'2026-05-25'
+  },
+  'detail-01': {
+    name:'상세페이지 맞춤 제작', cat:'detail', emoji:'🖼️', price:0, discount:0, type:'inquiry',
+    desc:'브랜드에 맞는 상세페이지를 전문적으로 제작해드립니다',
+    detail:'상세페이지 맞춤 제작 서비스로 전환율을 높이세요.\n\n**서비스 내용**\n• 브랜드 컨셉 분석 후 맞춤 제작\n• 모바일/PC 최적화 반응형 디자인\n• 수정 2회 포함\n• 납기: 영업일 기준 5~7일\n\n**제작 분야**\n• 스마트스토어, 쿠팡, 11번가 상세페이지\n• 자사몰 상품 상세 이미지',
+    features:[{icon:'🎨',t:'맞춤 디자인',d:'브랜드 컨셉에 맞는 디자인 제작'},{icon:'📱',t:'모바일 최적화',d:'모바일과 PC 모두 최적화된 레이아웃'},{icon:'✏️',t:'수정 2회',d:'납품 후 2회 수정 무료 제공'},{icon:'⚡',t:'빠른 납기',d:'영업일 기준 5~7일 이내 납품'}],
+    fileType:'', views:198, downloads:0, date:'2026-05-28'
+  },
+  'web-01': {
+    name:'홈페이지 맞춤 제작', cat:'web', emoji:'🌐', price:0, discount:0, type:'inquiry',
+    desc:'사업에 맞는 홈페이지를 기획부터 개발까지 제작해드립니다',
+    detail:'홈페이지 맞춤 제작 서비스로 전문적인 온라인 존재감을 만드세요.\n\n**서비스 내용**\n• 기획·디자인·개발 원스톱 서비스\n• 반응형 웹 (모바일 최적화)\n• SEO 기본 설정 포함\n• 무료 수정 기간 1개월',
+    features:[{icon:'🌐',t:'원스톱 서비스',d:'기획부터 개발까지 모두 담당'},{icon:'📱',t:'반응형 웹',d:'모든 기기에서 완벽하게 표시'},{icon:'🔍',t:'SEO 최적화',d:'검색엔진 최적화 기본 설정 포함'},{icon:'🔧',t:'무료 수정',d:'납품 후 1개월 무료 수정 지원'}],
+    fileType:'', views:156, downloads:0, date:'2026-06-01'
+  },
+  'prog-01': {
+    name:'맞춤 프로그램 제작', cat:'program', emoji:'⚙️', price:0, discount:0, type:'inquiry',
+    desc:'업무에 최적화된 자동화 프로그램을 맞춤 제작해드립니다',
+    detail:'맞춤 프로그램 제작 서비스로 업무 자동화를 실현하세요.\n\n**서비스 내용**\n• 요구사항 분석 후 맞춤 개발\n• Python·VBA·GAS 기반 자동화\n• 유지보수 지원\n• 소스코드 납품 포함',
+    features:[{icon:'💻',t:'맞춤 개발',d:'요구사항에 맞는 프로그램을 제작'},{icon:'🐍',t:'Python/VBA/GAS',d:'다양한 언어로 최적의 솔루션 제공'},{icon:'🔧',t:'유지보수',d:'납품 후 오류 발생 시 무료 수정'},{icon:'📁',t:'소스코드 납품',d:'완성된 소스코드를 함께 납품'}],
+    fileType:'', views:112, downloads:0, date:'2026-06-01'
+  },
+};
+
+const MOCK_REVIEWS = [
+  { name:'김**', avatar:'김', stars:'★★★★★', date:'2026-05-28', text:'실무에 바로 적용할 수 있어서 너무 좋았습니다. 설명서도 친절하게 작성되어 있어서 어렵지 않게 사용할 수 있었어요. 강력 추천합니다!' },
+  { name:'이**', avatar:'이', stars:'★★★★★', date:'2026-05-20', text:'처음엔 반신반의했는데 실제로 써보니 업무 시간이 확 줄었어요. 오류가 생겼을 때도 빠르게 답변해 주셔서 감동받았습니다.' },
+  { name:'박**', avatar:'박', stars:'★★★★☆', date:'2026-05-15', text:'기능은 정말 좋은데 처음 세팅하는 데 조금 시간이 걸렸어요. 그래도 한 번 익히면 정말 편리합니다. 재구매 의사 있습니다.' },
+];
+
+/* ── LOAD & RENDER ── */
+const params = new URLSearchParams(location.search);
+const urlId    = params.get('id') || '';
+const urlCat   = params.get('cat') || '';
+const urlName  = decodeURIComponent(params.get('name') || '');
+const urlPrice = parseInt(params.get('price')) || 0;
+const urlEmoji = params.get('emoji') || '📦';
+
+// Merge: localStorage > DEMO > URL params
+const lsProducts = JSON.parse(localStorage.getItem('modulab_products') || '[]');
+const lsP = lsProducts.find(p => (p.id || p.productId) === urlId) || {};
+const demo = DEMO[urlId] || {};
+
+const product = {
+  id:       urlId,
+  name:     lsP.productName || lsP.name || urlName  || demo.name  || '상품명',
+  cat:      lsP.category    || lsP.cat  || urlCat   || demo.cat   || '',
+  price:    lsP.price       || urlPrice || demo.price || 0,
+  discount: lsP.discountPrice || lsP.discount || demo.discount || 0,
+  emoji:    lsP.selectedEmoji || lsP.emoji || urlEmoji || demo.emoji || '📦',
+  type:     lsP.saleType    || lsP.type  || demo.type || 'file',
+  desc:     lsP.productDesc  || demo.desc || '',
+  detail:   lsP.productDetail|| demo.detail || '',
+  features: demo.features || [],
+  fileType: lsP.fileType   || demo.fileType || '',
+  newBadge: lsP.newBadge !== undefined ? lsP.newBadge : true,
+  bestBadge:lsP.bestBadge || false,
+  detailImages: lsP.detailImages || [],
+  views:    demo.views || 0,
+  downloads:demo.downloads || 0,
+  date:     lsP.date || lsP.createdAt?.slice(0,10) || demo.date || '',
+};
+
+function init() {
+  document.title = product.name + ' — 모듈랩';
+
+  // Breadcrumb
+  const catEl = document.getElementById('breadCat');
+  catEl.textContent = CAT_LABEL[product.cat] || product.cat || '전체';
+  catEl.href = CAT_HREF[product.cat] || 'index.html';
+  document.getElementById('breadProd').textContent = product.name;
+
+  // Gallery
+  const bg1 = CAT_BG[product.cat] || '#EFF6FF';
+  const bg2 = CAT_BG2[product.cat] || '#DBEAFE';
+  const mainBox = document.getElementById('mainImgBox');
+  mainBox.style.background = bg1;
+  document.getElementById('emojiDisplay').textContent = product.emoji;
+  document.getElementById('emojiDisplay').style.background = bg2;
+  document.getElementById('emojiDisplay').style.width = '55%';
+  document.getElementById('emojiDisplay').style.height = '55%';
+  document.getElementById('emojiDisplay').style.borderRadius = '16px';
+
+  renderThumbs();
+
+  // Badges
+  const badgeRow = document.getElementById('badgeRow');
+  const badgeCls = CAT_BADGE_CLS[product.cat] || '';
+  const badgeTxt = CAT_BADGE_TEXT[product.cat] || product.cat.toUpperCase();
+  badgeRow.innerHTML = `<span class="prod-cat-badge ${badgeCls}">${badgeTxt}</span>`;
+  if (product.newBadge) badgeRow.innerHTML += `<span class="prod-new-badge">NEW</span>`;
+  if (product.bestBadge) badgeRow.innerHTML += `<span class="prod-best-badge">BEST</span>`;
+
+  // Title + desc
+  document.getElementById('prodTitle').textContent = product.name;
+  document.getElementById('prodDesc').textContent = product.desc;
+
+  // Review count
+  const rc = product.downloads || Math.max(3, Math.floor(product.views * 0.12));
+  document.getElementById('reviewCountLabel').textContent = `(리뷰 ${rc}건)`;
+  document.getElementById('reviewSummaryCount').textContent = `총 ${rc}건의 리뷰`;
+  document.getElementById('reviewTabBtn').textContent = `리뷰 (${rc})`;
+
+  // Price
+  renderPrice();
+
+  // Meta
+  renderMeta();
+
+  // CTA
+  renderCTA();
+
+  // Tabs
+  renderDetailTab();
+  renderReviews(rc);
+  renderRelated();
+
+  // Cart badge
+  const cart = JSON.parse(localStorage.getItem('modulab_cart') || '[]');
+  document.getElementById('cart-badge-nav').textContent = cart.length;
+}
+
+function renderThumbs() {
+  const strip = document.getElementById('thumbStrip');
+  strip.innerHTML = '';
+
+  // Emoji thumb (main)
+  const emojiThumb = document.createElement('div');
+  emojiThumb.className = 'prod-thumb active';
+  emojiThumb.style.background = CAT_BG2[product.cat] || '#DBEAFE';
+  emojiThumb.textContent = product.emoji;
+  emojiThumb.onclick = () => { showEmoji(); setActiveThumb(emojiThumb); };
+  strip.appendChild(emojiThumb);
+
+  // Detail image thumbs
+  product.detailImages.forEach((img, i) => {
+    const t = document.createElement('div');
+    t.className = 'prod-thumb';
+    t.innerHTML = `<img src="${img.dataUrl}" alt="">`;
+    t.onclick = () => { showDetailImg(img.dataUrl); setActiveThumb(t); };
+    strip.appendChild(t);
+  });
+}
+
+function setActiveThumb(el) {
+  document.querySelectorAll('.prod-thumb').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function showEmoji() {
+  document.getElementById('mainImgTag').style.display = 'none';
+  document.getElementById('emojiDisplay').style.display = 'flex';
+}
+
+function showDetailImg(src) {
+  const img = document.getElementById('mainImgTag');
+  img.src = src;
+  img.style.display = 'block';
+  document.getElementById('emojiDisplay').style.display = 'none';
+}
+
+function renderPrice() {
+  const el = document.getElementById('priceSection');
+  if (product.type === 'inquiry' || product.price === 0) {
+    el.innerHTML = `<div class="prod-price-row"><span class="prod-final inquiry">견적 문의</span></div><p style="font-size:13px;color:var(--text3);margin-top:4px;">가격은 요구사항에 따라 달라집니다. 문의해 주세요.</p>`;
+    return;
+  }
+  if (product.discount > 0 && product.discount < product.price) {
+    const rate = Math.round((1 - product.discount / product.price) * 100);
+    const saved = (product.price - product.discount).toLocaleString();
+    el.innerHTML = `
+      <div class="prod-price-row">
+        <span class="prod-original">₩${product.price.toLocaleString()}</span>
+        <span class="prod-disc-badge">-${rate}%</span>
+      </div>
+      <div class="prod-price-row"><span class="prod-final">₩${product.discount.toLocaleString()}</span></div>
+      <div class="prod-savings">₩${saved} 할인 적용됨</div>`;
+  } else {
+    el.innerHTML = `<div class="prod-price-row"><span class="prod-final">₩${product.price.toLocaleString()}</span></div>`;
+  }
+}
+
+function renderMeta() {
+  const el = document.getElementById('metaList');
+  const finalPrice = product.type === 'inquiry' ? 0 : (product.discount || product.price);
+  const rows = [];
+  rows.push(`<div class="prod-meta-row"><span class="prod-meta-label">판매유형</span><span class="prod-meta-val">${product.type === 'file' ? '📂 파일 판매 (즉시 다운로드)' : '💬 문의형 (상담 후 제작)'}</span></div>`);
+  if (product.fileType) rows.push(`<div class="prod-meta-row"><span class="prod-meta-label">파일형식</span><span class="prod-meta-val">${FILE_LABEL[product.fileType] || product.fileType}</span></div>`);
+  if (product.views) rows.push(`<div class="prod-meta-row"><span class="prod-meta-label">조회수</span><span class="prod-meta-val" style="font-family:'JetBrains Mono',monospace;">${product.views.toLocaleString()}회</span></div>`);
+  if (product.downloads) rows.push(`<div class="prod-meta-row"><span class="prod-meta-label">다운로드</span><span class="prod-meta-val" style="font-family:'JetBrains Mono',monospace;">${product.downloads.toLocaleString()}건</span></div>`);
+  if (product.date) rows.push(`<div class="prod-meta-row"><span class="prod-meta-label">등록일</span><span class="prod-meta-val" style="font-family:'JetBrains Mono',monospace;">${product.date}</span></div>`);
+  el.innerHTML = rows.join('');
+}
+
+function renderCTA() {
+  const el = document.getElementById('ctaSection');
+  if (product.type === 'inquiry' || product.price === 0) {
+    el.innerHTML = `
+      <button class="prod-btn prod-btn-kakao" onclick="goInquiry()">💬 카카오톡으로 문의하기</button>
+      <a href="cs.html" class="prod-btn prod-btn-inquiry" style="text-decoration:none;">✉️ 1:1 문의하기</a>`;
+  } else {
+    el.innerHTML = `
+      <button class="prod-btn prod-btn-buy" onclick="buyNow()">⚡ 바로 구매하기</button>
+      <button class="prod-btn prod-btn-cart" onclick="addToCart()">🛒 장바구니 담기</button>`;
+  }
+}
+
+function renderDetailTab() {
+  const fg = document.getElementById('featureGrid');
+  if (product.features && product.features.length) {
+    fg.innerHTML = product.features.map(f => `
+      <div class="prod-feature-card">
+        <div class="prod-feature-icon">${f.icon}</div>
+        <div>
+          <div class="prod-feature-title">${f.t}</div>
+          <div class="prod-feature-desc">${f.d}</div>
+        </div>
+      </div>`).join('');
+  } else {
+    fg.style.display = 'none';
+  }
+
+  const dt = document.getElementById('detailText');
+  if (product.detail) {
+    const html = product.detail
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .split('\n\n').map(block =>
+        '<p>' + block.replace(/\n/g, '<br>') + '</p>'
+      ).join('');
+    dt.innerHTML = html;
+  } else {
+    dt.innerHTML = '<p style="color:var(--text3);">상세 정보가 아직 등록되지 않았습니다.</p>';
+  }
+}
+
+function renderReviews(count) {
+  const list = document.getElementById('reviewList');
+  const reviews = MOCK_REVIEWS.slice(0, Math.min(3, Math.max(1, Math.ceil(count / 10))));
+  list.innerHTML = reviews.map(r => `
+    <div class="prod-review-card">
+      <div class="prod-review-header">
+        <div class="prod-reviewer-avatar">${r.avatar}</div>
+        <div>
+          <div class="prod-reviewer-name">${r.name}</div>
+          <div class="prod-review-date">${r.date}</div>
+        </div>
+        <div class="prod-review-stars" style="margin-left:auto;">${r.stars}</div>
+      </div>
+      <div class="prod-review-text">${r.text}</div>
+    </div>`).join('');
+}
+
+function renderRelated() {
+  const grid = document.getElementById('relatedGrid');
+  const allProducts = [
+    ...Object.entries(DEMO).map(([id, d]) => ({ id, ...d })),
+    ...lsProducts.map(p => ({ id: p.id || p.productId, name: p.name || p.productName, cat: p.cat || p.category, price: p.price, discount: p.discountPrice || p.discount || 0, emoji: p.emoji || p.selectedEmoji, type: p.type || p.saleType }))
+  ];
+  const seen = new Set();
+  const related = allProducts.filter(p => {
+    if (p.id === product.id || seen.has(p.id)) return false;
+    seen.add(p.id);
+    return p.cat === product.cat;
+  }).slice(0, 4);
+
+  if (!related.length) { grid.closest('.prod-related-section').style.display = 'none'; return; }
+
+  grid.innerHTML = related.map(p => {
+    const bg1 = CAT_BG[p.cat] || '#EFF6FF';
+    const bg2 = CAT_BG2[p.cat] || '#DBEAFE';
+    const priceStr = !p.price ? '가격 문의' : `₩${(p.discount || p.price).toLocaleString()}`;
+    const href = `product.html?id=${p.id}&cat=${p.cat}&name=${encodeURIComponent(p.name)}&price=${p.price}&emoji=${encodeURIComponent(p.emoji)}`;
+    return `
+      <a href="${href}" class="product-card">
+        <div class="product-img" style="background:${bg1};">
+          <div class="product-img-inner" style="background:${bg2};">${p.emoji}</div>
+        </div>
+        <div class="product-body">
+          <div class="product-name">${p.name}</div>
+          <div class="product-creator">by 모듈랩 · ${CAT_LABEL[p.cat] || p.cat}</div>
+          <div class="product-footer">
+            <div class="product-price">${priceStr}</div>
+          </div>
+        </div>
+      </a>`;
+  }).join('');
+}
+
+/* ── CART ── */
+function addToCart(redirect = false) {
+  if (!product.price) { goInquiry(); return; }
+  const cart = JSON.parse(localStorage.getItem('modulab_cart') || '[]');
+  const existing = cart.find(c => c.id === product.id);
+  if (existing) {
+    existing.qty = (existing.qty || 1) + 1;
+  } else {
+    cart.push({ id: product.id, name: product.name, price: product.discount || product.price, emoji: product.emoji, cat: product.cat, qty: 1 });
+  }
+  localStorage.setItem('modulab_cart', JSON.stringify(cart));
+  document.getElementById('cart-badge-nav').textContent = cart.length;
+  if (redirect) { location.href = 'cart.html'; return; }
+  showToast('장바구니에 담았습니다 🛒');
+}
+
+function buyNow() { addToCart(true); }
+function goInquiry() { location.href = 'cs.html'; }
+
+/* ── TABS ── */
+function switchTab(tab, btn) {
+  document.querySelectorAll('.prod-tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.prod-tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  btn.classList.add('active');
+}
+
+/* ── TOAST ── */
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+init();
+</script>
+</body>
+</html>
