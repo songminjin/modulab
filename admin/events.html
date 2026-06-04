@@ -230,6 +230,11 @@ input[type="checkbox"]{accent-color:var(--blue);width:15px;height:15px;cursor:po
 .stat-green{color:var(--green);}
 .stat-yellow{color:var(--yellow);}
 .stat-purple{color:var(--purple);}
+
+/* ── COUPON CONDITIONS ── */
+.cond-cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:12px;background:var(--slate-light);border-radius:8px;margin-top:4px;}
+.cond-cat-item{display:flex;align-items:center;gap:8px;font-size:13px;padding:7px 10px;border-radius:7px;background:var(--white);border:1.5px solid var(--border);cursor:pointer;transition:all .15s;user-select:none;}
+.cond-cat-item.checked{border-color:var(--blue);background:var(--blue-light);color:var(--blue);font-weight:600;}
 </style>
 </head>
 <body>
@@ -381,6 +386,38 @@ input[type="checkbox"]{accent-color:var(--blue);width:15px;height:15px;cursor:po
                 </div>
                 <div class="field-hint" id="couponValueHint">0~100 사이의 할인율을 입력하세요</div>
               </div>
+              <div class="field">
+                <label class="field-label">최소 구매 금액</label>
+                <div class="toggle-group" id="minOrderGroup" style="margin-bottom:8px;">
+                  <div class="toggle-option selected" data-value="none" onclick="selectMinOrderType('none')">제한 없음</div>
+                  <div class="toggle-option" data-value="set" onclick="selectMinOrderType('set')">금액 설정</div>
+                </div>
+                <div id="minOrderInput" style="display:none;">
+                  <div class="input-with-unit">
+                    <input type="number" class="field-input" id="couponMinOrder" placeholder="30000" min="0" step="1000">
+                    <span class="input-unit">원 이상</span>
+                  </div>
+                  <div class="field-hint">이 금액 이상 구매 시에만 쿠폰을 사용할 수 있습니다</div>
+                </div>
+              </div>
+              <div class="field">
+                <label class="field-label">적용 카테고리</label>
+                <div class="toggle-group" id="catRestrGroup" style="margin-bottom:8px;">
+                  <div class="toggle-option selected" data-value="all" onclick="selectCatRestrType('all')">전체 카테고리</div>
+                  <div class="toggle-option" data-value="specific" onclick="selectCatRestrType('specific')">특정 카테고리만</div>
+                </div>
+                <div id="catCheckboxes" style="display:none;">
+                  <div class="cond-cat-grid" id="catCheckGrid">
+                    <div class="cond-cat-item" data-cat="excel" onclick="toggleCategoryCheck('excel')"><input type="checkbox" id="catChk_excel" style="pointer-events:none;accent-color:var(--blue);"> 📊 엑셀 프로그램</div>
+                    <div class="cond-cat-item" data-cat="sheets" onclick="toggleCategoryCheck('sheets')"><input type="checkbox" id="catChk_sheets" style="pointer-events:none;accent-color:var(--blue);"> 🔧 구글시트 자동화</div>
+                    <div class="cond-cat-item" data-cat="short" onclick="toggleCategoryCheck('short')"><input type="checkbox" id="catChk_short" style="pointer-events:none;accent-color:var(--blue);"> 🎬 숏폼 템플릿</div>
+                    <div class="cond-cat-item" data-cat="detail" onclick="toggleCategoryCheck('detail')"><input type="checkbox" id="catChk_detail" style="pointer-events:none;accent-color:var(--blue);"> 🖼️ 상세페이지</div>
+                    <div class="cond-cat-item" data-cat="web" onclick="toggleCategoryCheck('web')"><input type="checkbox" id="catChk_web" style="pointer-events:none;accent-color:var(--blue);"> 🌐 홈페이지 제작</div>
+                    <div class="cond-cat-item" data-cat="program" onclick="toggleCategoryCheck('program')"><input type="checkbox" id="catChk_program" style="pointer-events:none;accent-color:var(--blue);"> ⚙️ 프로그램 제작</div>
+                  </div>
+                  <div class="field-hint" style="margin-top:6px;">선택한 카테고리 상품에만 이 쿠폰을 사용할 수 있습니다</div>
+                </div>
+              </div>
               <div class="field-row">
                 <div class="field">
                   <label class="field-label">시작일 <span class="required">*</span></label>
@@ -430,6 +467,7 @@ input[type="checkbox"]{accent-color:var(--blue);width:15px;height:15px;cursor:po
                   <th>이벤트명</th>
                   <th>할인 유형</th>
                   <th>할인</th>
+                  <th>사용 조건</th>
                   <th>기간</th>
                   <th>적용 상품</th>
                   <th>상태</th>
@@ -704,9 +742,9 @@ const DEMO_PRODUCTS = [
 ];
 
 const DEMO_COUPON_EVENTS = [
-  {id:'cev-001',name:'신규가입 환영 쿠폰',discountType:'percent',discountValue:20,startDate:'2026-01-01',endDate:'2026-12-31',appliedProducts:['excel-pm','excel-hh','excel-margin'],note:'신규 회원 전용',createdAt:'2026-05-01T00:00:00'},
-  {id:'cev-002',name:'6월 여름 특가 쿠폰',discountType:'percent',discountValue:15,startDate:'2026-06-01',endDate:'2026-06-30',appliedProducts:['excel-pm','sheets-pm','sheets-crm'],note:'',createdAt:'2026-05-20T00:00:00'},
-  {id:'cev-003',name:'번들 구매 추가 할인',discountType:'percent',discountValue:30,startDate:'2026-06-01',endDate:'2026-07-31',appliedProducts:['excel-pm','excel-pay','excel-hh','excel-margin'],note:'2개 이상 구매 시',createdAt:'2026-05-25T00:00:00'},
+  {id:'cev-001',name:'신규가입 환영 쿠폰',discountType:'percent',discountValue:20,startDate:'2026-01-01',endDate:'2026-12-31',appliedProducts:['excel-pm','excel-hh','excel-margin'],note:'신규 회원 전용',minOrderAmount:0,applicableCategories:[],createdAt:'2026-05-01T00:00:00'},
+  {id:'cev-002',name:'6월 여름 특가 쿠폰',discountType:'percent',discountValue:15,startDate:'2026-06-01',endDate:'2026-06-30',appliedProducts:['excel-pm','sheets-pm','sheets-crm'],note:'',minOrderAmount:30000,applicableCategories:[],createdAt:'2026-05-20T00:00:00'},
+  {id:'cev-003',name:'구글시트 전용 할인',discountType:'amount',discountValue:3000,startDate:'2026-06-01',endDate:'2026-07-31',appliedProducts:['sheets-pm','sheets-crm'],note:'구글시트 전용',minOrderAmount:0,applicableCategories:['sheets'],createdAt:'2026-05-25T00:00:00'},
 ];
 const DEMO_SITE_EVENTS = [
   {id:'sev-001',name:'여름 특별 기획전',bannerImg:'',descImages:[],startDate:'2026-06-01',endDate:'2026-06-30',eventType:'discount',discountValue:15,bundleCount:0,bundleRate:0,otherDesc:'',appliedProducts:['excel-pm','sheets-pm'],createdAt:'2026-05-20T00:00:00'},
@@ -728,6 +766,9 @@ let tempSelectedProducts = [];
 let filteredProducts = [];
 let bannerImgData = '';
 let descImgData = [];
+let currentMinOrderType = 'none';
+let currentCatRestrType = 'all';
+let selectedCategories = [];
 
 /* ── LOAD / SAVE ── */
 async function loadData() {
@@ -745,6 +786,8 @@ async function loadData() {
       startDate: e.start_date,
       endDate: e.end_date,
       appliedProducts: e.applied_products || [],
+      minOrderAmount: e.min_order_amount || 0,
+      applicableCategories: e.applicable_categories || [],
     })) : [...DEMO_COUPON_EVENTS];
     siteEvents = siteRes.ok ? (await siteRes.json()).map(e => ({
       ...e,
@@ -776,6 +819,8 @@ async function saveCouponEvents(ev, isEdit) {
     end_date: ev.endDate,
     note: ev.note || null,
     applied_products: ev.appliedProducts || [],
+    min_order_amount: ev.minOrderAmount || 0,
+    applicable_categories: ev.applicableCategories || [],
   };
   const url = isEdit ? `${API_URL}/api/admin/events/coupons/${ev.id}` : `${API_URL}/api/admin/events/coupons`;
   const res = await fetch(url, {
@@ -860,6 +905,12 @@ function openCouponForm(id) {
     selectDiscountType(ev.discountType);
     couponAssignedProducts = [...(ev.appliedProducts || [])];
     updateCouponAssignUI();
+    const minAmt = ev.minOrderAmount || 0;
+    selectMinOrderType(minAmt > 0 ? 'set' : 'none');
+    if (minAmt > 0) document.getElementById('couponMinOrder').value = minAmt;
+    selectedCategories = [...(ev.applicableCategories || [])];
+    selectCatRestrType(selectedCategories.length > 0 ? 'specific' : 'all');
+    renderCategoryCheckboxes();
   } else {
     document.getElementById('couponFormTitle').textContent = '새 쿠폰 이벤트 등록';
     document.getElementById('couponName').value = '';
@@ -870,11 +921,55 @@ function openCouponForm(id) {
     selectDiscountType('percent');
     couponAssignedProducts = [];
     updateCouponAssignUI();
+    selectMinOrderType('none');
+    document.getElementById('couponMinOrder').value = '';
+    selectedCategories = [];
+    selectCatRestrType('all');
+    renderCategoryCheckboxes();
   }
 }
 function closeCouponForm() {
   document.getElementById('couponFormPanel').classList.remove('open');
   currentEditCouponId = null;
+  selectMinOrderType('none');
+  selectedCategories = [];
+  selectCatRestrType('all');
+}
+
+function selectMinOrderType(type) {
+  currentMinOrderType = type;
+  document.querySelectorAll('#minOrderGroup .toggle-option').forEach(el => {
+    el.className = 'toggle-option';
+    if (el.dataset.value === type) el.classList.add('selected');
+  });
+  document.getElementById('minOrderInput').style.display = type === 'set' ? '' : 'none';
+  if (type === 'none') document.getElementById('couponMinOrder').value = '';
+}
+
+function selectCatRestrType(type) {
+  currentCatRestrType = type;
+  document.querySelectorAll('#catRestrGroup .toggle-option').forEach(el => {
+    el.className = 'toggle-option';
+    if (el.dataset.value === type) el.classList.add('selected');
+  });
+  document.getElementById('catCheckboxes').style.display = type === 'specific' ? '' : 'none';
+}
+
+function toggleCategoryCheck(cat) {
+  const idx = selectedCategories.indexOf(cat);
+  if (idx >= 0) selectedCategories.splice(idx, 1);
+  else selectedCategories.push(cat);
+  renderCategoryCheckboxes();
+}
+
+function renderCategoryCheckboxes() {
+  document.querySelectorAll('#catCheckGrid .cond-cat-item').forEach(item => {
+    const cat = item.dataset.cat;
+    const chk = item.querySelector('input[type="checkbox"]');
+    const checked = selectedCategories.includes(cat);
+    chk.checked = checked;
+    item.classList.toggle('checked', checked);
+  });
 }
 
 function selectDiscountType(type) {
@@ -912,6 +1007,13 @@ async function saveCouponEvent() {
   if (currentDiscountType === 'percent' && val > 100) return showToast('할인율은 100%를 초과할 수 없습니다.', 'error');
   if (!start || !end) return showToast('기간을 설정해주세요.', 'error');
   if (start > end) return showToast('종료일이 시작일보다 앞설 수 없습니다.', 'error');
+  if (currentMinOrderType === 'set') {
+    const minAmt = parseInt(document.getElementById('couponMinOrder').value);
+    if (!minAmt || minAmt <= 0) return showToast('최소 구매 금액을 입력해주세요.', 'error');
+  }
+  if (currentCatRestrType === 'specific' && selectedCategories.length === 0) {
+    return showToast('적용할 카테고리를 하나 이상 선택해주세요.', 'error');
+  }
 
   const isEdit = !!currentEditCouponId;
   const ev = {
@@ -923,6 +1025,8 @@ async function saveCouponEvent() {
     endDate: end,
     appliedProducts: [...couponAssignedProducts],
     note: document.getElementById('couponNote').value.trim(),
+    minOrderAmount: currentMinOrderType === 'set' ? (parseInt(document.getElementById('couponMinOrder').value) || 0) : 0,
+    applicableCategories: currentCatRestrType === 'specific' ? [...selectedCategories] : [],
   };
 
   try {
@@ -958,8 +1062,12 @@ function renderCouponTable() {
   empty.style.display = 'none';
   tbody.innerHTML = couponEvents.map(ev => {
     const st = getEventStatus(ev.startDate, ev.endDate);
-    const discountLabel = ev.discountType === 'percent' ? `${ev.discountValue}% 할인` : `${ev.discountValue.toLocaleString()}원 할인`;
+    const discountLabel = ev.discountType === 'percent' ? `${ev.discountValue}% 할인` : `${Number(ev.discountValue).toLocaleString()}원 할인`;
     const typeLabel = ev.discountType === 'percent' ? '비율 할인' : '금액 할인';
+    const minAmtHtml = (ev.minOrderAmount > 0) ? `<div style="font-size:11px;color:var(--text2);white-space:nowrap;">₩${ev.minOrderAmount.toLocaleString()} 이상</div>` : '';
+    const catHtml = (ev.applicableCategories && ev.applicableCategories.length > 0)
+      ? `<div style="font-size:11px;color:var(--blue);">${ev.applicableCategories.map(c => CAT_LABEL[c]||c).join(', ')}</div>` : '';
+    const condHtml = (minAmtHtml || catHtml) ? (minAmtHtml + catHtml) : `<span style="font-size:11px;color:var(--text3);">없음</span>`;
     return `<tr>
       <td>
         <div class="event-name-cell">${ev.name}</div>
@@ -967,6 +1075,7 @@ function renderCouponTable() {
       </td>
       <td><span class="badge badge-coupon">${typeLabel}</span></td>
       <td style="font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--red);">${discountLabel}</td>
+      <td>${condHtml}</td>
       <td style="font-size:12px;color:var(--text2);">${ev.startDate} ~ ${ev.endDate}</td>
       <td><span style="font-size:13px;font-weight:600;color:var(--text);">${ev.appliedProducts.length}</span><span style="font-size:11px;color:var(--text3);">개 상품</span></td>
       <td><span class="badge ${st.cls}"><span class="status-dot ${st.dotCls}"></span>${st.label}</span></td>

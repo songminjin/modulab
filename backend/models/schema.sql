@@ -197,6 +197,10 @@ CREATE TABLE IF NOT EXISTS site_event_products (
   PRIMARY KEY (site_event_id, product_id)
 );
 
+-- Migration: coupon event conditions
+ALTER TABLE coupon_events ADD COLUMN IF NOT EXISTS min_order_amount INTEGER DEFAULT 0;
+ALTER TABLE coupon_events ADD COLUMN IF NOT EXISTS applicable_categories JSONB DEFAULT '[]';
+
 -- Indexes for events
 CREATE INDEX IF NOT EXISTS idx_coupon_events_dates ON coupon_events(start_date, end_date);
 CREATE INDEX IF NOT EXISTS idx_site_events_dates ON site_events(start_date, end_date);
