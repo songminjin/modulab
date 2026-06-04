@@ -17,8 +17,7 @@
     "views": 248,
     "downloads": 31,
     "newBadge": true,
-    "bestBadge": false,
-    "detailImages": []
+    "bestBadge": false
   },
   {
     "id": "excel-hh",
@@ -38,8 +37,7 @@
     "views": 512,
     "downloads": 87,
     "newBadge": true,
-    "bestBadge": true,
-    "detailImages": []
+    "bestBadge": true
   },
   {
     "id": "excel-pay",
@@ -59,8 +57,7 @@
     "views": 183,
     "downloads": 19,
     "newBadge": false,
-    "bestBadge": false,
-    "detailImages": []
+    "bestBadge": false
   },
   {
     "id": "excel-margin",
@@ -80,8 +77,7 @@
     "views": 341,
     "downloads": 56,
     "newBadge": false,
-    "bestBadge": false,
-    "detailImages": []
+    "bestBadge": false
   },
   {
     "id": "excel-crm",
@@ -101,8 +97,7 @@
     "views": 274,
     "downloads": 22,
     "newBadge": false,
-    "bestBadge": false,
-    "detailImages": []
+    "bestBadge": false
   },
   {
     "id": "excel-stock",
@@ -122,8 +117,7 @@
     "views": 197,
     "downloads": 28,
     "newBadge": false,
-    "bestBadge": false,
-    "detailImages": []
+    "bestBadge": false
   },
   {
     "id": "excel-attend",
@@ -143,8 +137,7 @@
     "views": 162,
     "downloads": 14,
     "newBadge": false,
-    "bestBadge": false,
-    "detailImages": []
+    "bestBadge": false
   },
   {
     "id": "sheets-pm",
@@ -164,8 +157,7 @@
     "views": 196,
     "downloads": 28,
     "newBadge": true,
-    "bestBadge": false,
-    "detailImages": []
+    "bestBadge": false
   },
   {
     "id": "sheets-crm",
@@ -185,8 +177,7 @@
     "views": 142,
     "downloads": 15,
     "newBadge": false,
-    "bestBadge": false,
-    "detailImages": []
+    "bestBadge": false
   },
   {
     "id": "short-pack",
@@ -206,8 +197,7 @@
     "views": 287,
     "downloads": 0,
     "newBadge": true,
-    "bestBadge": false,
-    "detailImages": []
+    "bestBadge": false
   },
   {
     "id": "detail-01",
@@ -227,8 +217,7 @@
     "views": 198,
     "downloads": 0,
     "newBadge": false,
-    "bestBadge": false,
-    "detailImages": []
+    "bestBadge": false
   },
   {
     "id": "web-01",
@@ -248,8 +237,7 @@
     "views": 156,
     "downloads": 0,
     "newBadge": false,
-    "bestBadge": false,
-    "detailImages": []
+    "bestBadge": false
   },
   {
     "id": "prog-01",
@@ -269,8 +257,7 @@
     "views": 112,
     "downloads": 0,
     "newBadge": false,
-    "bestBadge": false,
-    "detailImages": []
+    "bestBadge": false
   },
   {
     "id": "EXCEL-MPYYQMOK",
@@ -290,7 +277,32 @@
     "fileName": "",
     "date": "2026-06-04",
     "views": 0,
-    "downloads": 0,
-    "detailImages": []
+    "downloads": 0
+  },
+  {
+    "id": "EXCEL-MPYZ9D7A",
+    "name": "프로젝트 관리 ",
+    "cat": "excel",
+    "type": "file",
+    "emoji": "📊",
+    "price": 100000,
+    "discount": 90000,
+    "visible": true,
+    "newBadge": true,
+    "bestBadge": false,
+    "desc": "프로젝트 관리",
+    "detail": "상품등록",
+    "fileType": "",
+    "fileUrl": "https://docs.google.com/spreadsheets/d/1YPR3BqcJltTFFKA_vHTbYPdF1VFPy-v1daEt3h1_H2I/edit?gid=523316433#gid=523316433",
+    "fileName": "",
+    "thumbUrl": "https://raw.githubusercontent.com/songminjin/modulab/main/images/products/thumb-EXCEL-MPYZ9D7A.png",
+    "detailImageUrls": [
+      "https://raw.githubusercontent.com/songminjin/modulab/main/images/products/detail-EXCEL-MPYZ9D7A-0.png",
+      "https://raw.githubusercontent.com/songminjin/modulab/main/images/products/detail-EXCEL-MPYZ9D7A-1.png",
+      "https://raw.githubusercontent.com/songminjin/modulab/main/images/products/detail-EXCEL-MPYZ9D7A-2.png"
+    ],
+    "date": "2026-06-04",
+    "views": 0,
+    "downloads": 0
   }
 ]
