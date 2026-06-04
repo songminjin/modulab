@@ -701,8 +701,16 @@ async function startPayment() {
     showSpinner(false);
 
     if (verifyRes.ok && verifyData.success) {
-      if (cfg.payMethod === 'VIRTUAL_ACCOUNT') {
-        showSuccess('가상계좌 발급 완료', '발급된 계좌로 24시간 내 입금해주세요.<br>입금 확인 후 다운로드가 활성화됩니다.');
+      if (verifyData.type === 'vbank') {
+        const va = verifyData.vbankInfo || {};
+        const due = va.dueDate ? new Date(va.dueDate).toLocaleString('ko-KR') : '24시간 이내';
+        showSuccess('가상계좌 발급 완료',
+          `아래 계좌로 입금해주세요.<br><br>
+           <strong>은행:</strong> ${va.bank || '-'}<br>
+           <strong>계좌번호:</strong> ${va.accountNumber || '-'}<br>
+           <strong>금액:</strong> ₩${(va.amount || 0).toLocaleString()}<br>
+           <strong>입금 기한:</strong> ${due}<br><br>
+           입금 확인 후 다운로드가 활성화됩니다.`);
       } else {
         localStorage.removeItem('modulab_checkout');
         clearCartItems(items.map(i => i.id));

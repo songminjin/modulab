@@ -65,6 +65,25 @@ router.post('/portone/complete', authenticate, async (req, res) => {
     if (!portoneRes.ok) return res.status(400).json({ error: '포트원 결제 조회 실패' });
     const payment = await portoneRes.json();
 
+    // 가상계좌 발급 처리 (아직 입금 전)
+    if (payment.status === 'VIRTUAL_ACCOUNT_ISSUED') {
+      const va = payment.virtualAccount;
+      await db.query(
+        `UPDATE orders SET status='vbank_pending', payment_key=$1, pg_provider=$2 WHERE id=$3 AND user_id=$4`,
+        [paymentId, payment.channel?.pgProvider || 'portone', orderId, req.user.id]
+      );
+      return res.json({
+        success: true,
+        type: 'vbank',
+        vbankInfo: {
+          bank: va?.bank || '',
+          accountNumber: va?.accountNumber || '',
+          dueDate: va?.dueDate || '',
+          amount: payment.amount?.total
+        }
+      });
+    }
+
     if (payment.status !== 'PAID') return res.status(400).json({ error: '결제가 완료되지 않았습니다.' });
 
     // 금액 검증 (위변조 방지)
