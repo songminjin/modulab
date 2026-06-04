@@ -1253,52 +1253,55 @@ async function submitProduct() {
     if (err) { showToast(err, 'error'); return; }
   }
 
-  const payload = {
+  const savedId = editingOriginalId || generateProductId();
+
+  // products.json에 저장할 표준 형식
+  const normalized = {
+    id: savedId,
     name: data.productName,
-    short_description: data.productDesc || null,
-    description: data.productDetail || null,
-    price: parseInt(data.price) || 0,
-    discount_price: parseInt(data.discountPrice) || 0,
-    category: data.category,
+    cat: data.category,
+    type: data.saleType,
     emoji: data.selectedEmoji,
-    sale_type: data.saleType,
-    file_url: data.fileUrl || null,
-    file_name: data.fileName || null,
-    file_type: data.fileType || null,
-    is_active: data.visibility,
-    new_badge: data.newBadge,
-    best_badge: data.bestBadge,
-    meta_title: data.metaTitle || null,
-    meta_description: data.metaDesc || null,
-    detail_images: detailImages.map(i => i.dataUrl || i),
+    price: parseInt(data.price) || 0,
+    discount: parseInt(data.discountPrice) || 0,
+    visible: data.visibility,
+    newBadge: data.newBadge,
+    bestBadge: data.bestBadge,
+    desc: data.productDesc || '',
+    detail: data.productDetail || '',
+    fileType: data.fileType || '',
+    fileUrl: data.fileUrl || '',
+    fileName: data.fileName || '',
+    date: new Date().toISOString().slice(0, 10),
+    detailImages: detailImages,
+    views: 0,
+    downloads: 0,
   };
 
-  try {
-    let res;
-    if (isEdit) {
-      res = await fetch(`${API_URL}/api/admin/products/${EDIT_ID}`, {
-        method: 'PUT',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-    } else {
-      res = await fetch(`${API_URL}/api/admin/products`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-    }
-    const result = await res.json();
-    if (!res.ok) throw new Error(result.error || '오류가 발생했습니다.');
-    localStorage.removeItem('modulab_product_draft');
-    showToast(isEdit ? '✓ 상품이 수정되었습니다!' : '✓ 상품이 등록되었습니다!', 'success');
-    GhSync.syncAll(showToast);
-  } catch(e) {
-    showToast(e.message, 'error');
-    return;
+  // localStorage 업데이트
+  const products = JSON.parse(localStorage.getItem('modulab_products') || '[]');
+  const idx = products.findIndex(p => (p.id || p.productId) === savedId);
+  if (idx >= 0) {
+    products[idx] = { ...products[idx], ...normalized };
+  } else {
+    products.push(normalized);
   }
+  localStorage.setItem('modulab_products', JSON.stringify(products));
+  localStorage.removeItem('modulab_product_draft');
+
+  showToast(isEdit ? '✓ 상품이 수정되었습니다!' : '✓ 상품이 등록되었습니다!', 'success');
+
+  // GitHub products.json 동기화 (Railway API는 선택사항)
+  try {
+    await fetch(`${API_URL}/api/admin/products${isEdit ? '/' + EDIT_ID : ''}`, {
+      method: isEdit ? 'PUT' : 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(normalized),
+    });
+  } catch {}
+
+  GhSync.syncAll(showToast);
 
   setTimeout(() => {
     if (confirm('상품 목록 페이지로 이동할까요?')) location.href = 'products.html';
