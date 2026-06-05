@@ -60,8 +60,9 @@
       try {
         const r = await fetch(`${API_URL}/api/auth/me`, { credentials: 'include' });
         if (r.ok) {
-          const { user } = await r.json();
+          const { user, token } = await r.json();
           localStorage.setItem('user', JSON.stringify(user));
+          if (token) localStorage.setItem('modulab_token', token);
           applyUser(user);
           return;
         }

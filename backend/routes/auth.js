@@ -174,7 +174,7 @@ router.get('/me', async (req, res) => {
       [decoded.id]
     );
     if (!rows[0]) return res.status(401).json({ error: '유효하지 않은 토큰입니다.' });
-    res.json({ user: rows[0] });
+    res.json({ user: rows[0], token });
   } catch (err) {
     res.status(401).json({ error: '인증이 만료됐습니다.' });
   }
