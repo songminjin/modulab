@@ -80,6 +80,7 @@ async function runMigrations() {
     `ALTER TABLE reviews ADD COLUMN IF NOT EXISTS reviewer_name VARCHAR(50)`,
     `ALTER TABLE reviews ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES users(id) ON DELETE SET NULL`,
     `ALTER TABLE reviews ADD COLUMN IF NOT EXISTS product_id VARCHAR(100)`,
+    `ALTER TABLE reviews ALTER COLUMN product_id TYPE VARCHAR(100) USING product_id::text`,
     `CREATE INDEX IF NOT EXISTS idx_reviews_product_id ON reviews(product_id)`,
     `CREATE INDEX IF NOT EXISTS idx_reviews_created_at ON reviews(created_at)`,
     `CREATE TABLE IF NOT EXISTS coupon_event_downloads (
