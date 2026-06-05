@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>할인 이벤트 — 모듈랩</title>
+<title>쿠폰 &amp; 이벤트 — 모듈랩</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -81,7 +81,7 @@
 <div class="breadcrumb">
   <a href="index.html">홈</a>
   <span style="color:var(--border);">›</span>
-  <span>이벤트 · 할인</span>
+  <span>쿠폰 &amp; 이벤트</span>
 </div>
 
 <!-- EVENT HERO -->
@@ -94,28 +94,49 @@
   </div>
 </section>
 
-<!-- COUPON EVENTS -->
-<div class="section-wrap" id="couponSection" style="display:none;">
-  <div class="section-header">
-    <div class="section-title">🎫 다운로드 쿠폰 <span class="section-title-tag">받기</span></div>
-    <span style="font-size:13px;color:var(--text3);">쿠폰 받기 클릭 → 마이페이지에서 확인 → 결제 시 사용</span>
+<!-- TABS -->
+<div style="background:#fff;border-bottom:1px solid var(--border);position:sticky;top:60px;z-index:100;">
+  <div style="max-width:1100px;margin:0 auto;display:flex;gap:0;padding:0 20px;">
+    <button id="tab-btn-coupons" onclick="switchEventTab('coupons')"
+      style="padding:16px 24px;font-size:15px;font-weight:700;border:none;background:none;cursor:pointer;border-bottom:3px solid #2563EB;color:#2563EB;">
+      🎫 쿠폰
+    </button>
+    <button id="tab-btn-events" onclick="switchEventTab('events')"
+      style="padding:16px 24px;font-size:15px;font-weight:600;border:none;background:none;cursor:pointer;border-bottom:3px solid transparent;color:var(--text3);">
+      🎪 이벤트
+    </button>
   </div>
-  <div class="event-grid" id="couponGrid"></div>
 </div>
 
-<!-- SITE EVENTS -->
-<div class="section-wrap" id="siteSection" style="display:none;">
-  <div class="section-header">
-    <div class="section-title">🎪 진행 중 이벤트 <span class="section-title-tag">EVENT</span></div>
+<!-- COUPON TAB -->
+<div id="tab-coupons">
+  <div class="section-wrap" id="couponSection" style="display:none;">
+    <div class="section-header">
+      <div class="section-title">🎫 다운로드 쿠폰 <span class="section-title-tag">받기</span></div>
+      <span style="font-size:13px;color:var(--text3);">쿠폰 받기 클릭 → 마이페이지에서 확인 → 결제 시 사용</span>
+    </div>
+    <div class="event-grid" id="couponGrid"></div>
   </div>
-  <div class="event-grid" id="siteGrid"></div>
+  <div id="couponEmpty" style="display:none;text-align:center;padding:80px 20px;">
+    <div style="font-size:48px;margin-bottom:16px;">🎫</div>
+    <div style="font-size:18px;font-weight:700;color:var(--text2);margin-bottom:8px;">진행 중인 쿠폰이 없습니다</div>
+    <div style="font-size:14px;color:var(--text3);">곧 새로운 쿠폰 이벤트가 시작될 예정입니다!</div>
+  </div>
 </div>
 
-<!-- EMPTY STATE -->
-<div class="section-wrap" id="emptyState" style="display:none;text-align:center;padding:80px 20px;">
-  <div style="font-size:48px;margin-bottom:16px;">🎪</div>
-  <div style="font-size:18px;font-weight:700;color:var(--text2);margin-bottom:8px;">진행 중인 이벤트가 없습니다</div>
-  <div style="font-size:14px;color:var(--text3);">곧 새로운 이벤트가 시작될 예정입니다. 기대해 주세요!</div>
+<!-- EVENT TAB -->
+<div id="tab-events" style="display:none;">
+  <div class="section-wrap" id="siteSection" style="display:none;">
+    <div class="section-header">
+      <div class="section-title">🎪 진행 중 이벤트 <span class="section-title-tag">EVENT</span></div>
+    </div>
+    <div class="event-grid" id="siteGrid"></div>
+  </div>
+  <div id="siteEmpty" style="display:none;text-align:center;padding:80px 20px;">
+    <div style="font-size:48px;margin-bottom:16px;">🎪</div>
+    <div style="font-size:18px;font-weight:700;color:var(--text2);margin-bottom:8px;">진행 중인 이벤트가 없습니다</div>
+    <div style="font-size:14px;color:var(--text3);">곧 새로운 이벤트가 시작될 예정입니다. 기대해 주세요!</div>
+  </div>
 </div>
 
 <!-- COUPON TOAST -->
@@ -288,6 +309,24 @@ async function downloadCoupon(eventId, btn) {
   }
 }
 
+function switchEventTab(tab) {
+  const tabs = ['coupons', 'events'];
+  tabs.forEach(t => {
+    document.getElementById(`tab-${t}`).style.display = t === tab ? '' : 'none';
+    const btn = document.getElementById(`tab-btn-${t}`);
+    if (t === tab) {
+      btn.style.borderBottom = '3px solid #2563EB';
+      btn.style.color = '#2563EB';
+      btn.style.fontWeight = '700';
+    } else {
+      btn.style.borderBottom = '3px solid transparent';
+      btn.style.color = 'var(--text3)';
+      btn.style.fontWeight = '600';
+    }
+  });
+  history.replaceState(null, '', `?tab=${tab}`);
+}
+
 async function loadEvents() {
   try {
     const [couponRes, siteRes] = await Promise.all([
@@ -300,20 +339,27 @@ async function loadEvents() {
     if (coupons.length > 0) {
       document.getElementById('couponSection').style.display = '';
       document.getElementById('couponGrid').innerHTML = coupons.map((ev, i) => buildCouponCard(ev, i)).join('');
+    } else {
+      document.getElementById('couponEmpty').style.display = '';
     }
+
     if (sites.length > 0) {
       document.getElementById('siteSection').style.display = '';
       document.getElementById('siteGrid').innerHTML = sites.map((ev, i) => buildSiteCard(ev, i)).join('');
-    }
-    if (!coupons.length && !sites.length) {
-      document.getElementById('emptyState').style.display = '';
+    } else {
+      document.getElementById('siteEmpty').style.display = '';
     }
   } catch (e) {
-    document.getElementById('emptyState').style.display = '';
+    document.getElementById('couponEmpty').style.display = '';
+    document.getElementById('siteEmpty').style.display = '';
   }
 }
 
 loadEvents();
+
+// URL 쿼리로 탭 초기화
+const _initTab = new URLSearchParams(location.search).get('tab');
+if (_initTab === 'events') switchEventTab('events');
 
 function openDrawer() {
   const d = document.getElementById('drawerOverlay');
