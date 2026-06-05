@@ -111,6 +111,34 @@
 .mp-empty-icon { font-size: 36px; margin-bottom: 10px; }
 .mp-empty-msg { font-size: 14px; }
 
+/* Coupon Tab */
+.cp-section-label { font-size: 11px; font-weight: 700; letter-spacing: .08em; color: var(--text3); text-transform: uppercase; margin: 20px 0 12px; }
+.cp-section-label:first-child { margin-top: 0; }
+.cp-card {
+  border: 1.5px solid var(--border); border-radius: 12px; padding: 16px 18px;
+  display: flex; align-items: center; gap: 14px; margin-bottom: 10px;
+  transition: border-color .15s;
+}
+.cp-card:hover { border-color: var(--blue-mid); }
+.cp-card.used { opacity: .55; }
+.cp-icon { width: 44px; height: 44px; border-radius: 10px; background: #EFF6FF; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+.cp-info { flex: 1; min-width: 0; }
+.cp-name { font-size: 14px; font-weight: 700; color: var(--text); }
+.cp-cond { font-size: 11px; color: var(--text3); margin-top: 3px; line-height: 1.5; }
+.cp-discount { font-size: 15px; font-weight: 700; color: var(--blue); font-family: 'JetBrains Mono', monospace; flex-shrink: 0; }
+.cp-badge { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 12px; flex-shrink: 0; }
+.cp-badge-unused { background: #DCFCE7; color: #16A34A; }
+.cp-badge-used { background: var(--slate-light); color: var(--text3); border: 1px solid var(--border); }
+.cp-badge-expired { background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; }
+.cp-dl-btn {
+  padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 700;
+  font-family: inherit; border: none; cursor: pointer; transition: all .15s;
+  white-space: nowrap; flex-shrink: 0;
+}
+.cp-dl-btn-primary { background: var(--blue); color: white; }
+.cp-dl-btn-primary:hover { background: #1D4ED8; }
+.cp-dl-btn-done { background: var(--slate-light); color: var(--text3); border: 1px solid var(--border); cursor: default; }
+
 /* Toast */
 #mp-toast {
   position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(80px);
@@ -177,6 +205,7 @@
     <button class="mp-tab active" onclick="switchTab('profile')">내 정보</button>
     <button class="mp-tab" onclick="switchTab('orders')">구매 이력</button>
     <button class="mp-tab" onclick="switchTab('downloads')">내 다운로드</button>
+    <button class="mp-tab" onclick="switchTab('coupons')">🎫 쿠폰</button>
     <button class="mp-tab" onclick="switchTab('privacy')">개인정보 관리</button>
   </div>
 
@@ -242,6 +271,22 @@
       <div class="mp-card-title">📂 다운로드 가능 상품</div>
       <div id="downloadsList">
         <div class="mp-empty"><div class="mp-empty-icon">📂</div><div class="mp-empty-msg">로딩 중...</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Tab: 쿠폰 ─── -->
+  <div class="mp-section" id="tab-coupons">
+    <div class="mp-card">
+      <div class="mp-card-title">🎁 받을 수 있는 쿠폰</div>
+      <div id="availableCouponsList">
+        <div class="mp-empty"><div class="mp-empty-icon">🎫</div><div class="mp-empty-msg">로딩 중...</div></div>
+      </div>
+    </div>
+    <div class="mp-card">
+      <div class="mp-card-title">📋 내 쿠폰 보관함</div>
+      <div id="myCouponsList">
+        <div class="mp-empty"><div class="mp-empty-icon">🎫</div><div class="mp-empty-msg">로딩 중...</div></div>
       </div>
     </div>
   </div>
@@ -313,13 +358,14 @@ function switchTab(tabName) {
   tabBtns.forEach(btn => btn.classList.remove('active'));
   tabSections.forEach(s => s.classList.remove('active'));
 
-  const idx = ['profile','orders','downloads','privacy'].indexOf(tabName);
+  const idx = ['profile','orders','downloads','coupons','privacy'].indexOf(tabName);
   if (tabBtns[idx]) tabBtns[idx].classList.add('active');
   const section = document.getElementById('tab-' + tabName);
   if (section) section.classList.add('active');
 
   if (tabName === 'orders') loadOrders();
   if (tabName === 'downloads') loadDownloads();
+  if (tabName === 'coupons') loadCoupons();
   if (tabName === 'privacy') loadPrivacy();
 }
 
@@ -451,6 +497,118 @@ async function downloadFile(productId) {
   }
 }
 
+// ── Coupons ──
+const CAT_LABEL_CP = { excel:'엑셀 프로그램', sheets:'구글시트 자동화', short:'숏폼 템플릿', detail:'상세페이지 제작', web:'홈페이지 제작', program:'프로그램 제작' };
+
+function formatDiscount(type, value) {
+  return type === 'percent' ? `${value}%` : `${Number(value).toLocaleString()}원`;
+}
+
+function buildCondText(cp) {
+  const parts = [];
+  if (cp.min_order_amount > 0) parts.push(`${Number(cp.min_order_amount).toLocaleString()}원 이상`);
+  const cats = cp.applicable_categories;
+  if (cats && cats.length > 0) parts.push(cats.map(c => CAT_LABEL_CP[c] || c).join(', ') + ' 전용');
+  return parts.length ? parts.join(' · ') : '모든 상품 적용 가능';
+}
+
+let downloadedIds = new Set();
+
+async function loadCoupons() {
+  const availEl = document.getElementById('availableCouponsList');
+  const myEl = document.getElementById('myCouponsList');
+
+  try {
+    const [availRes, myRes] = await Promise.all([
+      fetch(`${API}/api/events/coupons`),
+      fetch(`${API}/api/events/my-coupons?all=true`, { credentials: 'include' }),
+    ]);
+    const available = availRes.ok ? await availRes.json() : [];
+    const mine = myRes.ok ? await myRes.json() : [];
+
+    downloadedIds = new Set(mine.map(cp => cp.coupon_event_id));
+
+    // ── 받을 수 있는 쿠폰 ──
+    if (!available.length) {
+      availEl.innerHTML = '<div class="mp-empty"><div class="mp-empty-icon">🎫</div><div class="mp-empty-msg">진행 중인 쿠폰 이벤트가 없습니다.</div></div>';
+    } else {
+      availEl.innerHTML = available.map(cp => {
+        const alreadyDl = downloadedIds.has(cp.id);
+        const discLabel = formatDiscount(cp.discount_type, cp.discount_value);
+        const condText = buildCondText(cp);
+        return `<div class="cp-card${alreadyDl ? '' : ''}">
+          <div class="cp-icon">🎫</div>
+          <div class="cp-info">
+            <div class="cp-name">${cp.name}</div>
+            <div class="cp-cond">${condText} · ~${String(cp.end_date).slice(0,10)}</div>
+          </div>
+          <div class="cp-discount">${discLabel} 할인</div>
+          ${alreadyDl
+            ? `<button class="cp-dl-btn cp-dl-btn-done" disabled>✅ 받음</button>`
+            : `<button class="cp-dl-btn cp-dl-btn-primary" onclick="downloadCoupon('${cp.id}', this)">쿠폰 받기</button>`
+          }
+        </div>`;
+      }).join('');
+    }
+
+    // ── 내 쿠폰 보관함 ──
+    if (!mine.length) {
+      myEl.innerHTML = '<div class="mp-empty"><div class="mp-empty-icon">🎁</div><div class="mp-empty-msg">받은 쿠폰이 없습니다. 위에서 쿠폰을 받아보세요!</div></div>';
+    } else {
+      const today = new Date().toISOString().slice(0,10);
+      myEl.innerHTML = mine.map(cp => {
+        const expired = String(cp.end_date).slice(0,10) < today;
+        const discLabel = formatDiscount(cp.discount_type, cp.discount_value);
+        const condText = buildCondText(cp);
+        let badge = '';
+        if (cp.is_used) badge = `<span class="cp-badge cp-badge-used">사용 완료</span>`;
+        else if (expired) badge = `<span class="cp-badge cp-badge-expired">기간 만료</span>`;
+        else badge = `<span class="cp-badge cp-badge-unused">사용 가능</span>`;
+        return `<div class="cp-card${cp.is_used || expired ? ' used' : ''}">
+          <div class="cp-icon">${cp.is_used ? '✅' : expired ? '⏰' : '🎁'}</div>
+          <div class="cp-info">
+            <div class="cp-name">${cp.name}</div>
+            <div class="cp-cond">${condText} · ~${String(cp.end_date).slice(0,10)}</div>
+          </div>
+          <div class="cp-discount">${discLabel} 할인</div>
+          ${badge}
+        </div>`;
+      }).join('');
+    }
+  } catch(e) {
+    availEl.innerHTML = '<div class="mp-empty"><div class="mp-empty-icon">⚠️</div><div class="mp-empty-msg">불러오기에 실패했습니다.</div></div>';
+    myEl.innerHTML = '';
+  }
+}
+
+async function downloadCoupon(eventId, btn) {
+  btn.disabled = true;
+  btn.textContent = '발급 중...';
+  try {
+    const res = await fetch(`${API}/api/events/coupons/${eventId}/download`, {
+      method: 'POST',
+      credentials: 'include',
+    });
+    const data = await res.json();
+    if (res.ok) {
+      showToast('쿠폰이 발급됐습니다!');
+      await loadCoupons();
+    } else if (res.status === 409) {
+      showToast('이미 발급받은 쿠폰입니다.');
+      btn.textContent = '✅ 받음';
+      btn.classList.replace('cp-dl-btn-primary', 'cp-dl-btn-done');
+    } else {
+      showToast(data.error || '쿠폰 발급 중 오류가 발생했습니다.');
+      btn.disabled = false;
+      btn.textContent = '쿠폰 받기';
+    }
+  } catch {
+    showToast('네트워크 오류가 발생했습니다.');
+    btn.disabled = false;
+    btn.textContent = '쿠폰 받기';
+  }
+}
+
 // ── Privacy ──
 async function loadPrivacy() {
   const container = document.getElementById('privacyInfo');
@@ -510,8 +668,20 @@ function showToast(msg) {
 }
 
 // ── Drawer ──
-function openDrawer() { document.getElementById('drawerOverlay')?.classList.add('open'); }
-function closeDrawer() { document.getElementById('drawerOverlay')?.classList.remove('open'); }
+function openDrawer() {
+  const d = document.getElementById('drawerOverlay');
+  if (!d) return;
+  d.style.display = 'block';
+  setTimeout(() => d.classList.add('open'), 10);
+  document.body.style.overflow = 'hidden';
+}
+function closeDrawer() {
+  const d = document.getElementById('drawerOverlay');
+  if (!d) return;
+  d.classList.remove('open');
+  setTimeout(() => { d.style.display = 'none'; }, 260);
+  document.body.style.overflow = '';
+}
 </script>
 </body>
 </html>

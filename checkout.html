@@ -900,8 +900,20 @@ function getCookieToken() {
     document.cookie.split(';').map(c => c.trim()).find(c => c.startsWith('token='))?.split('=')[1] || '';
 }
 
-function openDrawer() { document.getElementById('drawerOverlay').classList.add('open'); }
-function closeDrawer() { document.getElementById('drawerOverlay').classList.remove('open'); }
+function openDrawer() {
+  const d = document.getElementById('drawerOverlay');
+  if (!d) return;
+  d.style.display = 'block';
+  setTimeout(() => d.classList.add('open'), 10);
+  document.body.style.overflow = 'hidden';
+}
+function closeDrawer() {
+  const d = document.getElementById('drawerOverlay');
+  if (!d) return;
+  d.classList.remove('open');
+  setTimeout(() => { d.style.display = 'none'; }, 260);
+  document.body.style.overflow = '';
+}
 </script>
 </body>
 </html>

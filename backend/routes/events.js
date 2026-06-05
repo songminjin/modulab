@@ -64,19 +64,21 @@ router.post('/coupons/:id/download', authenticate, async (req, res) => {
   }
 });
 
-// GET /api/events/my-coupons — 내가 받은 쿠폰 목록 (미사용)
+// GET /api/events/my-coupons — 내가 받은 쿠폰 목록 (?all=true 면 사용 완료 포함)
 router.get('/my-coupons', authenticate, async (req, res) => {
   const today = new Date().toISOString().slice(0, 10);
+  const showAll = req.query.all === 'true';
   const { rows } = await db.query(
-    `SELECT ced.id as download_id, ced.coupon_event_id, ced.created_at,
+    `SELECT ced.id as download_id, ced.coupon_event_id, ced.is_used, ced.used_at, ced.created_at,
             ce.name, ce.discount_type, ce.discount_value, ce.min_order_amount,
             ce.applicable_categories, ce.applicable_grades,
             ce.start_date, ce.end_date
      FROM coupon_event_downloads ced
      JOIN coupon_events ce ON ce.id = ced.coupon_event_id
-     WHERE ced.user_id = $1 AND ced.is_used = false AND ce.end_date >= $2
-     ORDER BY ced.created_at DESC`,
-    [req.user.id, today]
+     WHERE ced.user_id = $1
+       ${showAll ? '' : 'AND ced.is_used = false AND ce.end_date >= $2'}
+     ORDER BY ced.is_used ASC, ced.created_at DESC`,
+    showAll ? [req.user.id] : [req.user.id, today]
   );
   res.json(rows);
 });
