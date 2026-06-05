@@ -148,61 +148,7 @@
     <div class="section-title">이벤트 추천 상품 <span class="section-title-tag">BEST DEAL</span></div>
     <a href="category-excel.html" class="section-more">전체 보기 →</a>
   </div>
-  <div class="mkt-grid">
-
-    <a href="product.html?id=excel-hh&cat=excel&name=가계부+자동화&price=9900&emoji=💰" class="mkt-card">
-      <div class="mkt-card-img" style="background:#F0FDF4;">
-        <div style="background:#DCFCE7;width:75%;height:65%;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:52px;">💰</div>
-        <span class="mkt-badge">판매중</span>
-      </div>
-      <div class="mkt-card-body">
-        <div class="mkt-card-name">가계부 자동화</div>
-        <div class="mkt-card-desc">수입·지출 자동 집계 및 월별/카테고리별 통계. 예산 초과 알림 기능</div>
-        <div class="mkt-card-price">₩9,900</div>
-        <div class="mkt-card-meta"><span>👁 512</span><span>↓ 87</span><span class="mkt-card-seller">by 모듈랩</span></div>
-      </div>
-    </a>
-
-    <a href="product.html?id=excel-margin&cat=excel&name=마진+계산기&price=9900&emoji=📈" class="mkt-card">
-      <div class="mkt-card-img" style="background:#FFF1F2;">
-        <div style="background:#FFE4E6;width:75%;height:65%;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:52px;">📈</div>
-        <span class="mkt-badge">판매중</span>
-      </div>
-      <div class="mkt-card-body">
-        <div class="mkt-card-name">마진 계산기</div>
-        <div class="mkt-card-desc">단가·마진율·수익률 즉시 분석. 쇼핑몰·도매 사업자에게 최적화된 도구</div>
-        <div class="mkt-card-price">₩9,900</div>
-        <div class="mkt-card-meta"><span>👁 341</span><span>↓ 56</span><span class="mkt-card-seller">by 모듈랩</span></div>
-      </div>
-    </a>
-
-    <a href="product.html?id=excel-pm&cat=excel&name=프로젝트+관리+자동화&price=19900&emoji=📊" class="mkt-card">
-      <div class="mkt-card-img" style="background:#EFF6FF;">
-        <div style="background:#DBEAFE;width:75%;height:65%;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:52px;">📊</div>
-        <span class="mkt-badge">판매중</span>
-      </div>
-      <div class="mkt-card-body">
-        <div class="mkt-card-name">프로젝트 관리 자동화</div>
-        <div class="mkt-card-desc">업무 일정·진행률·담당자를 한눈에 관리. 자동 알림 & 상태 추적 기능 포함</div>
-        <div class="mkt-card-price">₩19,900</div>
-        <div class="mkt-card-meta"><span>👁 248</span><span>↓ 31</span><span class="mkt-card-seller">by 모듈랩</span></div>
-      </div>
-    </a>
-
-    <a href="product.html?id=sheets-pm&cat=sheets&name=구글시트+프로젝트+관리&price=19900&emoji=🔧" class="mkt-card">
-      <div class="mkt-card-img" style="background:#FEFCE8;">
-        <div style="background:#FEF9C3;width:75%;height:65%;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:52px;">🔧</div>
-        <span class="mkt-badge">판매중</span>
-      </div>
-      <div class="mkt-card-body">
-        <div class="mkt-card-name">구글시트 프로젝트 관리</div>
-        <div class="mkt-card-desc">실시간 공유·협업이 가능한 클라우드 프로젝트 관리. GAS 자동화 알림 포함</div>
-        <div class="mkt-card-price">₩19,900</div>
-        <div class="mkt-card-meta"><span>👁 214</span><span>↓ 27</span><span class="mkt-card-seller">by 모듈랩</span></div>
-      </div>
-    </a>
-
-  </div>
+  <div class="mkt-grid" id="eventGrid"></div>
 </div>
 
 <!-- FOOTER -->
@@ -264,6 +210,18 @@
   </div>
 </footer>
 
+<script src="products-renderer.js"></script>
+<script>
+if (window.ModuProducts) {
+  ModuProducts.fetchProducts().then(products => {
+    if (!products) return;
+    const grid = document.getElementById('eventGrid');
+    if (!grid) return;
+    const visible = products.filter(p => p.visible !== false).slice(0, 4);
+    grid.innerHTML = visible.map(ModuProducts.mktCardHTML).join('');
+  });
+}
+</script>
 <script src="auth.js"></script>
 <script>
 function openDrawer() {
