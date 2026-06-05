@@ -96,6 +96,7 @@ async function runMigrations() {
     `CREATE INDEX IF NOT EXISTS idx_ced_user ON coupon_event_downloads(user_id)`,
     `ALTER TABLE orders ADD COLUMN IF NOT EXISTS coupon_event_download_id UUID`,
     `ALTER TABLE coupon_events ADD COLUMN IF NOT EXISTS applicable_grades JSONB DEFAULT '[]'`,
+    `ALTER TABLE order_items ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'active'`,
   ];
   for (const sql of migrations) {
     try { await db.query(sql); } catch (err) { console.error('[migration error]', err.message); }
