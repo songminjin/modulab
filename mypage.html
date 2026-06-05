@@ -189,9 +189,31 @@
       </div>
       <button class="drawer-close" onclick="closeDrawer()">✕</button>
     </div>
-    <div id="drawer-auth" style="display:flex;gap:8px;padding:16px 20px;border-bottom:1px solid var(--border);">
-      <button class="nav-btn nav-btn-ghost" onclick="location.href='login.html'" style="flex:1;justify-content:center;">로그인</button>
-      <button class="nav-btn nav-btn-primary" onclick="location.href='register.html'" style="flex:1;justify-content:center;">회원가입</button>
+    <div class="drawer-search">
+      <span style="color:var(--text3);">🔍</span>
+      <input type="text" placeholder="상품 검색...">
+    </div>
+    <div class="drawer-section-title">카테고리</div>
+    <ul class="drawer-nav">
+      <li><a href="index.html"><span class="cat-icon">🏠</span>전체 상품</a></li>
+      <li><a href="category-excel.html"><span class="cat-icon">📊</span>엑셀 프로그램</a></li>
+      <li><a href="category-sheets.html"><span class="cat-icon">🔧</span>구글시트 자동화</a></li>
+      <li><a href="category-short.html"><span class="cat-icon">🎬</span>숏폼 템플릿</a></li>
+      <li><a href="category-detail.html"><span class="cat-icon">🖼️</span>상세페이지 제작</a></li>
+      <li><a href="category-web.html"><span class="cat-icon">🌐</span>홈페이지 제작</a></li>
+      <li><a href="category-program.html"><span class="cat-icon">⚙️</span>프로그램 제작</a></li>
+      <li><a href="event.html" class="hot"><span class="cat-icon">🎁</span>이벤트</a></li>
+    </ul>
+    <div class="drawer-divider"></div>
+    <div class="drawer-section-title">내 계정</div>
+    <ul class="drawer-nav">
+      <li><a href="mypage.html" class="active-cat"><span class="cat-icon">👤</span>마이페이지</a></li>
+      <li><a href="cart.html"><span class="cat-icon">🛒</span>장바구니</a></li>
+      <li><a href="cs.html"><span class="cat-icon">💬</span>문의하기</a></li>
+    </ul>
+    <div class="drawer-btns" id="drawer-auth">
+      <button class="nav-btn nav-btn-ghost" onclick="location.href='login.html'">로그인</button>
+      <button class="nav-btn nav-btn-primary" onclick="location.href='register.html'">회원가입</button>
     </div>
   </div>
 </div>
