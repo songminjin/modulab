@@ -1260,6 +1260,27 @@ function showToast(msg) {
     } catch {}
   }
   init();
+
+  // 조회수 증가 + 실제 조회수/구매수 반영
+  if (product.uuid && window.ModuProducts) {
+    const API = ModuProducts.API_URL;
+    // GET /api/products/:uuid 는 view_count를 +1 하고 최신값 반환
+    fetch(`${API}/api/products/${product.uuid}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (!data) return;
+        product.views = data.view_count ?? product.views;
+        // 구매수는 /stats에서 가져옴 (order 기준)
+        return fetch(`${API}/api/products/stats`, { cache: 'no-cache' })
+          .then(r => r.ok ? r.json() : [])
+          .then(stats => {
+            const s = stats.find(p => p.id === product.uuid);
+            if (s) product.downloads = s.purchase_count;
+            renderMeta();
+          });
+      })
+      .catch(() => {});
+  }
 })();
 </script>
 </body>

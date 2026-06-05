@@ -3,6 +3,25 @@ const router = express.Router();
 const db = require('../config/db');
 const { authenticate, isAdmin } = require('../middleware/auth');
 
+// 공개 통계 API — 조회수·구매수 (인증 불필요, products-renderer.js에서 호출)
+router.get('/stats', async (req, res) => {
+  try {
+    const { rows } = await db.query(
+      `SELECT p.id, p.view_count,
+              COUNT(DISTINCT o.id)::int AS purchase_count
+       FROM products p
+       LEFT JOIN order_items oi ON oi.product_id = p.id
+       LEFT JOIN orders o ON o.id = oi.order_id AND o.status = 'paid'
+       WHERE p.is_active = true
+       GROUP BY p.id, p.view_count`
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error('[stats]', err.message);
+    res.json([]);
+  }
+});
+
 // 전체 상품 조회
 router.get('/', async (req, res) => {
   const { category, sort } = req.query;

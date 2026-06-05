@@ -1,15 +1,43 @@
 /* ── ModuLab Products Renderer ── */
 (function() {
   const RAW_URL = 'https://raw.githubusercontent.com/songminjin/modulab/main/products.json';
+  const API_URL = 'https://modulab-production.up.railway.app';
 
   const CAT_BG  = { excel:'#EFF6FF', sheets:'#FEFCE8', short:'#F5F3FF', detail:'#FFF1F2', web:'#EFF6FF', program:'#F8FAFC' };
   const CAT_BG2 = { excel:'#DBEAFE', sheets:'#FEF9C3', short:'#EDE9FE', detail:'#FFE4E6', web:'#BFDBFE', program:'#F1F5F9' };
   const CAT_LABEL = { excel:'엑셀 프로그램', sheets:'구글시트 자동화', short:'숏폼 템플릿', detail:'상세페이지 제작', web:'홈페이지 제작', program:'프로그램 제작' };
 
+  async function fetchStats() {
+    try {
+      const res = await fetch(`${API_URL}/api/products/stats`, { cache: 'no-cache' });
+      if (!res.ok) return {};
+      const data = await res.json();
+      const map = {};
+      data.forEach(p => { map[p.id] = { views: p.view_count, downloads: p.purchase_count }; });
+      return map;
+    } catch {
+      return {};
+    }
+  }
+
   async function fetchProducts() {
     try {
-      const res = await fetch(RAW_URL, { cache: 'no-cache' });
-      if (res.ok) return await res.json();
+      const [jsonRes, statsMap] = await Promise.all([
+        fetch(RAW_URL, { cache: 'no-cache' }),
+        fetchStats()
+      ]);
+      if (jsonRes.ok) {
+        const products = await jsonRes.json();
+        if (Object.keys(statsMap).length) {
+          products.forEach(p => {
+            if (p.uuid && statsMap[p.uuid]) {
+              p.views = statsMap[p.uuid].views;
+              p.downloads = statsMap[p.uuid].downloads;
+            }
+          });
+        }
+        return products;
+      }
     } catch {}
     return null;
   }
@@ -126,5 +154,5 @@
     return products.find(p => p.id === id) || null;
   }
 
-  window.ModuProducts = { fetchProducts, renderCategoryGrid, renderIndexSection, renderIndexAll, getProduct, mktCardHTML, productCardHTML };
+  window.ModuProducts = { fetchProducts, fetchStats, renderCategoryGrid, renderIndexSection, renderIndexAll, getProduct, mktCardHTML, productCardHTML, API_URL };
 })();
