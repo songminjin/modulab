@@ -846,19 +846,38 @@ async function confirmAction(){
     showToast(`📨 ${ids.length}건 재발송 완료`);
     selectedIds.clear();
   } else if(type==='refund'){
-    await updateStatus(id, 'refund');
-    const o = orders.find(o=>o.id===id);
-    if(o) o.status='refund';
-    showToast('환불 처리가 완료되었습니다');
+    try {
+      const token = getToken();
+      const r = await fetch(`${API}/api/admin/orders/${id}/refund`, {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json', ...(token ? { Authorization:`Bearer ${token}` } : {}) },
+        credentials: 'include'
+      });
+      const result = await r.json();
+      if (!r.ok) throw new Error(result.error || '환불 실패');
+      const o = orders.find(o=>o.id===id);
+      if(o) o.status='refund';
+      showToast('✅ 환불이 완료됐습니다 (PG 환불 처리됨)');
+    } catch(e) {
+      showToast('❌ 환불 실패: ' + e.message, 'error');
+    }
   } else if(type==='bulkRefund'){
+    let successCount = 0;
     for(const i of ids){
       const o = orders.find(o=>o.id===i);
       if(o && o.status!=='done' && o.status!=='refund'){
-        await updateStatus(i, 'refund');
-        o.status='refund';
+        try {
+          const token = getToken();
+          const r = await fetch(`${API}/api/admin/orders/${i}/refund`, {
+            method: 'POST',
+            headers: { 'Content-Type':'application/json', ...(token ? { Authorization:`Bearer ${token}` } : {}) },
+            credentials: 'include'
+          });
+          if (r.ok) { o.status='refund'; successCount++; }
+        } catch(e) { console.warn('환불 실패:', i, e); }
       }
     }
-    showToast(`${ids.length}건 환불 처리 완료`);
+    showToast(`✅ ${successCount}건 환불 완료 (PG 환불 처리됨)`);
     selectedIds.clear();
   }
 

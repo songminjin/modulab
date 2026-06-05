@@ -121,6 +121,80 @@ router.put('/orders/:id/status', authenticate, isAdmin, async (req, res) => {
   }
 });
 
+// POST /api/admin/orders/:id/refund — 실제 PG 환불 처리
+router.post('/orders/:id/refund', authenticate, isAdmin, async (req, res) => {
+  const client = await db.pool.connect();
+  try {
+    const { rows: [order] } = await client.query('SELECT * FROM orders WHERE id=$1', [req.params.id]);
+    if (!order) return res.status(404).json({ error: '주문을 찾을 수 없습니다.' });
+    if (!['paid', 'sent', 'resend'].includes(order.status)) {
+      return res.status(400).json({ error: '환불 가능한 주문이 아닙니다.' });
+    }
+    if (!order.payment_key) return res.status(400).json({ error: '결제 정보가 없습니다.' });
+
+    if (order.pg_provider === 'paypal') {
+      // ── PayPal 환불 ──
+      const ppBase = process.env.PAYPAL_MODE === 'live'
+        ? 'https://api-m.paypal.com'
+        : 'https://api-m.sandbox.paypal.com';
+      const auth = Buffer.from(`${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_CLIENT_SECRET}`).toString('base64');
+      const tokenRes = await fetch(`${ppBase}/v1/oauth2/token`, {
+        method: 'POST',
+        headers: { Authorization: `Basic ${auth}`, 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'grant_type=client_credentials'
+      });
+      const { access_token } = await tokenRes.json();
+
+      // 주문 상세에서 captureId 획득
+      const orderRes = await fetch(`${ppBase}/v2/checkout/orders/${order.payment_key}`, {
+        headers: { Authorization: `Bearer ${access_token}` }
+      });
+      const ppOrder = await orderRes.json();
+      const captureId = ppOrder.purchase_units?.[0]?.payments?.captures?.[0]?.id;
+      if (!captureId) return res.status(400).json({ error: 'PayPal 캡처 ID를 찾을 수 없습니다.' });
+
+      const refundRes = await fetch(`${ppBase}/v2/payments/captures/${captureId}/refund`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${access_token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
+      });
+      if (!refundRes.ok) {
+        const err = await refundRes.json();
+        return res.status(400).json({ error: 'PayPal 환불 실패', detail: err });
+      }
+    } else {
+      // ── PortOne(토스페이먼츠 등) 환불 ──
+      const portoneRes = await fetch(
+        `https://api.portone.io/payments/${encodeURIComponent(order.payment_key)}/cancel`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `PortOne ${process.env.PORTONE_SECRET_KEY}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ reason: '관리자 환불 처리' })
+        }
+      );
+      if (!portoneRes.ok) {
+        const err = await portoneRes.json();
+        return res.status(400).json({ error: '포트원 환불 실패', detail: err });
+      }
+    }
+
+    // DB 상태 업데이트
+    await client.query(
+      `UPDATE orders SET status='refund', paid_at=NULL WHERE id=$1`,
+      [req.params.id]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    console.error('[환불 처리]', err);
+    res.status(500).json({ error: '환불 처리 중 오류가 발생했습니다.' });
+  } finally {
+    client.release();
+  }
+});
+
 // GET /api/admin/products
 router.get('/products', authenticate, isAdmin, async (req, res) => {
   const { rows } = await db.query('SELECT * FROM products ORDER BY created_at DESC');
