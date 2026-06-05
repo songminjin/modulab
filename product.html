@@ -1155,13 +1155,23 @@ async function submitReview() {
   const content = document.getElementById('reviewContent').value.trim();
   if (content.length < 10) { showToast('리뷰 내용을 최소 10자 이상 입력해주세요.'); return; }
 
+  const token = localStorage.getItem('modulab_token');
+  if (!token) {
+    showToast('로그인이 필요합니다.');
+    setTimeout(() => { location.href = 'login.html'; }, 1600);
+    return;
+  }
+
   const btn = document.getElementById('reviewSubmitBtn');
   btn.disabled = true;
   btn.textContent = '등록 중...';
   try {
     const r = await fetch(`${REVIEW_API}/api/reviews`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
       credentials: 'include',
       body: JSON.stringify({ productId: product.id, rating: selectedRating, content })
     });
