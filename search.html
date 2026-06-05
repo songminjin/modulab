@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>검색 결과 — 모듈랩</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.search-page { max-width: 1280px; margin: 0 auto; padding: 40px 40px 80px; }
+.search-header { margin-bottom: 32px; }
+.search-bar-wrap {
+  display: flex; align-items: center; gap: 12px;
+  border: 2px solid var(--blue); border-radius: 12px;
+  padding: 12px 20px; background: var(--white);
+  max-width: 640px; margin-bottom: 16px;
+}
+.search-bar-wrap input {
+  flex: 1; border: none; outline: none; font-size: 16px;
+  font-family: inherit; color: var(--text); background: transparent;
+}
+.search-bar-btn {
+  background: var(--blue); color: white; border: none;
+  border-radius: 8px; padding: 8px 18px; font-size: 14px;
+  font-weight: 600; cursor: pointer; font-family: inherit;
+  transition: background .15s; white-space: nowrap;
+}
+.search-bar-btn:hover { background: var(--blue-dark); }
+.search-meta { font-size: 14px; color: var(--text3); }
+.search-meta strong { color: var(--text); font-weight: 700; }
+.search-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+.search-empty {
+  text-align: center; padding: 80px 20px; color: var(--text3);
+}
+.search-empty-icon { font-size: 52px; margin-bottom: 16px; }
+.search-empty-title { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+.search-empty-sub { font-size: 14px; line-height: 1.7; }
+@media (max-width: 960px) { .search-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) {
+  .search-page { padding: 24px 20px 60px; }
+  .search-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-left">
+      <div class="hamburger" onclick="openDrawer()"><span></span><span></span><span></span></div>
+    </div>
+    <div class="nav-center">
+      <a href="index.html" class="nav-logo"><div class="logo-mark"></div>Modu<span>Lab</span></a>
+    </div>
+    <div class="nav-right">
+      <div class="nav-search">
+        <span style="color:var(--text3);font-size:14px;">🔍</span>
+        <input type="text" placeholder="상품 검색...">
+      </div>
+      <div id="nav-auth" style="display:flex;align-items:center;gap:8px;">
+        <button class="nav-btn nav-btn-ghost" onclick="location.href='login.html'">로그인</button>
+        <button class="nav-btn nav-btn-primary" onclick="location.href='register.html'">회원가입</button>
+      </div>
+      <a href="cart.html" class="cart-btn">🛒<div class="cart-badge" id="cart-badge-nav">0</div></a>
+    </div>
+  </div>
+</nav>
+
+<!-- DRAWER -->
+<div class="drawer-overlay" id="drawerOverlay">
+  <div class="drawer-backdrop" onclick="closeDrawer()"></div>
+  <div class="drawer-panel">
+    <div class="drawer-header">
+      <div class="drawer-logo"><div class="logo-mark" style="width:28px;height:28px;"></div>Modu<span>Lab</span></div>
+      <button class="drawer-close" onclick="closeDrawer()">✕</button>
+    </div>
+    <div class="drawer-search">
+      <span style="color:var(--text3);">🔍</span>
+      <input type="text" placeholder="상품 검색...">
+    </div>
+    <div class="drawer-section-title">카테고리</div>
+    <ul class="drawer-nav">
+      <li><a href="index.html"><span class="cat-icon">🏠</span>전체 상품</a></li>
+      <li><a href="category-excel.html"><span class="cat-icon">📊</span>엑셀 프로그램</a></li>
+      <li><a href="category-sheets.html"><span class="cat-icon">🔧</span>구글시트 자동화</a></li>
+      <li><a href="category-short.html"><span class="cat-icon">🎬</span>숏폼 템플릿</a></li>
+      <li><a href="category-detail.html"><span class="cat-icon">🖼️</span>상세페이지 제작</a></li>
+      <li><a href="category-web.html"><span class="cat-icon">🌐</span>홈페이지 제작</a></li>
+      <li><a href="category-program.html"><span class="cat-icon">⚙️</span>프로그램 제작</a></li>
+    </ul>
+    <div class="drawer-divider"></div>
+    <div class="drawer-section-title">내 계정</div>
+    <ul class="drawer-nav">
+      <li><a href="mypage.html"><span class="cat-icon">👤</span>마이페이지</a></li>
+      <li><a href="cart.html"><span class="cat-icon">🛒</span>장바구니</a></li>
+      <li><a href="cs.html"><span class="cat-icon">💬</span>문의하기</a></li>
+    </ul>
+    <div class="drawer-btns" id="drawer-auth">
+      <button class="nav-btn nav-btn-ghost" onclick="location.href='login.html'">로그인</button>
+      <button class="nav-btn nav-btn-primary" onclick="location.href='register.html'">회원가입</button>
+    </div>
+  </div>
+</div>
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb">
+  <a href="index.html">홈</a>
+  <span style="color:var(--border);">›</span>
+  <span>검색 결과</span>
+</div>
+
+<!-- SEARCH PAGE -->
+<div class="search-page">
+  <div class="search-header">
+    <div class="search-bar-wrap">
+      <span style="color:var(--text3);font-size:18px;">🔍</span>
+      <input type="text" id="searchInput" placeholder="상품 이름, 카테고리로 검색...">
+      <button class="search-bar-btn" onclick="doSearch()">검색</button>
+    </div>
+    <div class="search-meta" id="searchMeta"></div>
+  </div>
+  <div id="searchGrid" class="search-grid">
+    <div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--text3);">검색 중...</div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="logo-wrap"><div class="logo-mark"></div><div class="brand-name">Modu<span>Lab</span></div></div>
+      <p>혼자 일해도 팀처럼 돌아가는<br>업무 시스템을 만듭니다.</p>
+    </div>
+    <div class="footer-col">
+      <h4>카테고리</h4>
+      <ul>
+        <li><a href="category-excel.html">엑셀 프로그램</a></li>
+        <li><a href="category-sheets.html">구글시트 자동화</a></li>
+        <li><a href="category-short.html">숏폼 템플릿</a></li>
+        <li><a href="category-detail.html">상세페이지 제작</a></li>
+        <li><a href="category-web.html">홈페이지 제작</a></li>
+        <li><a href="category-program.html">프로그램 제작</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>빠른 링크</h4>
+      <ul>
+        <li><a href="index.html">홈</a></li>
+        <li><a href="event.html">이벤트</a></li>
+        <li><a href="guide.html">구매 가이드</a></li>
+        <li><a href="cs.html">고객센터</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>정책 안내</h4>
+      <ul>
+        <li><a href="terms.html">이용약관</a></li>
+        <li><a href="privacy.html">개인정보처리방침</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 ModuLab. All rights reserved.</p>
+  </div>
+</footer>
+
+<script src="auth.js"></script>
+<script src="products-renderer.js"></script>
+<script>
+function openDrawer() {
+  const d = document.getElementById('drawerOverlay');
+  d.style.display = 'block';
+  setTimeout(() => d.classList.add('open'), 10);
+  document.body.style.overflow = 'hidden';
+}
+function closeDrawer() {
+  const d = document.getElementById('drawerOverlay');
+  d.classList.remove('open');
+  setTimeout(() => { d.style.display = 'none'; }, 260);
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+
+const CAT_LABEL = { excel:'엑셀 프로그램', sheets:'구글시트 자동화', short:'숏폼 템플릿', detail:'상세페이지 제작', web:'홈페이지 제작', program:'프로그램 제작' };
+
+let currentQuery = '';
+
+function doSearch() {
+  const q = document.getElementById('searchInput').value.trim();
+  if (!q) return;
+  history.replaceState(null, '', `search.html?q=${encodeURIComponent(q)}`);
+  currentQuery = q;
+  renderResults(q);
+}
+
+document.getElementById('searchInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doSearch();
+});
+
+async function renderResults(q) {
+  const grid = document.getElementById('searchGrid');
+  const meta = document.getElementById('searchMeta');
+  grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--text3);">검색 중...</div>';
+
+  const products = await ModuProducts.fetchProducts();
+  const all = products || [];
+  const lower = q.toLowerCase();
+
+  const results = all.filter(p =>
+    p.visible !== false && (
+      p.name?.toLowerCase().includes(lower) ||
+      p.desc?.toLowerCase().includes(lower) ||
+      (CAT_LABEL[p.cat] || '').toLowerCase().includes(lower) ||
+      p.cat?.toLowerCase().includes(lower)
+    )
+  );
+
+  document.title = `"${q}" 검색 결과 — 모듈랩`;
+  meta.innerHTML = results.length
+    ? `<strong>"${q}"</strong> 검색 결과 ${results.length}건`
+    : `<strong>"${q}"</strong>에 대한 결과가 없습니다.`;
+
+  if (!results.length) {
+    grid.innerHTML = `
+      <div class="search-empty" style="grid-column:1/-1;">
+        <div class="search-empty-icon">🔍</div>
+        <div class="search-empty-title">"${q}" 검색 결과가 없습니다</div>
+        <div class="search-empty-sub">
+          다른 키워드로 검색하거나 카테고리를 탐색해보세요.<br>
+          <a href="index.html" style="color:var(--blue);font-weight:600;">전체 상품 보기 →</a>
+        </div>
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML = results.map(p => ModuProducts.mktCardHTML(p)).join('');
+
+  const cart = JSON.parse(localStorage.getItem('modulab_cart') || '[]');
+  document.getElementById('cart-badge-nav').textContent = cart.length;
+}
+
+// 초기 로드
+(async () => {
+  const q = new URLSearchParams(location.search).get('q') || '';
+  const input = document.getElementById('searchInput');
+  if (q) {
+    input.value = q;
+    currentQuery = q;
+    await renderResults(q);
+  } else {
+    document.getElementById('searchGrid').innerHTML =
+      '<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--text3);">검색어를 입력해주세요.</div>';
+    document.getElementById('searchMeta').textContent = '';
+  }
+
+  const cart = JSON.parse(localStorage.getItem('modulab_cart') || '[]');
+  document.getElementById('cart-badge-nav').textContent = cart.length;
+})();
+</script>
+</body>
+</html>

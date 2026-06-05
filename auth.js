@@ -71,6 +71,19 @@
     applyUser(getUser());
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
-  else init();
+  function initSearch() {
+    const isAdmin = location.pathname.includes('/admin/');
+    const searchBase = isAdmin ? '../search.html' : 'search.html';
+    const goSearch = (q) => {
+      if (q.trim()) location.href = `${searchBase}?q=${encodeURIComponent(q.trim())}`;
+    };
+    document.querySelectorAll('.nav-search input, .drawer-search input').forEach(input => {
+      const q = new URLSearchParams(location.search).get('q');
+      if (q && location.pathname.includes('search.html')) input.value = q;
+      input.addEventListener('keydown', e => { if (e.key === 'Enter') goSearch(input.value); });
+    });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => { init(); initSearch(); });
+  else { init(); initSearch(); }
 })();
