@@ -182,11 +182,11 @@ router.post('/events/coupons', authenticate, isAdmin, async (req, res) => {
   const client = await db.pool.connect();
   try {
     await client.query('BEGIN');
-    const { name, discount_type, discount_value, start_date, end_date, note, applied_products, min_order_amount, applicable_categories } = req.body;
+    const { name, discount_type, discount_value, start_date, end_date, note, applied_products, min_order_amount, applicable_categories, applicable_grades } = req.body;
     if (!name || !discount_type || !discount_value || !start_date || !end_date) return res.status(400).json({ error: '필수 항목을 입력해주세요.' });
     const { rows: [ev] } = await client.query(
-      'INSERT INTO coupon_events (name, discount_type, discount_value, start_date, end_date, note, min_order_amount, applicable_categories, created_by) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *',
-      [name, discount_type, discount_value, start_date, end_date, note||null, min_order_amount||0, JSON.stringify(applicable_categories||[]), req.user.id]
+      'INSERT INTO coupon_events (name, discount_type, discount_value, start_date, end_date, note, min_order_amount, applicable_categories, applicable_grades, created_by) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *',
+      [name, discount_type, discount_value, start_date, end_date, note||null, min_order_amount||0, JSON.stringify(applicable_categories||[]), JSON.stringify(applicable_grades||[]), req.user.id]
     );
     if (applied_products?.length) {
       for (const pid of applied_products) {
@@ -194,7 +194,7 @@ router.post('/events/coupons', authenticate, isAdmin, async (req, res) => {
       }
     }
     await client.query('COMMIT');
-    res.status(201).json({ ...ev, applied_products: applied_products || [], applicable_categories: applicable_categories || [] });
+    res.status(201).json({ ...ev, applied_products: applied_products || [], applicable_categories: applicable_categories || [], applicable_grades: applicable_grades || [] });
   } catch (err) {
     await client.query('ROLLBACK');
     res.status(500).json({ error: '쿠폰 이벤트 등록 중 오류가 발생했습니다.' });
@@ -206,10 +206,10 @@ router.put('/events/coupons/:id', authenticate, isAdmin, async (req, res) => {
   const client = await db.pool.connect();
   try {
     await client.query('BEGIN');
-    const { name, discount_type, discount_value, start_date, end_date, note, applied_products, min_order_amount, applicable_categories } = req.body;
+    const { name, discount_type, discount_value, start_date, end_date, note, applied_products, min_order_amount, applicable_categories, applicable_grades } = req.body;
     const { rows: [ev] } = await client.query(
-      'UPDATE coupon_events SET name=$1, discount_type=$2, discount_value=$3, start_date=$4, end_date=$5, note=$6, min_order_amount=$7, applicable_categories=$8, updated_at=NOW() WHERE id=$9 RETURNING *',
-      [name, discount_type, discount_value, start_date, end_date, note||null, min_order_amount||0, JSON.stringify(applicable_categories||[]), req.params.id]
+      'UPDATE coupon_events SET name=$1, discount_type=$2, discount_value=$3, start_date=$4, end_date=$5, note=$6, min_order_amount=$7, applicable_categories=$8, applicable_grades=$9, updated_at=NOW() WHERE id=$10 RETURNING *',
+      [name, discount_type, discount_value, start_date, end_date, note||null, min_order_amount||0, JSON.stringify(applicable_categories||[]), JSON.stringify(applicable_grades||[]), req.params.id]
     );
     if (!ev) return res.status(404).json({ error: '이벤트를 찾을 수 없습니다.' });
     await client.query('DELETE FROM coupon_event_products WHERE coupon_event_id = $1', [req.params.id]);
@@ -219,7 +219,7 @@ router.put('/events/coupons/:id', authenticate, isAdmin, async (req, res) => {
       }
     }
     await client.query('COMMIT');
-    res.json({ ...ev, applied_products: applied_products || [], applicable_categories: applicable_categories || [] });
+    res.json({ ...ev, applied_products: applied_products || [], applicable_categories: applicable_categories || [], applicable_grades: applicable_grades || [] });
   } catch (err) {
     await client.query('ROLLBACK');
     res.status(500).json({ error: '쿠폰 이벤트 수정 중 오류가 발생했습니다.' });

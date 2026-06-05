@@ -64,23 +64,20 @@
 #paypal-btn-container.hidden { display: none; }
 
 /* Coupon */
-.coupon-row {
-  display: flex; gap: 8px;
+.coupon-empty { font-size: 13px; color: var(--text3); padding: 12px 0; }
+.coupon-list { display: flex; flex-direction: column; gap: 8px; }
+.coupon-item {
+  border: 2px solid var(--border); border-radius: 10px; padding: 14px 16px;
+  cursor: pointer; transition: all .15s; background: var(--white);
+  display: flex; align-items: center; gap: 12px;
 }
-.coupon-input {
-  flex: 1; padding: 10px 14px; border: 1px solid var(--border);
-  border-radius: 8px; font-size: 14px; font-family: inherit;
-  color: var(--text); background: var(--white);
-  transition: border-color .15s; outline: none;
-}
-.coupon-input:focus { border-color: var(--blue); }
-.coupon-apply-btn {
-  padding: 10px 18px; border-radius: 8px;
-  background: var(--navy); color: white;
-  font-size: 13px; font-weight: 700; font-family: inherit;
-  border: none; cursor: pointer; transition: all .15s; white-space: nowrap;
-}
-.coupon-apply-btn:hover { background: var(--blue); }
+.coupon-item:hover { border-color: var(--blue-mid); background: var(--blue-light); }
+.coupon-item.selected { border-color: var(--blue); background: var(--blue-light); }
+.coupon-item-radio { width: 18px; height: 18px; accent-color: var(--blue); flex-shrink: 0; }
+.coupon-item-info { flex: 1; min-width: 0; }
+.coupon-item-name { font-size: 14px; font-weight: 700; color: var(--text); }
+.coupon-item-cond { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.coupon-item-discount { font-size: 15px; font-weight: 700; color: var(--blue); font-family: 'JetBrains Mono', monospace; flex-shrink: 0; }
 .coupon-result {
   font-size: 13px; margin-top: 8px; padding: 8px 12px;
   border-radius: 7px; display: none;
@@ -314,12 +311,12 @@
     <!-- STEP 2: 쿠폰 -->
     <div class="checkout-section">
       <div class="checkout-step">STEP 02</div>
-      <div class="checkout-section-title">쿠폰 / 할인코드</div>
-      <div class="coupon-row">
-        <input class="coupon-input" id="coupon-input" type="text" placeholder="쿠폰 코드를 입력하세요">
-        <button class="coupon-apply-btn" onclick="applyCoupon()">적용</button>
+      <div class="checkout-section-title">할인 쿠폰 선택</div>
+      <div id="coupon-loading" style="font-size:13px;color:var(--text3);">쿠폰 목록을 불러오는 중...</div>
+      <div id="coupon-list-wrap" style="display:none;">
+        <div class="coupon-list" id="coupon-list"></div>
+        <div class="coupon-result" id="coupon-result"></div>
       </div>
-      <div class="coupon-result" id="coupon-result"></div>
     </div>
 
     <!-- STEP 3: 결제 방법 -->
@@ -500,12 +497,13 @@ let subtotal = 0;
 let discount = 0;
 let finalAmount = 0;
 let selectedPM = null;
-let couponCode = null;
+let selectedCouponDownloadId = null;
 let orderId = null;
 let paypalLoaded = false;
+let myCoupons = [];
 
 // ── 초기화 ──
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   const raw = localStorage.getItem('modulab_checkout');
   if (!raw) { location.href = 'cart.html'; return; }
 
@@ -518,6 +516,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderItems();
   updateSummary();
   updateBadge();
+  await loadMyCoupons();
 });
 
 function renderItems() {
@@ -572,33 +571,102 @@ function selectPM(pm) {
   updateSummary();
 }
 
-// ── 쿠폰 적용 ──
-async function applyCoupon() {
-  const code = document.getElementById('coupon-input').value.trim();
-  const resultEl = document.getElementById('coupon-result');
-  if (!code) return;
+// ── 내 쿠폰 목록 로드 ──
+async function loadMyCoupons() {
+  const loadingEl = document.getElementById('coupon-loading');
+  const wrapEl = document.getElementById('coupon-list-wrap');
+  const listEl = document.getElementById('coupon-list');
+  const token = getCookieToken();
+
+  if (!token) {
+    loadingEl.textContent = '로그인 후 쿠폰을 사용할 수 있습니다.';
+    return;
+  }
 
   try {
-    const token = getCookieToken();
-    const res = await fetch(`${API}/api/coupons/validate`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+    const res = await fetch(`${API}/api/events/my-coupons`, {
       credentials: 'include',
-      body: JSON.stringify({ code, amount: subtotal, product_ids: items.map(i => i.id) })
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) { loadingEl.textContent = '쿠폰 목록을 불러올 수 없습니다.'; return; }
+    myCoupons = await res.json();
+    loadingEl.style.display = 'none';
+    wrapEl.style.display = 'block';
+
+    const CAT_LABEL = { excel:'엑셀 프로그램', sheets:'구글시트 자동화', short:'숏폼 템플릿', detail:'상세페이지 제작', web:'홈페이지 제작', program:'프로그램 제작' };
+
+    if (!myCoupons.length) {
+      listEl.innerHTML = '<div class="coupon-empty">보유한 쿠폰이 없습니다. <a href="event.html" style="color:var(--blue);">이벤트 페이지</a>에서 쿠폰을 받아보세요.</div>';
+      return;
+    }
+
+    listEl.innerHTML = myCoupons.map(cp => {
+      const discLabel = cp.discount_type === 'percent' ? `${cp.discount_value}% 할인` : `${Number(cp.discount_value).toLocaleString()}원 할인`;
+      let conds = [];
+      if (cp.min_order_amount > 0) conds.push(`${Number(cp.min_order_amount).toLocaleString()}원 이상 구매 시`);
+      const cats = cp.applicable_categories;
+      if (cats && cats.length > 0) conds.push(cats.map(c => CAT_LABEL[c]||c).join(', ') + ' 전용');
+      const condText = conds.length ? conds.join(' · ') : '모든 상품에 적용 가능';
+      return `<div class="coupon-item" onclick="selectCoupon('${cp.download_id}', this)" id="coupon-item-${cp.download_id}">
+        <input type="radio" class="coupon-item-radio" name="coupon" value="${cp.download_id}">
+        <div class="coupon-item-info">
+          <div class="coupon-item-name">${cp.name}</div>
+          <div class="coupon-item-cond">${condText} · ~${cp.end_date.slice(0,10)}</div>
+        </div>
+        <div class="coupon-item-discount">${discLabel}</div>
+      </div>`;
+    }).join('') + `<div class="coupon-item" onclick="selectCoupon(null, this)" id="coupon-item-none">
+        <input type="radio" class="coupon-item-radio" name="coupon" value="" checked>
+        <div class="coupon-item-info"><div class="coupon-item-name" style="color:var(--text3);">쿠폰 사용 안 함</div></div>
+      </div>`;
+  } catch {
+    loadingEl.textContent = '쿠폰 목록을 불러올 수 없습니다.';
+  }
+}
+
+// ── 쿠폰 선택 ──
+async function selectCoupon(downloadId, el) {
+  document.querySelectorAll('.coupon-item').forEach(i => { i.classList.remove('selected'); i.querySelector('input[type="radio"]').checked = false; });
+  el.classList.add('selected');
+  el.querySelector('input[type="radio"]').checked = true;
+
+  const resultEl = document.getElementById('coupon-result');
+  resultEl.style.display = 'none';
+
+  if (!downloadId) {
+    selectedCouponDownloadId = null;
+    discount = 0;
+    updateSummary();
+    return;
+  }
+
+  const token = getCookieToken();
+  try {
+    const productCats = items.map(i => i.cat).filter(Boolean);
+    const res = await fetch(`${API}/api/events/coupons/validate`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ coupon_download_id: downloadId, amount: subtotal, product_categories: productCats }),
     });
     const data = await res.json();
 
-    if (res.ok && data.discount) {
+    if (res.ok && data.discount != null) {
+      selectedCouponDownloadId = downloadId;
       discount = data.discount;
-      couponCode = code;
       resultEl.className = 'coupon-result success';
-      resultEl.textContent = `✅ 쿠폰 적용! ${data.discount.toLocaleString()}원 할인`;
+      resultEl.textContent = `✅ "${data.coupon_name}" 적용 — ${data.discount.toLocaleString()}원 할인`;
       resultEl.style.display = 'block';
       updateSummary();
     } else {
+      selectedCouponDownloadId = null;
+      discount = 0;
       resultEl.className = 'coupon-result error';
-      resultEl.textContent = '❌ ' + (data.error || '사용할 수 없는 쿠폰입니다.');
+      resultEl.textContent = '❌ ' + (data.error || '이 쿠폰은 현재 상품에 사용할 수 없습니다.');
       resultEl.style.display = 'block';
+      el.classList.remove('selected');
+      document.getElementById('coupon-item-none')?.classList.add('selected');
+      updateSummary();
     }
   } catch {
     resultEl.className = 'coupon-result error';
@@ -630,7 +698,7 @@ async function createOrder() {
     credentials: 'include',
     body: JSON.stringify({
       product_ids: productIds,
-      coupon_code: couponCode || undefined
+      coupon_event_download_id: selectedCouponDownloadId || undefined
     })
   });
   const data = await res.json();

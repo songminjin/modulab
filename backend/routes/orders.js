@@ -9,34 +9,42 @@ router.post('/', authenticate, async (req, res) => {
   const client = await db.pool.connect();
   try {
     await client.query('BEGIN');
-    const { product_ids, coupon_code } = req.body;
+    const { product_ids, coupon_event_download_id } = req.body;
     if (!product_ids?.length) return res.status(400).json({ error: '상품을 선택해주세요.' });
 
     // 상품 조회
     const { rows: products } = await client.query(
-      'SELECT id, name, price FROM products WHERE id = ANY($1) AND is_active = true',
+      'SELECT id, name, price, category FROM products WHERE id = ANY($1) AND is_active = true',
       [product_ids]
     );
     if (products.length !== product_ids.length) return res.status(400).json({ error: '유효하지 않은 상품이 포함됐습니다.' });
 
     const total = products.reduce((sum, p) => sum + p.price, 0);
     let discount = 0;
-    let couponId = null;
+    let couponEventDownloadId = null;
 
-    // 쿠폰 적용
-    if (coupon_code) {
-      const { rows: [coupon] } = await client.query(
-        `SELECT uc.id as uc_id, c.* FROM user_coupons uc
-         JOIN coupons c ON c.id = uc.coupon_id
-         WHERE uc.user_id = $1 AND c.code = $2 AND uc.is_used = false
-         AND (c.expires_at IS NULL OR c.expires_at > NOW())`,
-        [req.user.id, coupon_code]
+    // 쿠폰 이벤트 적용
+    if (coupon_event_download_id) {
+      const today = new Date().toISOString().slice(0, 10);
+      const { rows: [dl] } = await client.query(
+        `SELECT ced.id, ce.discount_type, ce.discount_value, ce.min_order_amount,
+                ce.applicable_categories
+         FROM coupon_event_downloads ced
+         JOIN coupon_events ce ON ce.id = ced.coupon_event_id
+         WHERE ced.id = $1 AND ced.user_id = $2 AND ced.is_used = false
+           AND ce.start_date <= $3 AND ce.end_date >= $3`,
+        [coupon_event_download_id, req.user.id, today]
       );
-      if (coupon && total >= coupon.min_order_amount) {
-        discount = coupon.discount_type === 'percent'
-          ? Math.min(Math.floor(total * coupon.discount_value / 100), coupon.max_discount_amount || Infinity)
-          : coupon.discount_value;
-        couponId = coupon.id;
+      if (dl && total >= (dl.min_order_amount || 0)) {
+        const cats = dl.applicable_categories;
+        const productCats = products.map(p => p.category);
+        const catOk = !cats || cats.length === 0 || productCats.some(c => cats.includes(c));
+        if (catOk) {
+          discount = dl.discount_type === 'percent'
+            ? Math.floor(total * dl.discount_value / 100)
+            : Math.min(Number(dl.discount_value), total);
+          couponEventDownloadId = dl.id;
+        }
       }
     }
 
@@ -45,8 +53,8 @@ router.post('/', authenticate, async (req, res) => {
 
     // 주문 생성
     await client.query(
-      'INSERT INTO orders (id, user_id, total_amount, discount_amount, final_amount, coupon_id) VALUES ($1,$2,$3,$4,$5,$6)',
-      [orderId, req.user.id, total, discount, finalAmount, couponId]
+      'INSERT INTO orders (id, user_id, total_amount, discount_amount, final_amount, coupon_event_download_id) VALUES ($1,$2,$3,$4,$5,$6)',
+      [orderId, req.user.id, total, discount, finalAmount, couponEventDownloadId]
     );
 
     // 주문 상품 저장

@@ -87,69 +87,37 @@
 <!-- EVENT HERO -->
 <section class="event-hero">
   <div class="event-hero-inner">
-    <div class="event-tag">🔥 LIMITED OFFER · 2026 JUNE</div>
-    <h1 class="event-hero-title">6월 특별 이벤트</h1>
-    <p class="event-hero-sub">지금만 누릴 수 있는 혜택을 놓치지 마세요.<br>신규 가입부터 번들 구매까지 최대 30% 할인!</p>
+    <div class="event-tag">🔥 CURRENT EVENTS</div>
+    <h1 class="event-hero-title">진행 중인 이벤트</h1>
+    <p class="event-hero-sub">지금 진행 중인 혜택을 놓치지 마세요.<br>쿠폰을 받아 결제 시 할인을 적용할 수 있습니다.</p>
   </div>
 </section>
 
-<!-- EVENTS -->
-<div class="section-wrap">
-  <div class="event-grid">
-
-    <!-- 이벤트 1 -->
-    <div class="event-card">
-      <div class="event-card-top" style="background:linear-gradient(135deg,#EFF6FF 0%,#DBEAFE 100%);">
-        <span class="event-card-emoji">🎁</span>
-        <div class="event-period limited">2026.06.01 ~ 06.30</div>
-        <div class="event-card-title">신규가입 웰컴 쿠폰</div>
-        <div class="event-card-desc">가입 즉시 첫 구매에 사용 가능한 20% 할인 쿠폰을 드립니다. 모든 상품에 적용 가능.</div>
-      </div>
-      <div class="event-card-bottom">
-        <div class="event-discount" style="color:var(--blue);">20% OFF</div>
-        <a href="#" class="event-cta" style="background:var(--blue);">회원가입 →</a>
-      </div>
-    </div>
-
-    <!-- 이벤트 2 -->
-    <div class="event-card">
-      <div class="event-card-top" style="background:linear-gradient(135deg,#F0FDF4 0%,#DCFCE7 100%);">
-        <span class="event-card-emoji">⭐</span>
-        <div class="event-period ongoing">상시 진행</div>
-        <div class="event-card-title">리뷰 작성 포인트 적립</div>
-        <div class="event-card-desc">구매한 상품에 후기를 작성하면 500P를 적립해드립니다. 포인트는 다음 구매 시 현금처럼 사용 가능.</div>
-      </div>
-      <div class="event-card-bottom">
-        <div class="event-discount" style="color:var(--green);">+500P</div>
-        <a href="#" class="event-cta" style="background:var(--green);">후기 쓰기 →</a>
-      </div>
-    </div>
-
-    <!-- 이벤트 3 -->
-    <div class="event-card">
-      <div class="event-card-top" style="background:linear-gradient(135deg,#FFF7ED 0%,#FED7AA 100%);">
-        <span class="event-card-emoji">🛒</span>
-        <div class="event-period limited">2026.06.01 ~ 06.14</div>
-        <div class="event-card-title">번들 구매 추가 할인</div>
-        <div class="event-card-desc">2개 이상 동시 구매 시 전체 금액의 30%를 추가 할인해드립니다. 기간 한정 이벤트.</div>
-      </div>
-      <div class="event-card-bottom">
-        <div class="event-discount" style="color:#EA580C;">30% OFF</div>
-        <a href="category-excel.html" class="event-cta" style="background:#EA580C;">상품 보기 →</a>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<!-- FEATURED PRODUCTS -->
-<div class="section-wrap" style="padding-top:0;">
+<!-- COUPON EVENTS -->
+<div class="section-wrap" id="couponSection" style="display:none;">
   <div class="section-header">
-    <div class="section-title">이벤트 추천 상품 <span class="section-title-tag">BEST DEAL</span></div>
-    <a href="category-excel.html" class="section-more">전체 보기 →</a>
+    <div class="section-title">쿠폰 이벤트 <span class="section-title-tag">COUPON</span></div>
   </div>
-  <div class="mkt-grid" id="eventGrid"></div>
+  <div class="event-grid" id="couponGrid"></div>
 </div>
+
+<!-- SITE EVENTS -->
+<div class="section-wrap" id="siteSection" style="display:none;">
+  <div class="section-header">
+    <div class="section-title">사이트 이벤트 <span class="section-title-tag">EVENT</span></div>
+  </div>
+  <div class="event-grid" id="siteGrid"></div>
+</div>
+
+<!-- EMPTY STATE -->
+<div class="section-wrap" id="emptyState" style="display:none;text-align:center;padding:80px 20px;">
+  <div style="font-size:48px;margin-bottom:16px;">🎪</div>
+  <div style="font-size:18px;font-weight:700;color:var(--text2);margin-bottom:8px;">진행 중인 이벤트가 없습니다</div>
+  <div style="font-size:14px;color:var(--text3);">곧 새로운 이벤트가 시작될 예정입니다. 기대해 주세요!</div>
+</div>
+
+<!-- COUPON TOAST -->
+<div id="couponToast" style="position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(80px);background:#0F172A;color:white;padding:13px 24px;border-radius:10px;font-size:14px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.25);transition:transform .3s,opacity .3s;opacity:0;z-index:9000;white-space:nowrap;"></div>
 
 <!-- FOOTER -->
 <footer>
@@ -210,20 +178,141 @@
   </div>
 </footer>
 
-<script src="products-renderer.js"></script>
-<script>
-if (window.ModuProducts) {
-  ModuProducts.fetchProducts().then(products => {
-    if (!products) return;
-    const grid = document.getElementById('eventGrid');
-    if (!grid) return;
-    const visible = products.filter(p => p.visible !== false).slice(0, 4);
-    grid.innerHTML = visible.map(ModuProducts.mktCardHTML).join('');
-  });
-}
-</script>
 <script src="auth.js"></script>
 <script>
+const API = 'https://modulab-production.up.railway.app';
+const CAT_LABEL = { excel:'엑셀 프로그램', sheets:'구글시트 자동화', short:'숏폼 템플릿', detail:'상세페이지 제작', web:'홈페이지 제작', program:'프로그램 제작' };
+const SITE_COLORS = [
+  'linear-gradient(135deg,#EFF6FF 0%,#DBEAFE 100%)',
+  'linear-gradient(135deg,#F0FDF4 0%,#DCFCE7 100%)',
+  'linear-gradient(135deg,#FFF7ED 0%,#FED7AA 100%)',
+  'linear-gradient(135deg,#F5F3FF 0%,#EDE9FE 100%)',
+];
+const SITE_COLORS_CTA = ['#2563EB','#16A34A','#EA580C','#7C3AED'];
+
+function getCookieToken() {
+  return localStorage.getItem('modulab_token') ||
+    document.cookie.split(';').map(c => c.trim()).find(c => c.startsWith('token='))?.split('=')[1] || '';
+}
+
+function showToast(msg, isError) {
+  const t = document.getElementById('couponToast');
+  t.textContent = msg;
+  t.style.background = isError ? '#DC2626' : '#0F172A';
+  t.style.opacity = '1';
+  t.style.transform = 'translateX(-50%) translateY(0)';
+  setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateX(-50%) translateY(80px)'; }, 3000);
+}
+
+function formatDiscount(type, value) {
+  return type === 'percent' ? `${value}% 할인` : `${Number(value).toLocaleString()}원 할인`;
+}
+
+function buildCouponCard(ev, idx) {
+  const color = SITE_COLORS[idx % SITE_COLORS.length];
+  const ctaColor = SITE_COLORS_CTA[idx % SITE_COLORS_CTA.length];
+  const end = ev.end_date.slice(0, 10);
+  let condHtml = '';
+  if (ev.min_order_amount > 0) condHtml += `<div style="font-size:11px;color:#64748B;">최소 구매 ${Number(ev.min_order_amount).toLocaleString()}원 이상</div>`;
+  const cats = ev.applicable_categories;
+  if (cats && cats.length > 0) condHtml += `<div style="font-size:11px;color:#64748B;">${cats.map(c => CAT_LABEL[c]||c).join(', ')} 전용</div>`;
+  return `<div class="event-card">
+    <div class="event-card-top" style="background:${color};">
+      <span class="event-card-emoji">🎫</span>
+      <div class="event-period limited">~ ${end}</div>
+      <div class="event-card-title">${ev.name}</div>
+      ${condHtml ? `<div style="margin-top:6px;">${condHtml}</div>` : ''}
+    </div>
+    <div class="event-card-bottom">
+      <div class="event-discount" style="color:${ctaColor};">${formatDiscount(ev.discount_type, ev.discount_value)}</div>
+      <button class="event-cta" style="background:${ctaColor};border:none;cursor:pointer;font-size:13px;font-weight:700;color:white;padding:10px 20px;border-radius:8px;width:100%;"
+        onclick="downloadCoupon('${ev.id}', this)">쿠폰 받기 🎁</button>
+    </div>
+  </div>`;
+}
+
+function buildSiteCard(ev, idx) {
+  const color = SITE_COLORS[idx % SITE_COLORS.length];
+  const ctaColor = SITE_COLORS_CTA[idx % SITE_COLORS_CTA.length];
+  const end = ev.end_date.slice(0, 10);
+  let benefit = '';
+  let emoji = '🎪';
+  if (ev.event_type === 'discount') { benefit = `${ev.discount_value}% 할인`; emoji = '💸'; }
+  else if (ev.event_type === 'bundle') { benefit = `${ev.bundle_count}개 이상 구매 시 ${ev.bundle_rate}% 할인`; emoji = '📦'; }
+  else { benefit = (ev.other_desc || '').slice(0, 40); emoji = '✏️'; }
+  return `<div class="event-card">
+    <div class="event-card-top" style="background:${color};">
+      <span class="event-card-emoji">${emoji}</span>
+      <div class="event-period limited">~ ${end}</div>
+      <div class="event-card-title">${ev.name}</div>
+      <div class="event-card-desc">${benefit}</div>
+    </div>
+    <div class="event-card-bottom">
+      <div class="event-discount" style="color:${ctaColor};">${benefit}</div>
+      <a href="index.html" class="event-cta" style="background:${ctaColor};">상품 보기 →</a>
+    </div>
+  </div>`;
+}
+
+async function downloadCoupon(eventId, btn) {
+  const token = getCookieToken();
+  if (!token) { showToast('로그인이 필요합니다.', true); setTimeout(() => location.href = 'login.html', 1200); return; }
+  btn.disabled = true;
+  btn.textContent = '발급 중...';
+  try {
+    const res = await fetch(`${API}/api/events/coupons/${eventId}/download`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+    if (res.ok) {
+      btn.textContent = '✅ 쿠폰 받기 완료';
+      btn.style.background = '#16A34A';
+      showToast('쿠폰이 발급됐습니다! 결제 시 사용하세요.', false);
+    } else if (res.status === 409) {
+      btn.textContent = '✅ 이미 받은 쿠폰';
+      btn.style.background = '#64748B';
+      showToast('이미 발급받은 쿠폰입니다.', false);
+    } else {
+      btn.disabled = false;
+      btn.textContent = '쿠폰 받기 🎁';
+      showToast(data.error || '쿠폰 발급 중 오류가 발생했습니다.', true);
+    }
+  } catch {
+    btn.disabled = false;
+    btn.textContent = '쿠폰 받기 🎁';
+    showToast('네트워크 오류가 발생했습니다.', true);
+  }
+}
+
+async function loadEvents() {
+  try {
+    const [couponRes, siteRes] = await Promise.all([
+      fetch(`${API}/api/events/coupons`),
+      fetch(`${API}/api/events/sites`),
+    ]);
+    const coupons = couponRes.ok ? await couponRes.json() : [];
+    const sites = siteRes.ok ? await siteRes.json() : [];
+
+    if (coupons.length > 0) {
+      document.getElementById('couponSection').style.display = '';
+      document.getElementById('couponGrid').innerHTML = coupons.map((ev, i) => buildCouponCard(ev, i)).join('');
+    }
+    if (sites.length > 0) {
+      document.getElementById('siteSection').style.display = '';
+      document.getElementById('siteGrid').innerHTML = sites.map((ev, i) => buildSiteCard(ev, i)).join('');
+    }
+    if (!coupons.length && !sites.length) {
+      document.getElementById('emptyState').style.display = '';
+    }
+  } catch (e) {
+    document.getElementById('emptyState').style.display = '';
+  }
+}
+
+loadEvents();
+
 function openDrawer() {
   const d = document.getElementById('drawerOverlay');
   d.style.display = 'block';
@@ -237,8 +326,6 @@ function closeDrawer() {
   document.body.style.overflow = '';
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
-</script>
-<script>
 (function(){var c=JSON.parse(localStorage.getItem('modulab_cart')||'[]');var b=document.getElementById('cart-badge-nav');if(b)b.textContent=c.length;})();
 </script>
 </body>

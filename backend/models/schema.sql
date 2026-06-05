@@ -233,3 +233,22 @@ INSERT INTO member_grade_config (id) VALUES (1) ON CONFLICT (id) DO NOTHING;
 -- Indexes for events
 CREATE INDEX IF NOT EXISTS idx_coupon_events_dates ON coupon_events(start_date, end_date);
 CREATE INDEX IF NOT EXISTS idx_site_events_dates ON site_events(start_date, end_date);
+
+-- Coupon event downloads (사용자가 다운받은 쿠폰 이벤트)
+CREATE TABLE IF NOT EXISTS coupon_event_downloads (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  coupon_event_id UUID NOT NULL REFERENCES coupon_events(id) ON DELETE CASCADE,
+  is_used BOOLEAN DEFAULT false,
+  used_at TIMESTAMP,
+  order_id UUID,
+  created_at TIMESTAMP DEFAULT NOW(),
+  UNIQUE(user_id, coupon_event_id)
+);
+CREATE INDEX IF NOT EXISTS idx_ced_user ON coupon_event_downloads(user_id);
+
+-- Migration: orders 테이블에 쿠폰 이벤트 다운로드 ID 추가
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS coupon_event_download_id UUID;
+
+-- Migration: coupon_events 에 applicable_grades 추가
+ALTER TABLE coupon_events ADD COLUMN IF NOT EXISTS applicable_grades JSONB DEFAULT '[]';

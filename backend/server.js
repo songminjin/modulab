@@ -45,6 +45,7 @@ app.use('/api/products', require('./routes/products'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/reviews', require('./routes/reviews'));
 app.use('/api/payments', require('./routes/payments'));
+app.use('/api/events', require('./routes/events'));
 
 // ── 헬스체크 ──
 app.get('/health', (req, res) => res.json({ status: 'ok', env: process.env.NODE_ENV }));
@@ -81,6 +82,19 @@ async function runMigrations() {
     `ALTER TABLE reviews ADD COLUMN IF NOT EXISTS product_id VARCHAR(100)`,
     `CREATE INDEX IF NOT EXISTS idx_reviews_product_id ON reviews(product_id)`,
     `CREATE INDEX IF NOT EXISTS idx_reviews_created_at ON reviews(created_at)`,
+    `CREATE TABLE IF NOT EXISTS coupon_event_downloads (
+       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+       user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+       coupon_event_id UUID NOT NULL REFERENCES coupon_events(id) ON DELETE CASCADE,
+       is_used BOOLEAN DEFAULT false,
+       used_at TIMESTAMP,
+       order_id UUID,
+       created_at TIMESTAMP DEFAULT NOW(),
+       UNIQUE(user_id, coupon_event_id)
+     )`,
+    `CREATE INDEX IF NOT EXISTS idx_ced_user ON coupon_event_downloads(user_id)`,
+    `ALTER TABLE orders ADD COLUMN IF NOT EXISTS coupon_event_download_id UUID`,
+    `ALTER TABLE coupon_events ADD COLUMN IF NOT EXISTS applicable_grades JSONB DEFAULT '[]'`,
   ];
   for (const sql of migrations) {
     try { await db.query(sql); } catch (err) { console.error('[migration error]', err.message); }
