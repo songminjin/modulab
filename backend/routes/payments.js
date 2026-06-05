@@ -23,6 +23,13 @@ async function confirmOrderPayment(client, orderId, userId, paymentKey, paymentM
     );
   }
 
+  if (order.coupon_event_download_id) {
+    await client.query(
+      'UPDATE coupon_event_downloads SET is_used=true, used_at=NOW(), order_id=$1 WHERE id=$2 AND user_id=$3',
+      [orderId, order.coupon_event_download_id, userId]
+    );
+  }
+
   const { rows: items } = await client.query('SELECT product_id FROM order_items WHERE order_id=$1', [orderId]);
   for (const item of items) {
     await client.query(
@@ -130,7 +137,10 @@ router.post('/paypal/create-order', authenticate, async (req, res) => {
         intent: 'CAPTURE',
         purchase_units: [{
           reference_id: orderId,
-          amount: { currency_code: 'KRW', value: String(order.final_amount) }
+          amount: {
+            currency_code: 'USD',
+            value: (order.final_amount / 1350).toFixed(2)
+          }
         }]
       })
     });
