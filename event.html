@@ -77,43 +77,46 @@
   </div>
 </div>
 
-<!-- BREADCRUMB -->
-<div class="breadcrumb">
-  <a href="index.html">홈</a>
-  <span style="color:var(--border);">›</span>
-  <span>쿠폰 &amp; 이벤트</span>
-</div>
-
-<!-- EVENT HERO -->
-<section class="event-hero">
-  <div class="event-hero-inner">
-    <div class="event-tag">🎫 COUPON &amp; EVENTS</div>
-    <h1 class="event-hero-title">쿠폰 &amp; 이벤트</h1>
-    <p class="event-hero-sub">쿠폰을 다운받아 결제 시 즉시 할인을 적용하세요.<br>내 쿠폰은 마이페이지 → 쿠폰 탭에서 확인할 수 있습니다.</p>
-    <a href="mypage.html" onclick="sessionStorage.setItem('mpTab','coupons')" style="display:inline-block;margin-top:16px;padding:10px 22px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.35);border-radius:8px;font-size:13px;font-weight:700;color:white;text-decoration:none;backdrop-filter:blur(4px);">🎁 내 쿠폰 보관함 →</a>
-  </div>
-</section>
-
-<!-- TABS -->
-<div style="background:#fff;border-bottom:1px solid var(--border);position:sticky;top:60px;z-index:100;">
-  <div style="max-width:1100px;margin:0 auto;display:flex;gap:0;padding:0 20px;">
-    <button id="tab-btn-coupons" onclick="switchEventTab('coupons')"
-      style="padding:16px 24px;font-size:15px;font-weight:700;border:none;background:none;cursor:pointer;border-bottom:3px solid #2563EB;color:#2563EB;">
-      🎫 쿠폰
-    </button>
-    <button id="tab-btn-events" onclick="switchEventTab('events')"
-      style="padding:16px 24px;font-size:15px;font-weight:600;border:none;background:none;cursor:pointer;border-bottom:3px solid transparent;color:var(--text3);">
-      🎪 이벤트
-    </button>
+<!-- PAGE HEADER -->
+<div style="background:#fff;border-bottom:1px solid var(--border);">
+  <div style="max-width:1100px;margin:0 auto;padding:28px 40px 0;">
+    <div style="font-size:12px;color:var(--text3);margin-bottom:10px;">
+      <a href="index.html" style="color:var(--text3);text-decoration:none;">홈</a>
+      <span style="margin:0 6px;">›</span>쿠폰 &amp; 이벤트
+    </div>
+    <h1 style="font-size:24px;font-weight:800;color:var(--text1);margin:0 0 4px;">쿠폰 &amp; 이벤트</h1>
+    <p style="font-size:14px;color:var(--text3);margin:0 0 20px;">쿠폰을 다운받아 결제 시 즉시 할인을 적용하세요.</p>
+    <!-- TABS -->
+    <div style="display:flex;gap:0;">
+      <button id="tab-btn-coupons" onclick="switchEventTab('coupons')"
+        style="padding:14px 24px;font-size:15px;font-weight:700;border:none;border-radius:0;background:none;cursor:pointer;border-bottom:3px solid #2563EB;color:#2563EB;">
+        🎫 쿠폰
+      </button>
+      <button id="tab-btn-events" onclick="switchEventTab('events')"
+        style="padding:14px 24px;font-size:15px;font-weight:600;border:none;border-radius:0;background:none;cursor:pointer;border-bottom:3px solid transparent;color:var(--text3);">
+        🎪 이벤트
+      </button>
+    </div>
   </div>
 </div>
 
 <!-- COUPON TAB -->
 <div id="tab-coupons">
+  <div style="background:linear-gradient(135deg,#EFF6FF,#DBEAFE);padding:20px 40px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+    <div style="max-width:1100px;margin:0 auto;width:100%;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#2563EB;margin-bottom:4px;">쿠폰 받기 → 마이페이지 확인 → 결제 시 사용</div>
+        <div style="font-size:13px;color:#475569;">쿠폰 받기를 누르면 내 쿠폰 보관함에 저장됩니다.</div>
+      </div>
+      <a href="mypage.html" onclick="sessionStorage.setItem('mpTab','coupons')"
+        style="display:inline-block;padding:10px 20px;background:#2563EB;border-radius:8px;font-size:13px;font-weight:700;color:white;text-decoration:none;white-space:nowrap;">
+        🎁 내 쿠폰 보관함 →
+      </a>
+    </div>
+  </div>
   <div class="section-wrap" id="couponSection" style="display:none;">
     <div class="section-header">
       <div class="section-title">🎫 다운로드 쿠폰 <span class="section-title-tag">받기</span></div>
-      <span style="font-size:13px;color:var(--text3);">쿠폰 받기 클릭 → 마이페이지에서 확인 → 결제 시 사용</span>
     </div>
     <div class="event-grid" id="couponGrid"></div>
   </div>
