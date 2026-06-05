@@ -345,6 +345,11 @@ let currentUser = null;
       const pwCard = document.getElementById('pwCard');
       if (pwCard) pwCard.style.display = 'none';
     }
+    // URL 또는 sessionStorage로 탭 바로 열기
+    const urlTab = new URLSearchParams(location.search).get('tab');
+    const ssTab = sessionStorage.getItem('mpTab');
+    if (ssTab) { sessionStorage.removeItem('mpTab'); switchTab(ssTab); }
+    else if (urlTab) switchTab(urlTab);
   } catch(e) {
     location.href = 'login.html';
   }

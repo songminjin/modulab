@@ -63,27 +63,87 @@
 #paypal-btn-container { margin-top: 12px; }
 #paypal-btn-container.hidden { display: none; }
 
-/* Coupon */
-.coupon-empty { font-size: 13px; color: var(--text3); padding: 12px 0; }
-.coupon-list { display: flex; flex-direction: column; gap: 8px; }
-.coupon-item {
-  border: 2px solid var(--border); border-radius: 10px; padding: 14px 16px;
-  cursor: pointer; transition: all .15s; background: var(--white);
-  display: flex; align-items: center; gap: 12px;
+/* Coupon trigger row */
+.ck-coupon-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
 }
-.coupon-item:hover { border-color: var(--blue-mid); background: var(--blue-light); }
-.coupon-item.selected { border-color: var(--blue); background: var(--blue-light); }
-.coupon-item-radio { width: 18px; height: 18px; accent-color: var(--blue); flex-shrink: 0; }
-.coupon-item-info { flex: 1; min-width: 0; }
-.coupon-item-name { font-size: 14px; font-weight: 700; color: var(--text); }
-.coupon-item-cond { font-size: 11px; color: var(--text3); margin-top: 2px; }
-.coupon-item-discount { font-size: 15px; font-weight: 700; color: var(--blue); font-family: 'JetBrains Mono', monospace; flex-shrink: 0; }
-.coupon-result {
-  font-size: 13px; margin-top: 8px; padding: 8px 12px;
-  border-radius: 7px; display: none;
+.ck-coupon-status { flex: 1; font-size: 14px; color: var(--text3); }
+.ck-coupon-status.applied { color: var(--blue); font-weight: 700; }
+.ck-coupon-open-btn {
+  padding: 9px 18px; border-radius: 8px; border: 1.5px solid var(--border);
+  background: var(--white); color: var(--text2); font-size: 13px; font-weight: 700;
+  font-family: inherit; cursor: pointer; transition: all .15s; white-space: nowrap;
 }
-.coupon-result.success { background: #F0FDF4; color: #16A34A; border: 1px solid #BBF7D0; }
-.coupon-result.error { background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; }
+.ck-coupon-open-btn:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-light); }
+
+/* Coupon selection modal */
+.cp-modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.55);
+  z-index: 2000; display: none; align-items: flex-end; justify-content: center;
+  padding: 0;
+}
+.cp-modal-overlay.open { display: flex; }
+.cp-modal-box {
+  background: var(--white); border-radius: 20px 20px 0 0;
+  width: 100%; max-width: 560px; max-height: 85vh;
+  display: flex; flex-direction: column;
+  box-shadow: 0 -8px 40px rgba(0,0,0,.2);
+  animation: cpSlideUp .25s ease;
+}
+@keyframes cpSlideUp { from { transform: translateY(30px); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (min-width: 600px) {
+  .cp-modal-overlay { align-items: center; padding: 20px; }
+  .cp-modal-box { border-radius: 20px; max-height: 80vh; }
+}
+.cp-modal-head {
+  padding: 20px 24px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+.cp-modal-title { font-size: 17px; font-weight: 700; color: var(--text); }
+.cp-modal-close {
+  width: 32px; height: 32px; border-radius: 50%; border: none;
+  background: var(--slate-light); color: var(--text2); font-size: 16px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: background .15s; flex-shrink: 0;
+}
+.cp-modal-close:hover { background: #E2E8F0; }
+.cp-modal-preview {
+  margin: 16px 24px 0; background: var(--blue-light);
+  border: 1px solid var(--blue-mid); border-radius: 12px;
+  padding: 14px 18px; display: none; flex-shrink: 0;
+}
+.cp-modal-preview-discount { font-size: 22px; font-weight: 700; color: var(--blue); font-family: 'JetBrains Mono', monospace; }
+.cp-modal-preview-label { font-size: 13px; color: var(--blue); margin-top: 2px; }
+.cp-modal-body { flex: 1; overflow-y: auto; padding: 16px 24px; }
+.cp-modal-list { display: flex; flex-direction: column; gap: 8px; }
+.cp-modal-item {
+  border: 2px solid var(--border); border-radius: 12px; padding: 14px 16px;
+  cursor: pointer; transition: all .15s; display: flex; align-items: center; gap: 12px;
+}
+.cp-modal-item:hover { border-color: var(--blue-mid); background: #FAFBFF; }
+.cp-modal-item.selected { border-color: var(--blue); background: var(--blue-light); }
+.cp-modal-check {
+  width: 20px; height: 20px; border-radius: 50%; border: 2px solid #CBD5E1;
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  transition: all .15s; font-size: 11px; font-weight: 700; color: white;
+}
+.cp-modal-item.selected .cp-modal-check { background: var(--blue); border-color: var(--blue); }
+.cp-modal-item-info { flex: 1; min-width: 0; }
+.cp-modal-item-name { font-size: 14px; font-weight: 700; color: var(--text); }
+.cp-modal-item-cond { font-size: 11px; color: var(--text3); margin-top: 3px; }
+.cp-modal-item-discount { font-size: 15px; font-weight: 700; color: var(--blue); font-family: 'JetBrains Mono', monospace; flex-shrink: 0; }
+.cp-modal-empty { text-align: center; padding: 48px 20px; }
+.cp-modal-empty-icon { font-size: 40px; margin-bottom: 12px; }
+.cp-modal-empty-msg { font-size: 14px; color: var(--text3); line-height: 1.6; }
+.cp-modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); flex-shrink: 0; }
+.cp-modal-apply-btn {
+  width: 100%; padding: 15px; border-radius: 12px; border: none;
+  font-size: 16px; font-weight: 700; font-family: inherit; cursor: pointer; transition: all .2s;
+}
+.cp-modal-apply-btn.active { background: var(--blue); color: white; }
+.cp-modal-apply-btn.active:hover { background: #1D4ED8; }
+.cp-modal-apply-btn.inactive { background: var(--slate-light); color: var(--text3); cursor: default; }
 
 /* Order items */
 .checkout-item {
@@ -311,13 +371,34 @@
     <!-- STEP 2: 쿠폰 -->
     <div class="checkout-section">
       <div class="checkout-step">STEP 02</div>
-      <div class="checkout-section-title">할인 쿠폰 선택</div>
-      <div id="coupon-loading" style="font-size:13px;color:var(--text3);">쿠폰 목록을 불러오는 중...</div>
-      <div id="coupon-list-wrap" style="display:none;">
-        <div class="coupon-list" id="coupon-list"></div>
-        <div class="coupon-result" id="coupon-result"></div>
+      <div class="checkout-section-title">할인 쿠폰</div>
+      <div class="ck-coupon-row">
+        <div class="ck-coupon-status" id="couponStatus">쿠폰을 선택해주세요</div>
+        <button class="ck-coupon-open-btn" onclick="openCouponModal()">쿠폰 선택</button>
       </div>
     </div>
+
+<!-- ── COUPON MODAL ── -->
+<div class="cp-modal-overlay" id="couponModalOverlay" onclick="handleModalOverlayClick(event)">
+  <div class="cp-modal-box">
+    <div class="cp-modal-head">
+      <div class="cp-modal-title">🎫 쿠폰 선택</div>
+      <button class="cp-modal-close" onclick="closeCouponModal()">✕</button>
+    </div>
+    <div class="cp-modal-preview" id="couponPreview">
+      <div class="cp-modal-preview-discount" id="couponPreviewDiscount"></div>
+      <div class="cp-modal-preview-label">할인 적용 예정</div>
+    </div>
+    <div class="cp-modal-body">
+      <div class="cp-modal-list" id="couponModalList"></div>
+    </div>
+    <div class="cp-modal-footer">
+      <button class="cp-modal-apply-btn inactive" id="couponApplyBtn" onclick="applyCouponFromModal()">
+        쿠폰을 선택해주세요
+      </button>
+    </div>
+  </div>
+</div>
 
     <!-- STEP 3: 결제 방법 -->
     <div class="checkout-section">
@@ -500,7 +581,10 @@ let selectedPM = null;
 let selectedCouponDownloadId = null;
 let orderId = null;
 let paypalLoaded = false;
-let myCoupons = [];
+let myCoupons = [];           // 내가 받은 전체 쿠폰 (캐시)
+let modalSelectedId = null;   // 모달에서 임시 선택된 쿠폰
+
+const CAT_LABEL = { excel:'엑셀 프로그램', sheets:'구글시트 자동화', short:'숏폼 템플릿', detail:'상세페이지 제작', web:'홈페이지 제작', program:'프로그램 제작' };
 
 // ── 초기화 ──
 document.addEventListener('DOMContentLoaded', async () => {
@@ -516,7 +600,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderItems();
   updateSummary();
   updateBadge();
-  await loadMyCoupons();
+
+  // 쿠폰 목록 미리 캐싱 (모달 열 때 빠르게 표시)
+  const token = getCookieToken();
+  if (token) {
+    fetch(`${API}/api/events/my-coupons`, {
+      credentials: 'include',
+      headers: { Authorization: `Bearer ${token}` },
+    }).then(r => r.ok ? r.json() : []).then(data => { myCoupons = data; }).catch(() => {});
+  }
 });
 
 function renderItems() {
@@ -571,108 +663,165 @@ function selectPM(pm) {
   updateSummary();
 }
 
-// ── 내 쿠폰 목록 로드 ──
-async function loadMyCoupons() {
-  const loadingEl = document.getElementById('coupon-loading');
-  const wrapEl = document.getElementById('coupon-list-wrap');
-  const listEl = document.getElementById('coupon-list');
-  const token = getCookieToken();
-
-  if (!token) {
-    loadingEl.textContent = '로그인 후 쿠폰을 사용할 수 있습니다.';
-    return;
-  }
-
-  try {
-    const res = await fetch(`${API}/api/events/my-coupons`, {
-      credentials: 'include',
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (!res.ok) { loadingEl.textContent = '쿠폰 목록을 불러올 수 없습니다.'; return; }
-    myCoupons = await res.json();
-    loadingEl.style.display = 'none';
-    wrapEl.style.display = 'block';
-
-    const CAT_LABEL = { excel:'엑셀 프로그램', sheets:'구글시트 자동화', short:'숏폼 템플릿', detail:'상세페이지 제작', web:'홈페이지 제작', program:'프로그램 제작' };
-
-    if (!myCoupons.length) {
-      listEl.innerHTML = '<div class="coupon-empty">보유한 쿠폰이 없습니다. <a href="event.html" style="color:var(--blue);">이벤트 페이지</a>에서 쿠폰을 받아보세요.</div>';
-      return;
+// ── 쿠폰 조건 프론트 필터 ──
+function getApplicableCoupons() {
+  const cartCats = [...new Set(items.map(i => i.cat).filter(Boolean))];
+  return myCoupons.filter(cp => {
+    if (cp.min_order_amount > 0 && subtotal < cp.min_order_amount) return false;
+    const cats = cp.applicable_categories;
+    if (cats && cats.length > 0) {
+      if (!cartCats.some(c => cats.includes(c))) return false;
     }
-
-    listEl.innerHTML = myCoupons.map(cp => {
-      const discLabel = cp.discount_type === 'percent' ? `${cp.discount_value}% 할인` : `${Number(cp.discount_value).toLocaleString()}원 할인`;
-      let conds = [];
-      if (cp.min_order_amount > 0) conds.push(`${Number(cp.min_order_amount).toLocaleString()}원 이상 구매 시`);
-      const cats = cp.applicable_categories;
-      if (cats && cats.length > 0) conds.push(cats.map(c => CAT_LABEL[c]||c).join(', ') + ' 전용');
-      const condText = conds.length ? conds.join(' · ') : '모든 상품에 적용 가능';
-      return `<div class="coupon-item" onclick="selectCoupon('${cp.download_id}', this)" id="coupon-item-${cp.download_id}">
-        <input type="radio" class="coupon-item-radio" name="coupon" value="${cp.download_id}">
-        <div class="coupon-item-info">
-          <div class="coupon-item-name">${cp.name}</div>
-          <div class="coupon-item-cond">${condText} · ~${cp.end_date.slice(0,10)}</div>
-        </div>
-        <div class="coupon-item-discount">${discLabel}</div>
-      </div>`;
-    }).join('') + `<div class="coupon-item" onclick="selectCoupon(null, this)" id="coupon-item-none">
-        <input type="radio" class="coupon-item-radio" name="coupon" value="" checked>
-        <div class="coupon-item-info"><div class="coupon-item-name" style="color:var(--text3);">쿠폰 사용 안 함</div></div>
-      </div>`;
-  } catch {
-    loadingEl.textContent = '쿠폰 목록을 불러올 수 없습니다.';
-  }
+    return true;
+  });
 }
 
-// ── 쿠폰 선택 ──
-async function selectCoupon(downloadId, el) {
-  document.querySelectorAll('.coupon-item').forEach(i => { i.classList.remove('selected'); i.querySelector('input[type="radio"]').checked = false; });
-  el.classList.add('selected');
-  el.querySelector('input[type="radio"]').checked = true;
+function calcCouponDiscount(cp) {
+  if (cp.discount_type === 'percent') return Math.floor(subtotal * cp.discount_value / 100);
+  return Math.min(Number(cp.discount_value), subtotal);
+}
 
-  const resultEl = document.getElementById('coupon-result');
-  resultEl.style.display = 'none';
+function buildCondText(cp) {
+  const parts = [];
+  if (cp.min_order_amount > 0) parts.push(`${Number(cp.min_order_amount).toLocaleString()}원 이상`);
+  const cats = cp.applicable_categories;
+  if (cats && cats.length > 0) parts.push(cats.map(c => CAT_LABEL[c]||c).join(', ') + ' 전용');
+  return parts.length ? parts.join(' · ') : '모든 상품 적용 가능';
+}
 
-  if (!downloadId) {
-    selectedCouponDownloadId = null;
-    discount = 0;
-    updateSummary();
+// ── 쿠폰 모달 열기 ──
+async function openCouponModal() {
+  const token = getCookieToken();
+  if (!token) {
+    alert('로그인 후 쿠폰을 사용할 수 있습니다.');
+    location.href = 'login.html';
     return;
   }
 
-  const token = getCookieToken();
-  try {
-    const productCats = items.map(i => i.cat).filter(Boolean);
-    const res = await fetch(`${API}/api/events/coupons/validate`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ coupon_download_id: downloadId, amount: subtotal, product_categories: productCats }),
-    });
-    const data = await res.json();
-
-    if (res.ok && data.discount != null) {
-      selectedCouponDownloadId = downloadId;
-      discount = data.discount;
-      resultEl.className = 'coupon-result success';
-      resultEl.textContent = `✅ "${data.coupon_name}" 적용 — ${data.discount.toLocaleString()}원 할인`;
-      resultEl.style.display = 'block';
-      updateSummary();
-    } else {
-      selectedCouponDownloadId = null;
-      discount = 0;
-      resultEl.className = 'coupon-result error';
-      resultEl.textContent = '❌ ' + (data.error || '이 쿠폰은 현재 상품에 사용할 수 없습니다.');
-      resultEl.style.display = 'block';
-      el.classList.remove('selected');
-      document.getElementById('coupon-item-none')?.classList.add('selected');
-      updateSummary();
-    }
-  } catch {
-    resultEl.className = 'coupon-result error';
-    resultEl.textContent = '❌ 쿠폰 확인 중 오류가 발생했습니다.';
-    resultEl.style.display = 'block';
+  // 아직 로드 안 됐으면 지금 로드
+  if (!myCoupons.length) {
+    try {
+      const res = await fetch(`${API}/api/events/my-coupons`, {
+        credentials: 'include',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      myCoupons = res.ok ? await res.json() : [];
+    } catch { myCoupons = []; }
   }
+
+  modalSelectedId = selectedCouponDownloadId; // 기존 선택 유지
+  renderCouponModalList();
+
+  document.getElementById('couponModalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeCouponModal() {
+  document.getElementById('couponModalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function handleModalOverlayClick(e) {
+  if (e.target === document.getElementById('couponModalOverlay')) closeCouponModal();
+}
+
+function renderCouponModalList() {
+  const listEl = document.getElementById('couponModalList');
+  const previewEl = document.getElementById('couponPreview');
+  const applyBtn = document.getElementById('couponApplyBtn');
+
+  const applicable = getApplicableCoupons();
+
+  if (!applicable.length) {
+    listEl.innerHTML = `<div class="cp-modal-empty">
+      <div class="cp-modal-empty-icon">🎫</div>
+      <div class="cp-modal-empty-msg">
+        현재 장바구니 상품에 사용 가능한 쿠폰이 없습니다.<br>
+        <a href="event.html" style="color:var(--blue);font-weight:700;">이벤트 페이지</a>에서 쿠폰을 받아보세요.
+      </div>
+    </div>`;
+    previewEl.style.display = 'none';
+    applyBtn.className = 'cp-modal-apply-btn inactive';
+    applyBtn.textContent = '사용 가능한 쿠폰이 없습니다';
+    return;
+  }
+
+  // "쿠폰 사용 안 함" 옵션 추가
+  const noneSelected = !modalSelectedId;
+  listEl.innerHTML = applicable.map(cp => {
+    const selected = modalSelectedId === cp.download_id;
+    const discLabel = cp.discount_type === 'percent'
+      ? `${cp.discount_value}% 할인`
+      : `${Number(cp.discount_value).toLocaleString()}원 할인`;
+    const condText = buildCondText(cp);
+    return `<div class="cp-modal-item${selected ? ' selected' : ''}" onclick="selectInModal('${cp.download_id}')">
+      <div class="cp-modal-check">${selected ? '✓' : ''}</div>
+      <div class="cp-modal-item-info">
+        <div class="cp-modal-item-name">${cp.name}</div>
+        <div class="cp-modal-item-cond">${condText} · ~${String(cp.end_date).slice(0,10)}</div>
+      </div>
+      <div class="cp-modal-item-discount">${discLabel}</div>
+    </div>`;
+  }).join('') + `<div class="cp-modal-item${noneSelected ? ' selected' : ''}" style="margin-top:8px;border-style:dashed;" onclick="selectInModal(null)">
+    <div class="cp-modal-check">${noneSelected ? '✓' : ''}</div>
+    <div class="cp-modal-item-info">
+      <div class="cp-modal-item-name" style="color:var(--text3);">쿠폰 사용 안 함</div>
+    </div>
+  </div>`;
+
+  updateModalPreview();
+}
+
+function selectInModal(downloadId) {
+  modalSelectedId = downloadId;
+  renderCouponModalList();
+}
+
+function updateModalPreview() {
+  const previewEl = document.getElementById('couponPreview');
+  const previewDiscount = document.getElementById('couponPreviewDiscount');
+  const applyBtn = document.getElementById('couponApplyBtn');
+
+  if (!modalSelectedId) {
+    previewEl.style.display = 'none';
+    applyBtn.className = 'cp-modal-apply-btn active';
+    applyBtn.textContent = '쿠폰 없이 결제하기';
+    return;
+  }
+
+  const cp = myCoupons.find(c => c.download_id === modalSelectedId);
+  if (!cp) return;
+
+  const discAmt = calcCouponDiscount(cp);
+  previewEl.style.display = 'block';
+  previewDiscount.textContent = `-${discAmt.toLocaleString()}원`;
+  applyBtn.className = 'cp-modal-apply-btn active';
+  applyBtn.textContent = `${discAmt.toLocaleString()}원 할인 적용하기`;
+}
+
+function applyCouponFromModal() {
+  if (modalSelectedId) {
+    const cp = myCoupons.find(c => c.download_id === modalSelectedId);
+    if (!cp) return;
+    selectedCouponDownloadId = modalSelectedId;
+    discount = calcCouponDiscount(cp);
+    const discLabel = cp.discount_type === 'percent'
+      ? `${cp.discount_value}% 할인`
+      : `${Number(cp.discount_value).toLocaleString()}원 할인`;
+    const statusEl = document.getElementById('couponStatus');
+    statusEl.className = 'ck-coupon-status applied';
+    statusEl.textContent = `✅ "${cp.name}" 적용 중 (-${discount.toLocaleString()}원)`;
+    document.querySelector('.ck-coupon-open-btn').textContent = '변경';
+  } else {
+    selectedCouponDownloadId = null;
+    discount = 0;
+    const statusEl = document.getElementById('couponStatus');
+    statusEl.className = 'ck-coupon-status';
+    statusEl.textContent = '쿠폰을 선택해주세요';
+    document.querySelector('.ck-coupon-open-btn').textContent = '쿠폰 선택';
+  }
+  updateSummary();
+  closeCouponModal();
 }
 
 // ── slug → UUID 매핑 (products.json 기준) ──
