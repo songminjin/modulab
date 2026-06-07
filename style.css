@@ -934,38 +934,44 @@ footer { background: var(--navy); color: white; }
 
 /* ───── MARKETPLACE CATEGORY HERO V2 ───── */
 .cat-hero-v2 {
-  background: var(--white);
-  border-bottom: 1px solid var(--border);
+  background: var(--navy);
   padding: 64px 40px 52px;
   text-align: center;
+  position: relative; overflow: hidden;
 }
-.cat-hero-v2-inner { max-width: 640px; margin: 0 auto; }
+.cat-hero-v2::before {
+  content: ''; position: absolute; top: -100px; left: 50%; transform: translateX(-50%);
+  width: 600px; height: 600px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(37,99,235,.1) 0%, transparent 70%);
+}
+.cat-hero-v2-inner { max-width: 640px; margin: 0 auto; position: relative; z-index: 1; }
 .cat-hero-v2-tag {
   display: inline-flex; align-items: center; gap: 6px;
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px; font-weight: 500; letter-spacing: .1em;
-  color: var(--blue); background: var(--blue-light); border: 1px solid var(--blue-mid);
+  color: var(--blue-mid); background: rgba(37,99,235,.15); border: 1px solid rgba(37,99,235,.3);
   border-radius: 20px; padding: 4px 14px; margin-bottom: 18px;
 }
 .cat-hero-v2-title {
   font-family: 'Bebas Neue', sans-serif;
   font-size: clamp(40px, 5vw, 64px);
-  line-height: 1; letter-spacing: .02em; color: var(--navy); margin-bottom: 14px;
+  line-height: 1; letter-spacing: .02em; color: white; margin-bottom: 14px;
 }
 .cat-hero-v2-sub {
-  font-size: 15px; color: var(--text2); line-height: 1.7; margin-bottom: 28px;
+  font-size: 15px; color: #94A3B8; line-height: 1.7; margin-bottom: 28px;
 }
 .cat-hero-v2-search {
   display: flex; align-items: center; gap: 10px;
   max-width: 480px; margin: 0 auto;
-  background: var(--slate-light); border: 1.5px solid var(--border);
+  background: rgba(255,255,255,.08); border: 1.5px solid rgba(255,255,255,.15);
   border-radius: 12px; padding: 12px 20px; transition: border-color .15s;
 }
 .cat-hero-v2-search:focus-within { border-color: var(--blue); }
 .cat-hero-v2-search input {
   border: none; background: none; outline: none;
-  font-size: 14px; color: var(--text); font-family: inherit; width: 100%;
+  font-size: 14px; color: white; font-family: inherit; width: 100%;
 }
+.cat-hero-v2-search input::placeholder { color: rgba(255,255,255,.35); }
 
 /* ───── MARKETPLACE PRODUCT CARDS ───── */
 .mkt-grid {
