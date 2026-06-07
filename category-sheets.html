@@ -97,9 +97,26 @@
   </div>
 </section>
 
+<!-- FILTER BAR -->
+<div class="filter-bar">
+  <div class="filter-inner">
+    <span class="filter-count"><strong id="productCount">2</strong>개 상품</span>
+    <div class="filter-tags">
+      <button class="filter-tag active" onclick="filterProducts('all', this)">전체</button>
+      <button class="filter-tag" onclick="filterProducts('9900', this)">₩9,900</button>
+      <button class="filter-tag" onclick="filterProducts('19900', this)">₩19,900</button>
+      <button class="filter-tag" onclick="filterProducts('29900', this)">₩29,900</button>
+    </div>
+    <select class="filter-sort" onchange="sortProducts(this.value)">
+      <option value="default">기본 순</option>
+      <option value="price-asc">낮은 가격 순</option>
+      <option value="price-desc">높은 가격 순</option>
+    </select>
+  </div>
+</div>
+
 <!-- PRODUCTS -->
 <div class="section-wrap">
-  <span id="productCount" style="display:none;"></span>
   <div class="mkt-grid" id="productGrid"></div>
 </div>
 
@@ -214,11 +231,42 @@ function closeDrawer() {
   document.body.style.overflow = '';
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+function filterProducts(price, btn) {
+  document.querySelectorAll('.filter-tag').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  const cards = document.querySelectorAll('#productGrid .mkt-card');
+  let count = 0;
+  cards.forEach(card => {
+    const show = price === 'all' || card.dataset.price === price;
+    card.style.display = show ? '' : 'none';
+    if (show) count++;
+  });
+  document.getElementById('productCount').textContent = count;
+}
+
+function sortProducts(val) {
+  const grid = document.getElementById('productGrid');
+  const cards = [...grid.querySelectorAll('.mkt-card')];
+  cards.sort((a, b) => {
+    const pa = parseInt(a.dataset.price);
+    const pb = parseInt(b.dataset.price);
+    if (val === 'price-asc') return pa - pb;
+    if (val === 'price-desc') return pb - pa;
+    return 0;
+  });
+  cards.forEach(c => grid.appendChild(c));
+}
+
 function searchProducts(val) {
   const q = val.trim().toLowerCase();
-  document.querySelectorAll('#productGrid .mkt-card').forEach(card => {
-    card.style.display = (!q || card.dataset.name.toLowerCase().includes(q)) ? '' : 'none';
+  const cards = document.querySelectorAll('#productGrid .mkt-card');
+  let count = 0;
+  cards.forEach(card => {
+    const show = !q || card.dataset.name.toLowerCase().includes(q);
+    card.style.display = show ? '' : 'none';
+    if (show) count++;
   });
+  document.getElementById('productCount').textContent = count;
 }
 </script>
 <script>

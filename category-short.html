@@ -85,56 +85,68 @@
 </div>
 
 <!-- CATEGORY HERO V2 -->
-<section class="cat-hero-v2" style="background:linear-gradient(135deg,#F5F3FF 0%,#EDE9FE 100%);">
+<section class="cat-hero-v2">
   <div class="cat-hero-v2-inner">
-    <div class="cat-hero-v2-tag" style="background:rgba(109,40,217,.1);border-color:rgba(109,40,217,.2);color:#6D28D9;">🎬 SHORT-FORM · 1 PRODUCT</div>
+    <div class="cat-hero-v2-tag">🎬 SHORT-FORM · 1 PRODUCT</div>
     <h1 class="cat-hero-v2-title">숏폼 편집 템플릿</h1>
     <p class="cat-hero-v2-sub">CapCut / Premiere Pro 호환 숏폼 편집 템플릿.<br>자막·효과·트랜지션을 클릭 한 번으로 적용하세요.</p>
     <div class="cat-hero-v2-search">
       <span style="color:var(--text3);font-size:15px;">🔍</span>
-      <input type="text" placeholder="숏폼 템플릿 검색...">
+      <input type="text" id="searchInput" placeholder="숏폼 템플릿 검색..." oninput="searchProducts(this.value)">
     </div>
   </div>
 </section>
 
-<!-- PRODUCTS -->
-<div class="section-wrap">
-  <span id="productCount" style="display:none;"></span>
-  <div class="mkt-grid" id="productGrid"></div>
-
-  <!-- FEATURE LIST -->
-  <div style="margin-top:56px;">
-    <div style="font-size:12px;font-family:'JetBrains Mono',monospace;letter-spacing:.1em;color:var(--blue);margin-bottom:10px;text-align:center;">WHAT'S INCLUDED</div>
-    <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--navy);margin-bottom:28px;text-align:center;">템플릿 구성</div>
-    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;max-width:720px;">
-      <div style="display:flex;align-items:flex-start;gap:14px;padding:20px;border:1px solid var(--border);border-radius:12px;">
-        <span style="font-size:24px;flex-shrink:0;">✍️</span>
-        <div><div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;">자막 템플릿 20종</div><div style="font-size:13px;color:var(--text2);">다양한 스타일의 자막 애니메이션 포함</div></div>
-      </div>
-      <div style="display:flex;align-items:flex-start;gap:14px;padding:20px;border:1px solid var(--border);border-radius:12px;">
-        <span style="font-size:24px;flex-shrink:0;">⚡</span>
-        <div><div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;">트랜지션 효과 15종</div><div style="font-size:13px;color:var(--text2);">유행하는 컷 전환 효과 포함</div></div>
-      </div>
-      <div style="display:flex;align-items:flex-start;gap:14px;padding:20px;border:1px solid var(--border);border-radius:12px;">
-        <span style="font-size:24px;flex-shrink:0;">🎵</span>
-        <div><div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;">BGM 싱크 가이드</div><div style="font-size:13px;color:var(--text2);">비트에 맞춘 편집 타이밍 가이드 포함</div></div>
-      </div>
-      <div style="display:flex;align-items:flex-start;gap:14px;padding:20px;border:1px solid var(--border);border-radius:12px;">
-        <span style="font-size:24px;flex-shrink:0;">📱</span>
-        <div><div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;">9:16 최적화</div><div style="font-size:13px;color:var(--text2);">틱톡·인스타 릴스·유튜브 쇼츠 최적화</div></div>
-      </div>
+<!-- FILTER BAR -->
+<div class="filter-bar">
+  <div class="filter-inner">
+    <span class="filter-count"><strong id="productCount">1</strong>개 상품</span>
+    <div class="filter-tags">
+      <button class="filter-tag active" onclick="filterProducts('all', this)">전체</button>
+      <button class="filter-tag" onclick="filterProducts('9900', this)">₩9,900</button>
+      <button class="filter-tag" onclick="filterProducts('19900', this)">₩19,900</button>
+      <button class="filter-tag" onclick="filterProducts('29900', this)">₩29,900</button>
     </div>
+    <select class="filter-sort" onchange="sortProducts(this.value)">
+      <option value="default">기본 순</option>
+      <option value="price-asc">낮은 가격 순</option>
+      <option value="price-desc">높은 가격 순</option>
+    </select>
   </div>
 </div>
 
-<!-- INQUIRY SECTION -->
-<section class="inquiry-section">
-  <div class="inquiry-inner">
-    <div class="inquiry-title">가격이 궁금하신가요?</div>
-    <p class="inquiry-desc">원하시는 구성과 수량에 따라 가격이 달라집니다.<br>카카오로 문의해주시면 빠르게 안내드립니다.</p>
-    <div class="inquiry-btns">
-      <button class="inquiry-btn-kakao">💬 카카오로 문의하기</button>
-      <a href="index.html" class="inquiry-btn-ghost">다른 상품 보기</a>
+<!-- PRODUCTS -->
+<div class="section-wrap">
+  <div class="mkt-grid" id="productGrid"></div>
+</div>
+
+<!-- FEATURES -->
+<section style="background:var(--slate-light);padding:48px 40px;">
+  <div style="max-width:1280px;margin:0 auto;">
+    <div style="text-align:center;margin-bottom:36px;">
+      <div style="font-size:12px;font-family:'JetBrains Mono',monospace;letter-spacing:.1em;color:var(--blue);margin-bottom:10px;">WHAT'S INCLUDED</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--navy);">템플릿 구성</div>
+    </div>
+    <div class="features-grid">
+      <div class="feature-item"><div class="feature-icon">✍️</div><div><div class="feature-title">자막 템플릿 20종</div><div class="feature-desc">다양한 스타일의 자막 애니메이션 포함</div></div></div>
+      <div class="feature-item"><div class="feature-icon">⚡</div><div><div class="feature-title">트랜지션 효과 15종</div><div class="feature-desc">유행하는 컷 전환 효과 포함</div></div></div>
+      <div class="feature-item"><div class="feature-icon">🎵</div><div><div class="feature-title">BGM 싱크 가이드</div><div class="feature-desc">비트에 맞춘 편집 타이밍 가이드 포함</div></div></div>
+      <div class="feature-item"><div class="feature-icon">📱</div><div><div class="feature-title">9:16 최적화</div><div class="feature-desc">틱톡·인스타 릴스·유튜브 쇼츠 최적화</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- INQUIRY BANNER -->
+<section class="banner-section">
+  <div class="banner-inner">
+    <div class="banner-left">
+      <div class="banner-eyebrow">CUSTOM SHORT-FORM · 맞춤 제작</div>
+      <div class="banner-title">원하는 템플릿이<br>없으신가요?</div>
+      <p class="banner-sub">브랜드에 맞는 숏폼 편집 템플릿을 맞춤 제작해드립니다. 카카오로 편하게 문의하세요.</p>
+      <a href="category-program.html" class="banner-btn">맞춤 제작 문의 →</a>
+    </div>
+    <div class="banner-right">
+      <div class="banner-visual"><div class="banner-visual-text">SF</div></div>
     </div>
   </div>
 </section>
@@ -219,6 +231,44 @@ function closeDrawer() {
   document.body.style.overflow = '';
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+
+function filterProducts(price, btn) {
+  document.querySelectorAll('.filter-tag').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  const cards = document.querySelectorAll('#productGrid .mkt-card');
+  let count = 0;
+  cards.forEach(card => {
+    const show = price === 'all' || card.dataset.price === price;
+    card.style.display = show ? '' : 'none';
+    if (show) count++;
+  });
+  document.getElementById('productCount').textContent = count;
+}
+
+function sortProducts(val) {
+  const grid = document.getElementById('productGrid');
+  const cards = [...grid.querySelectorAll('.mkt-card')];
+  cards.sort((a, b) => {
+    const pa = parseInt(a.dataset.price);
+    const pb = parseInt(b.dataset.price);
+    if (val === 'price-asc') return pa - pb;
+    if (val === 'price-desc') return pb - pa;
+    return 0;
+  });
+  cards.forEach(c => grid.appendChild(c));
+}
+
+function searchProducts(val) {
+  const q = val.trim().toLowerCase();
+  const cards = document.querySelectorAll('#productGrid .mkt-card');
+  let count = 0;
+  cards.forEach(card => {
+    const show = !q || card.dataset.name.toLowerCase().includes(q);
+    card.style.display = show ? '' : 'none';
+    if (show) count++;
+  });
+  document.getElementById('productCount').textContent = count;
+}
 </script>
 <script>
 (function(){var c=JSON.parse(localStorage.getItem('modulab_cart')||'[]');var b=document.getElementById('cart-badge-nav');if(b)b.textContent=c.length;})();
