@@ -77,43 +77,12 @@
   </div>
 </div>
 
-<!-- HERO -->
-<section class="hero">
-  <div class="hero-left">
-    <div class="hero-tag">NEW · 2026 업무 자동화 툴</div>
-    <h1 class="hero-title">
-      혼자 일해도<br>
-      <span class="accent">팀처럼</span> 돌아가는<br>
-      업무 시스템
-    </h1>
-    <p class="hero-sub">6년간 직접 쓰며 검증한 엑셀·구글시트 자동화 툴.<br>클릭 한 번으로 반복 업무를 끝내세요.</p>
-    <div class="hero-btns">
-      <a href="category-excel.html" class="btn-hero-primary">지금 둘러보기 →</a>
-      <a href="category-program.html" class="btn-hero-ghost">제작 의뢰하기</a>
-    </div>
-    <div class="hero-stats">
-      <div><div class="hero-stat-num">30+</div><div class="hero-stat-label">외주 제작 완료</div></div>
-      <div><div class="hero-stat-num">6Y</div><div class="hero-stat-label">자동화 전문 경력</div></div>
-      <div><div class="hero-stat-num">9개</div><div class="hero-stat-label">판매 중인 툴</div></div>
-    </div>
-  </div>
-  <div class="hero-right">
-    <div class="hero-mockup">
-      <div class="mockup-bar">
-        <div class="mockup-dot"></div><div class="mockup-dot"></div><div class="mockup-dot"></div>
-      </div>
-      <div class="mockup-row blue"></div>
-      <div class="mockup-row short"></div>
-      <div class="mockup-row shorter"></div>
-      <div class="mockup-row" style="width:50%"></div>
-      <div class="mockup-grid">
-        <div class="mockup-card"><div class="mockup-card-dot"></div><div class="mockup-line"></div><div class="mockup-line short"></div></div>
-        <div class="mockup-card"><div class="mockup-card-dot"></div><div class="mockup-line"></div><div class="mockup-line short"></div></div>
-        <div class="mockup-card"><div class="mockup-card-dot"></div><div class="mockup-line"></div><div class="mockup-line short"></div></div>
-        <div class="mockup-card"><div class="mockup-card-dot"></div><div class="mockup-line"></div><div class="mockup-line short"></div></div>
-      </div>
-    </div>
-  </div>
+<!-- HERO SLIDER -->
+<section class="hero-slider" id="heroSlider">
+  <div class="hero-slides" id="heroSlides"></div>
+  <button class="hero-arrow hero-arrow-left" id="heroPrev" onclick="sliderPrev()">‹</button>
+  <button class="hero-arrow hero-arrow-right" id="heroNext" onclick="sliderNext()">›</button>
+  <div class="hero-dots" id="heroDots"></div>
 </section>
 
 <!-- TRUST BAR -->
@@ -354,6 +323,79 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(
 </script>
 <script>
 (function(){var c=JSON.parse(localStorage.getItem('modulab_cart')||'[]');var b=document.getElementById('cart-badge-nav');if(b)b.textContent=c.length;})();
+</script>
+<script>
+// ── 히어로 슬라이더 ──
+const API_BASE = 'https://modulab-production.up.railway.app';
+const DEFAULT_SLIDES = [
+  {
+    title: '혼자 일해도\n<span class="accent">팀처럼</span> 돌아가는\n업무 시스템',
+    subtitle: '6년간 직접 쓰며 검증한 엑셀·구글시트 자동화 툴.<br>클릭 한 번으로 반복 업무를 끝내세요.',
+    btn_text: '지금 둘러보기 →', btn_url: 'category-excel.html',
+    image_url: ''
+  }
+];
+
+let slides = [];
+let current = 0;
+let autoTimer = null;
+
+async function initSlider() {
+  try {
+    const res = await fetch(`${API_BASE}/api/banners`);
+    const data = await res.json();
+    slides = data.length ? data : DEFAULT_SLIDES;
+  } catch {
+    slides = DEFAULT_SLIDES;
+  }
+  renderSlider();
+  startAuto();
+}
+
+function renderSlider() {
+  const container = document.getElementById('heroSlides');
+  const dotsEl = document.getElementById('heroDots');
+
+  container.innerHTML = slides.map((s, i) => `
+    <div class="hero-slide">
+      ${s.image_url ? `<div class="hero-slide-bg" style="background-image:url('${s.image_url}')"></div>` : ''}
+      <div class="hero-slide-content">
+        <h1 class="hero-slide-title">${(s.title||'').replace(/\n/g,'<br>')}</h1>
+        ${s.subtitle ? `<p class="hero-slide-sub">${s.subtitle}</p>` : ''}
+        ${s.btn_text ? `<div class="hero-slide-btns"><a href="${s.btn_url||'#'}" class="btn-hero-primary">${s.btn_text}</a></div>` : ''}
+      </div>
+    </div>
+  `).join('');
+
+  dotsEl.innerHTML = slides.map((_, i) =>
+    `<button class="hero-dot ${i===0?'active':''}" onclick="goSlide(${i})"></button>`
+  ).join('');
+
+  document.getElementById('heroPrev').style.display = slides.length > 1 ? '' : 'none';
+  document.getElementById('heroNext').style.display = slides.length > 1 ? '' : 'none';
+  updateSlider();
+}
+
+function updateSlider() {
+  document.getElementById('heroSlides').style.transform = `translateX(-${current * 100}%)`;
+  document.querySelectorAll('.hero-dot').forEach((d, i) => d.classList.toggle('active', i === current));
+}
+
+function goSlide(n) {
+  current = (n + slides.length) % slides.length;
+  updateSlider();
+  resetAuto();
+}
+function sliderPrev() { goSlide(current - 1); }
+function sliderNext() { goSlide(current + 1); }
+
+function startAuto() {
+  if (slides.length <= 1) return;
+  autoTimer = setInterval(() => goSlide(current + 1), 5000);
+}
+function resetAuto() { clearInterval(autoTimer); startAuto(); }
+
+initSlider();
 </script>
 </body>
 </html>

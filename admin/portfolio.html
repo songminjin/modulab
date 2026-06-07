@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>포트폴리오 관리 — ModuLab 관리자</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="admin-auth.js"></script>
+<style>
+:root{--blue:#2563EB;--blue-dark:#1D4ED8;--blue-light:#EFF6FF;--blue-mid:#BFDBFE;--navy:#0F172A;--green:#16A34A;--green-light:#F0FDF4;--red:#DC2626;--red-light:#FEF2F2;--yellow:#F59E0B;--yellow-light:#FFFBEB;--slate-light:#F1F5F9;--border:#E2E8F0;--white:#FFFFFF;--text:#0F172A;--text2:#475569;--text3:#94A3B8;--sidebar-w:220px;--header-h:64px;}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Noto Sans KR',sans-serif;color:var(--text);background:#F8FAFC;line-height:1.6;}
+a{text-decoration:none;color:inherit;}
+.mobile-guard{display:none;position:fixed;inset:0;z-index:9999;background:var(--navy);flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:32px;}
+.mobile-guard-icon{font-size:48px;}.mobile-guard-title{font-family:'Bebas Neue',sans-serif;font-size:32px;color:white;}.mobile-guard-desc{font-size:14px;color:#94A3B8;line-height:1.7;}
+@media(max-width:768px){.mobile-guard{display:flex;}}
+.admin-layout{display:flex;min-height:100vh;}
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--navy);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100;}
+.sidebar-logo{padding:20px 20px 16px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px;}
+.logo-mark{width:32px;height:32px;background:var(--blue);border-radius:7px;position:relative;overflow:hidden;flex-shrink:0;}
+.logo-mark::before{content:'';position:absolute;top:4px;left:4px;width:13px;height:13px;background:rgba(255,255,255,.3);border-radius:2px;}
+.logo-mark::after{content:'';position:absolute;bottom:4px;right:4px;width:13px;height:13px;background:#16A34A;border-radius:2px;}
+.sidebar-logo-text{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.04em;color:white;}
+.sidebar-logo-text span{color:var(--blue);}
+.sidebar-admin-badge{font-size:9px;font-weight:700;letter-spacing:.08em;color:#64748B;padding:2px 6px;border:1px solid #334155;border-radius:3px;display:block;margin-top:2px;}
+.sidebar-section{padding:20px 12px 8px;}
+.sidebar-section-label{font-size:10px;font-weight:700;letter-spacing:.1em;color:#475569;text-transform:uppercase;padding:0 8px;margin-bottom:6px;}
+.sidebar-nav{list-style:none;}
+.sidebar-nav li a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;font-size:13px;font-weight:500;color:#94A3B8;transition:all .15s;}
+.sidebar-nav li a:hover{background:rgba(255,255,255,.06);color:white;}
+.sidebar-nav li a.active{background:rgba(37,99,235,.2);color:#93C5FD;}
+.nav-icon{font-size:15px;width:18px;text-align:center;flex-shrink:0;}
+.sidebar-sub{margin-left:28px;margin-top:2px;}
+.sidebar-sub li a{font-size:12px;padding:6px 10px;color:#64748B;border-radius:6px;}
+.sidebar-sub li a:hover{color:#94A3B8;background:rgba(255,255,255,.04);}
+.sidebar-sub li a.active{color:#93C5FD;background:rgba(37,99,235,.15);}
+.sidebar-bottom{margin-top:auto;padding:16px 12px;border-top:1px solid rgba(255,255,255,.06);}
+.sidebar-bottom a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;font-size:13px;color:#64748B;transition:all .15s;}
+.sidebar-bottom a:hover{background:rgba(255,255,255,.06);color:#94A3B8;}
+.main-wrap{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh;}
+.admin-header{position:sticky;top:0;z-index:50;height:var(--header-h);background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 32px;gap:16px;}
+.header-breadcrumb{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text3);}
+.header-breadcrumb a{color:var(--text3);transition:color .15s;}.header-breadcrumb a:hover{color:var(--blue);}
+.header-breadcrumb .current{color:var(--text);font-weight:600;}
+.header-right{display:flex;align-items:center;gap:10px;}
+.header-logout-btn{padding:7px 16px;border-radius:8px;border:1px solid var(--border);background:none;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;font-family:inherit;transition:all .15s;}
+.header-logout-btn:hover{background:var(--red-light);border-color:#FCA5A5;color:var(--red);}
+.header-user{display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:8px;background:var(--slate-light);border:1px solid var(--border);}
+.header-user-avatar{width:28px;height:28px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;color:white;font-weight:700;}
+.header-user-name{font-size:13px;font-weight:500;color:var(--text2);}
+.page-content{padding:32px;flex:1;}
+.page-title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;gap:16px;flex-wrap:wrap;}
+.page-title{font-size:22px;font-weight:700;}.page-title-sub{font-size:13px;color:var(--text3);margin-top:2px;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;border:none;transition:all .15s;white-space:nowrap;}
+.btn-primary{background:var(--blue);color:white;}.btn-primary:hover{background:var(--blue-dark);}
+.btn-outline{background:var(--white);color:var(--text2);border:1px solid var(--border);}.btn-outline:hover{background:var(--slate-light);}
+.btn-sm{padding:5px 12px;font-size:12px;}
+.btn-red{background:var(--red-light);color:var(--red);border:1px solid #FCA5A5;}.btn-red:hover{background:var(--red);color:white;}
+.filter-bar{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:14px 20px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.filter-tags{display:flex;gap:6px;flex-wrap:wrap;}
+.filter-tag{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:500;border:1px solid var(--border);background:var(--white);color:var(--text2);cursor:pointer;transition:all .15s;}
+.filter-tag:hover,.filter-tag.active{border-color:var(--blue);color:var(--blue);background:var(--blue-light);font-weight:700;}
+.table-wrap{background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.table-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);}
+.table-count{font-size:13px;color:var(--text3);}.table-count strong{color:var(--text);font-weight:700;}
+table{width:100%;border-collapse:collapse;}
+thead tr{background:var(--slate-light);}
+thead th{padding:10px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.05em;text-transform:uppercase;border-bottom:1px solid var(--border);}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:#FAFBFF;}
+td{padding:12px 16px;font-size:13px;vertical-align:middle;}
+.thumb-img{width:60px;height:44px;object-fit:cover;border-radius:6px;background:var(--slate-light);}
+.thumb-placeholder{width:60px;height:44px;border-radius:6px;background:var(--slate-light);display:flex;align-items:center;justify-content:center;font-size:18px;}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.badge-on{background:#DCFCE7;color:#15803D;}.badge-on::before{background:#16A34A;}
+.badge-off{background:var(--slate-light);color:var(--text3);}.badge-off::before{background:#CBD5E1;}
+.cat-badge{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.04em;}
+.cat-short{background:#EDE9FE;color:#6D28D9;}.cat-detail{background:#FFE4E6;color:#B91C1C;}
+.cat-web{background:#DBEAFE;color:#1D4ED8;}.cat-program{background:#F1F5F9;color:#475569;}
+.switch{position:relative;width:40px;height:22px;flex-shrink:0;}
+.switch input{display:none;}
+.switch-track{position:absolute;inset:0;background:var(--border);border-radius:11px;cursor:pointer;transition:background .2s;}
+.switch-track::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;background:white;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+.switch input:checked+.switch-track{background:var(--blue);}
+.switch input:checked+.switch-track::after{transform:translateX(18px);}
+.action-btns{display:flex;gap:6px;}
+.empty-state{text-align:center;padding:60px 20px;}
+.empty-icon{font-size:40px;margin-bottom:12px;}
+.empty-title{font-size:15px;font-weight:600;color:var(--text2);margin-bottom:6px;}
+.empty-desc{font-size:13px;color:var(--text3);}
+/* Modal */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center;}
+.modal-bg.open{display:flex;}
+.modal{background:var(--white);border-radius:16px;width:560px;max-height:90vh;overflow-y:auto;padding:32px;}
+.modal-title{font-size:18px;font-weight:700;margin-bottom:24px;}
+.form-group{margin-bottom:18px;}
+.form-label{font-size:13px;font-weight:600;color:var(--text2);margin-bottom:6px;display:block;}
+.form-label .req{color:var(--red);margin-left:3px;}
+.form-input,.form-select,.form-textarea{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;color:var(--text);outline:none;transition:border-color .15s;background:var(--white);}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--blue);}
+.form-textarea{resize:vertical;min-height:80px;}
+.form-hint{font-size:11px;color:var(--text3);margin-top:5px;}
+.video-field{display:none;}
+.modal-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:24px;padding-top:20px;border-top:1px solid var(--border);}
+#toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--navy);color:white;padding:13px 24px;border-radius:10px;font-size:14px;font-weight:500;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);transition:transform .3s,opacity .3s;opacity:0;z-index:9000;}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+</style>
+</head>
+<body>
+<div class="mobile-guard"><div class="mobile-guard-icon">🖥️</div><div class="mobile-guard-title">PC에서 접속해주세요</div><div class="mobile-guard-desc">관리자 페이지는 PC 환경에서만<br>정상적으로 이용할 수 있습니다.</div></div>
+
+<div class="admin-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark"></div>
+      <div><div class="sidebar-logo-text">Modu<span>Lab</span></div><span class="sidebar-admin-badge">ADMIN SCM</span></div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">메인 메뉴</div>
+      <ul class="sidebar-nav">
+        <li><a href="dashboard.html"><span class="nav-icon">📊</span>대시보드</a></li>
+        <li>
+          <a href="products.html"><span class="nav-icon">📦</span>상품 관리</a>
+          <ul class="sidebar-sub sidebar-nav">
+            <li><a href="products.html">상품 목록</a></li>
+            <li><a href="product-add.html">상품 등록</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="portfolio.html" class="active"><span class="nav-icon">🖼️</span>포트폴리오</a>
+          <ul class="sidebar-sub sidebar-nav">
+            <li><a href="portfolio.html" class="active">포트폴리오 목록</a></li>
+          </ul>
+        </li>
+        <li><a href="hero-banner.html"><span class="nav-icon">🎠</span>히어로 배너</a></li>
+        <li>
+          <a href="events.html"><span class="nav-icon">🎪</span>이벤트 관리</a>
+          <ul class="sidebar-sub sidebar-nav">
+            <li><a href="events.html?tab=coupon">쿠폰 이벤트</a></li>
+            <li><a href="events.html?tab=site">사이트 이벤트</a></li>
+          </ul>
+        </li>
+        <li><a href="orders.html"><span class="nav-icon">🛒</span>주문 관리</a></li>
+        <li><a href="returns.html"><span class="nav-icon">🔄</span>반품 · 교환</a></li>
+        <li><a href="cs.html"><span class="nav-icon">💬</span>CS 관리</a></li>
+        <li>
+          <a href="customers.html"><span class="nav-icon">👥</span>회원 관리</a>
+          <ul class="sidebar-sub sidebar-nav">
+            <li><a href="customers.html">고객 목록</a></li>
+            <li><a href="members.html">등급 기준 설정</a></li>
+          </ul>
+        </li>
+        <li><a href="settlement.html"><span class="nav-icon">💰</span>정산 현황판</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">바로가기</div>
+      <ul class="sidebar-nav"><li><a href="../index.html" target="_blank"><span class="nav-icon">🌐</span>쇼핑몰 보기</a></li></ul>
+    </div>
+    <div class="sidebar-bottom"><a href="index.html" onclick="adminLogout(event)"><span class="nav-icon">🚪</span>로그아웃</a></div>
+  </aside>
+
+  <div class="main-wrap">
+    <header class="admin-header">
+      <div class="header-breadcrumb">
+        <a href="dashboard.html">홈</a><span style="color:var(--border);">›</span>
+        <span class="current">포트폴리오 관리</span>
+      </div>
+      <div class="header-right">
+        <div class="header-user"><div class="header-user-avatar">M</div><div class="header-user-name">관리자</div></div>
+        <button class="header-logout-btn" onclick="adminLogout()">로그아웃</button>
+      </div>
+    </header>
+
+    <div class="page-content">
+      <div class="page-title-row">
+        <div><div class="page-title">포트폴리오 관리</div><div class="page-title-sub">제작 사례를 등록하고 카테고리별로 노출합니다</div></div>
+        <button class="btn btn-primary" onclick="openModal()">+ 포트폴리오 등록</button>
+      </div>
+
+      <div class="filter-bar">
+        <div class="filter-tags">
+          <button class="filter-tag active" onclick="filterCat('all',this)">전체</button>
+          <button class="filter-tag" onclick="filterCat('short',this)">숏폼 템플릿</button>
+          <button class="filter-tag" onclick="filterCat('detail',this)">상세페이지</button>
+          <button class="filter-tag" onclick="filterCat('web',this)">홈페이지</button>
+          <button class="filter-tag" onclick="filterCat('program',this)">프로그램</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-header">
+          <div class="table-count">총 <strong id="totalCount">0</strong>개</div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th style="width:70px;">썸네일</th>
+              <th>제목</th>
+              <th style="width:100px;">카테고리</th>
+              <th style="width:80px;">유형</th>
+              <th style="width:60px;">순서</th>
+              <th style="width:70px;">노출</th>
+              <th style="width:120px;">관리</th>
+            </tr>
+          </thead>
+          <tbody id="portfolioList"></tbody>
+        </table>
+        <div class="empty-state" id="emptyState" style="display:none;">
+          <div class="empty-icon">🖼️</div>
+          <div class="empty-title">등록된 포트폴리오가 없습니다</div>
+          <div class="empty-desc">위 버튼을 눌러 포트폴리오를 등록해보세요</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 등록/수정 모달 -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <div class="modal-title" id="modalTitle">포트폴리오 등록</div>
+    <input type="hidden" id="editId">
+
+    <div class="form-group">
+      <label class="form-label">카테고리<span class="req">*</span></label>
+      <select class="form-select" id="fCategory" onchange="onCategoryChange(this.value)">
+        <option value="">선택하세요</option>
+        <option value="short">숏폼 템플릿</option>
+        <option value="detail">상세페이지 제작</option>
+        <option value="web">홈페이지 제작</option>
+        <option value="program">프로그램 제작</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">제목<span class="req">*</span></label>
+      <input type="text" class="form-input" id="fTitle" placeholder="포트폴리오 제목">
+    </div>
+    <div class="form-group">
+      <label class="form-label">설명</label>
+      <textarea class="form-textarea" id="fDesc" placeholder="간단한 설명을 입력하세요"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">썸네일 이미지 URL</label>
+      <input type="text" class="form-input" id="fThumbnail" placeholder="https://...">
+      <div class="form-hint">대표 이미지 URL을 입력하세요</div>
+    </div>
+
+    <!-- 숏폼 전용: 영상 URL -->
+    <div class="form-group video-field" id="videoField">
+      <label class="form-label">영상 URL <span class="req">*</span></label>
+      <input type="text" class="form-input" id="fVideoUrl" placeholder="YouTube URL 또는 직접 영상 URL">
+      <div class="form-hint">유튜브 공유 링크 또는 직접 링크를 입력하세요</div>
+    </div>
+
+    <!-- 이미지 전용: 상세 이미지 -->
+    <div class="form-group image-field" id="imageField">
+      <label class="form-label">상세 이미지 URL 목록</label>
+      <textarea class="form-textarea" id="fImages" placeholder="URL을 줄바꿈으로 구분해서 입력하세요&#10;https://...&#10;https://..." style="min-height:100px;"></textarea>
+      <div class="form-hint">여러 장의 상세 이미지를 줄바꿈으로 구분하여 입력</div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">노출 순서</label>
+      <input type="number" class="form-input" id="fSortOrder" value="0" min="0">
+      <div class="form-hint">숫자가 작을수록 먼저 표시됩니다</div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal()">취소</button>
+      <button class="btn btn-primary" onclick="savePortfolio()">저장</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const API = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  ? 'http://localhost:3000' : 'https://modulab-production.up.railway.app';
+
+let allItems = [];
+let currentCat = 'all';
+
+async function loadPortfolios() {
+  try {
+    const token = localStorage.getItem('adminToken');
+    const res = await fetch(`${API}/api/portfolios/admin/all`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    allItems = await res.json();
+    renderList();
+  } catch (e) {
+    showToast('❌ 데이터 불러오기 실패');
+  }
+}
+
+function renderList() {
+  const filtered = currentCat === 'all' ? allItems : allItems.filter(i => i.category === currentCat);
+  document.getElementById('totalCount').textContent = filtered.length;
+  const tbody = document.getElementById('portfolioList');
+  const empty = document.getElementById('emptyState');
+
+  if (!filtered.length) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  const catLabels = { short:'숏폼', detail:'상세페이지', web:'홈페이지', program:'프로그램' };
+  tbody.innerHTML = filtered.map(item => `
+    <tr>
+      <td>${item.thumbnail_url
+        ? `<img src="${item.thumbnail_url}" class="thumb-img" onerror="this.style.display='none'">`
+        : `<div class="thumb-placeholder">🖼️</div>`}</td>
+      <td><div style="font-weight:600;">${item.title}</div><div style="font-size:11px;color:var(--text3);">${item.description ? item.description.slice(0,40)+'…' : ''}</div></td>
+      <td><span class="cat-badge cat-${item.category}">${catLabels[item.category]||item.category}</span></td>
+      <td>${item.media_type === 'video' ? '🎬 영상' : '🖼️ 이미지'}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;">${item.sort_order}</td>
+      <td>
+        <label class="switch">
+          <input type="checkbox" ${item.is_active ? 'checked' : ''} onchange="toggleItem('${item.id}', this)">
+          <span class="switch-track"></span>
+        </label>
+      </td>
+      <td>
+        <div class="action-btns">
+          <button class="btn btn-sm btn-outline" onclick='openEdit(${JSON.stringify(item)})'>수정</button>
+          <button class="btn btn-sm btn-red" onclick="deleteItem('${item.id}')">삭제</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function filterCat(cat, btn) {
+  currentCat = cat;
+  document.querySelectorAll('.filter-tag').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  renderList();
+}
+
+function onCategoryChange(val) {
+  const isVideo = val === 'short';
+  document.getElementById('videoField').style.display = isVideo ? 'block' : 'none';
+  document.getElementById('imageField').style.display = isVideo ? 'none' : 'block';
+  document.getElementById('editId').dataset.mediaType = isVideo ? 'video' : 'image';
+}
+
+function openModal() {
+  document.getElementById('modalTitle').textContent = '포트폴리오 등록';
+  document.getElementById('editId').value = '';
+  document.getElementById('fCategory').value = '';
+  document.getElementById('fTitle').value = '';
+  document.getElementById('fDesc').value = '';
+  document.getElementById('fThumbnail').value = '';
+  document.getElementById('fVideoUrl').value = '';
+  document.getElementById('fImages').value = '';
+  document.getElementById('fSortOrder').value = 0;
+  document.getElementById('videoField').style.display = 'none';
+  document.getElementById('imageField').style.display = 'block';
+  document.getElementById('modalBg').classList.add('open');
+}
+
+function openEdit(item) {
+  document.getElementById('modalTitle').textContent = '포트폴리오 수정';
+  document.getElementById('editId').value = item.id;
+  document.getElementById('fCategory').value = item.category;
+  document.getElementById('fTitle').value = item.title;
+  document.getElementById('fDesc').value = item.description || '';
+  document.getElementById('fThumbnail').value = item.thumbnail_url || '';
+  document.getElementById('fVideoUrl').value = item.video_url || '';
+  document.getElementById('fImages').value = (item.images || []).join('\n');
+  document.getElementById('fSortOrder').value = item.sort_order || 0;
+  onCategoryChange(item.category);
+  document.getElementById('modalBg').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modalBg').classList.remove('open');
+}
+
+async function savePortfolio() {
+  const id = document.getElementById('editId').value;
+  const category = document.getElementById('fCategory').value;
+  const title = document.getElementById('fTitle').value.trim();
+  if (!category || !title) { showToast('❌ 카테고리와 제목을 입력해주세요'); return; }
+
+  const isVideo = category === 'short';
+  const images = document.getElementById('fImages').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  const body = {
+    title, category,
+    description: document.getElementById('fDesc').value,
+    thumbnail_url: document.getElementById('fThumbnail').value.trim(),
+    media_type: isVideo ? 'video' : 'image',
+    video_url: document.getElementById('fVideoUrl').value.trim(),
+    images: isVideo ? [] : images,
+    sort_order: parseInt(document.getElementById('fSortOrder').value) || 0,
+    is_active: true
+  };
+
+  const token = localStorage.getItem('adminToken');
+  const url = id ? `${API}/api/portfolios/admin/${id}` : `${API}/api/portfolios/admin`;
+  const method = id ? 'PUT' : 'POST';
+
+  try {
+    const res = await fetch(url, { method, headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${token}` }, body: JSON.stringify(body) });
+    if (!res.ok) { const e = await res.json(); showToast('❌ ' + e.error); return; }
+    showToast(id ? '✅ 수정됐습니다' : '✅ 등록됐습니다');
+    closeModal();
+    loadPortfolios();
+  } catch (e) {
+    showToast('❌ 저장 실패');
+  }
+}
+
+async function toggleItem(id, el) {
+  const token = localStorage.getItem('adminToken');
+  try {
+    const res = await fetch(`${API}/api/portfolios/admin/${id}/toggle`, {
+      method: 'PATCH', headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await res.json();
+    el.checked = data.is_active;
+    showToast(data.is_active ? '✅ 노출 활성화' : '⏸️ 노출 비활성화');
+  } catch (e) { showToast('❌ 상태 변경 실패'); el.checked = !el.checked; }
+}
+
+async function deleteItem(id) {
+  if (!confirm('정말 삭제하시겠습니까?')) return;
+  const token = localStorage.getItem('adminToken');
+  try {
+    await fetch(`${API}/api/portfolios/admin/${id}`, {
+      method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` }
+    });
+    showToast('🗑️ 삭제됐습니다');
+    loadPortfolios();
+  } catch (e) { showToast('❌ 삭제 실패'); }
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+document.getElementById('modalBg').addEventListener('click', e => { if (e.target === document.getElementById('modalBg')) closeModal(); });
+
+loadPortfolios();
+</script>
+</body>
+</html>

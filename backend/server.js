@@ -46,6 +46,8 @@ app.use('/api/admin', require('./routes/admin'));
 app.use('/api/reviews', require('./routes/reviews'));
 app.use('/api/payments', require('./routes/payments'));
 app.use('/api/events', require('./routes/events'));
+app.use('/api/portfolios', require('./routes/portfolios'));
+app.use('/api/banners', require('./routes/banners'));
 
 // ── 헬스체크 ──
 app.get('/health', (req, res) => res.json({ status: 'ok', env: process.env.NODE_ENV }));
@@ -97,6 +99,31 @@ async function runMigrations() {
     `ALTER TABLE orders ADD COLUMN IF NOT EXISTS coupon_event_download_id UUID`,
     `ALTER TABLE coupon_events ADD COLUMN IF NOT EXISTS applicable_grades JSONB DEFAULT '[]'`,
     `ALTER TABLE order_items ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'active'`,
+    `CREATE TABLE IF NOT EXISTS portfolios (
+       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+       title VARCHAR(200) NOT NULL,
+       category VARCHAR(50) NOT NULL,
+       description TEXT,
+       thumbnail_url TEXT,
+       media_type VARCHAR(10) DEFAULT 'image',
+       video_url TEXT,
+       images JSONB DEFAULT '[]',
+       sort_order INTEGER DEFAULT 0,
+       is_active BOOLEAN DEFAULT true,
+       created_at TIMESTAMP DEFAULT NOW()
+     )`,
+    `CREATE INDEX IF NOT EXISTS idx_portfolios_category ON portfolios(category)`,
+    `CREATE TABLE IF NOT EXISTS hero_banners (
+       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+       title TEXT NOT NULL,
+       subtitle TEXT,
+       btn_text VARCHAR(100),
+       btn_url VARCHAR(300),
+       image_url TEXT,
+       sort_order INTEGER DEFAULT 0,
+       is_active BOOLEAN DEFAULT true,
+       created_at TIMESTAMP DEFAULT NOW()
+     )`,
   ];
   for (const sql of migrations) {
     try { await db.query(sql); } catch (err) { console.error('[migration error]', err.message); }

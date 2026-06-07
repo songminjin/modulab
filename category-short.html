@@ -136,6 +136,22 @@
   </div>
 </section>
 
+<!-- PORTFOLIO SECTION -->
+<section class="service-section" id="portfolioSection">
+  <div style="font-size:12px;font-family:'JetBrains Mono',monospace;letter-spacing:.1em;color:var(--blue);margin-bottom:10px;">PORTFOLIO</div>
+  <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--navy);margin-bottom:4px;">제작 사례</div>
+  <p style="font-size:14px;color:var(--text2);margin-bottom:32px;">실제 제작된 숏폼 편집 템플릿 사례입니다.</p>
+  <div class="portfolio-grid" id="portfolioGrid"></div>
+</section>
+
+<!-- VIDEO MODAL -->
+<div id="videoModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:#000;border-radius:12px;overflow:hidden;width:90%;max-width:800px;position:relative;">
+    <button onclick="closeVideoModal()" style="position:absolute;top:12px;right:12px;background:rgba(255,255,255,.2);border:none;color:white;width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer;z-index:1;">✕</button>
+    <div id="videoContainer" style="width:100%;aspect-ratio:16/9;"></div>
+  </div>
+</div>
+
 <!-- INQUIRY BANNER -->
 <section class="banner-section">
   <div class="banner-inner">
@@ -272,6 +288,51 @@ function searchProducts(val) {
 </script>
 <script>
 (function(){var c=JSON.parse(localStorage.getItem('modulab_cart')||'[]');var b=document.getElementById('cart-badge-nav');if(b)b.textContent=c.length;})();
+</script>
+<script>
+(async function loadPortfolio() {
+  const API = 'https://modulab-production.up.railway.app';
+  const grid = document.getElementById('portfolioGrid');
+  try {
+    const res = await fetch(`${API}/api/portfolios?category=short`);
+    const items = await res.json();
+    if (!items.length) { grid.innerHTML = '<div class="portfolio-empty">아직 등록된 제작 사례가 없습니다.</div>'; return; }
+    grid.innerHTML = items.map(item => `
+      <div class="portfolio-card" onclick="openVideoModal('${item.video_url||''}')">
+        <div class="portfolio-thumb" style="position:relative;">
+          ${item.thumbnail_url
+            ? `<img src="${item.thumbnail_url}" alt="${item.title}">`
+            : '🎬'}
+          <span class="portfolio-video-badge">▶ 영상</span>
+        </div>
+        <div class="portfolio-card-body">
+          <div class="portfolio-card-cat">숏폼 템플릿</div>
+          <div class="portfolio-card-title">${item.title}</div>
+          <div class="portfolio-card-desc">${item.description||''}</div>
+        </div>
+      </div>
+    `).join('');
+  } catch(e) { grid.innerHTML = '<div class="portfolio-empty">제작 사례를 불러오는 중 오류가 발생했습니다.</div>'; }
+})();
+
+function openVideoModal(url) {
+  if (!url) return;
+  const modal = document.getElementById('videoModal');
+  const container = document.getElementById('videoContainer');
+  let embedUrl = url;
+  // 유튜브 URL 변환
+  const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([^&\s]+)/);
+  if (ytMatch) embedUrl = `https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1`;
+  container.innerHTML = `<iframe src="${embedUrl}" style="width:100%;height:100%;border:none;" allowfullscreen allow="autoplay"></iframe>`;
+  modal.style.display = 'flex';
+}
+function closeVideoModal() {
+  document.getElementById('videoModal').style.display = 'none';
+  document.getElementById('videoContainer').innerHTML = '';
+}
+document.getElementById('videoModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('videoModal')) closeVideoModal();
+});
 </script>
 </body>
 </html>
