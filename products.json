@@ -270,5 +270,27 @@
       "https://raw.githubusercontent.com/songminjin/modulab/main/images/products/detail-EXCEL-MPYYQMOK-2.png"
     ],
     "uuid": "67355ae7-cf3b-5c77-9339-b0385628fa11"
+  },
+  {
+    "id": "SHEETS-MQ6GR0DN",
+    "name": "테스트",
+    "cat": "sheets",
+    "type": "file",
+    "emoji": "📊",
+    "price": 500,
+    "discount": 0,
+    "visible": true,
+    "newBadge": true,
+    "bestBadge": false,
+    "desc": "11",
+    "detail": "11",
+    "fileType": "",
+    "fileUrl": "https://docs.google.com/spreadsheets/d/1YPR3BqcJltTFFKA_vHTbYPdF1VFPy-v1daEt3h1_H2I/edit?gid=523316433#gid=523316433",
+    "fileName": "",
+    "thumbUrl": "",
+    "detailImageUrls": [],
+    "date": "2026-06-09",
+    "views": 0,
+    "downloads": 0
   }
 ]
