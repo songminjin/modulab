@@ -652,6 +652,7 @@ function renderTable(){
       <td onclick="event.stopPropagation()">
         <div class="action-btns">
           ${o.status==='paid'||o.status==='resend' ? `<button class="btn btn-green btn-sm" onclick="quickResend('${o.id}')">📨 재발송</button>` : ''}
+          ${o.status==='paid' ? `<button class="btn btn-outline btn-sm" onclick="updateStatus('${o.id}','sent')">발송완료</button>` : ''}
           ${o.status!=='refund'&&o.status!=='done' ? `<button class="btn btn-red btn-sm"   onclick="openRefundModal('${o.id}')">환불</button>` : ''}
           ${o.status==='refund' ? `<span style="font-size:11px;color:var(--text3);">처리완료</span>` : ''}
           ${o.status==='done'   ? `<span style="font-size:11px;color:var(--text3);">확정완료</span>` : ''}
@@ -736,19 +737,33 @@ function openDetail(id){
     </div>
   `;
 
+  const statusOptions = [
+    { value:'paid',   label:'결제완료'    },
+    { value:'sent',   label:'발송완료'    },
+    { value:'done',   label:'구매확정'    },
+    { value:'resend', label:'재발송 필요' },
+    { value:'refund', label:'환불처리'    },
+  ].filter(s => s.value !== o.status && o.status !== 'refund' && o.status !== 'done');
+
+  const statusSelectHtml = statusOptions.length > 0 ? `
+    <div class="drawer-action-row" style="align-items:center;gap:8px;">
+      <select id="drawerStatusSel" style="flex:1;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none;background:var(--white);color:var(--text);">
+        ${statusOptions.map(s=>`<option value="${s.value}">${s.label}</option>`).join('')}
+      </select>
+      <button class="btn btn-primary" style="white-space:nowrap;" onclick="applyDrawerStatus('${o.id}')">상태 변경</button>
+    </div>` : '';
+
   const actions = [];
   if(o.status==='paid'||o.status==='resend'){
     actions.push(`<button class="btn btn-green" onclick="quickResend('${o.id}');closeDrawer()">📨 파일 재발송</button>`);
-  }
-  if(o.status==='paid'||o.status==='sent'){
-    actions.push(`<button class="btn btn-outline" onclick="updateStatus('${o.id}','sent');closeDrawer()">발송완료로 변경</button>`);
   }
   if(o.status!=='refund'&&o.status!=='done'){
     actions.push(`<button class="btn btn-red" onclick="openRefundModal('${o.id}');closeDrawer()">환불 처리</button>`);
   }
 
   document.getElementById('drawerActions').innerHTML =
-    `<div class="drawer-action-row">${actions.join('')}</div>` +
+    statusSelectHtml +
+    (actions.length ? `<div class="drawer-action-row">${actions.join('')}</div>` : '') +
     `<button class="btn btn-outline" style="width:100%;justify-content:center;" onclick="closeDrawer()">닫기</button>`;
 
   const overlay = document.getElementById('detailDrawer');
@@ -762,6 +777,13 @@ function closeDrawer(){
 }
 
 /* ── STATUS UPDATE ── */
+async function applyDrawerStatus(id){
+  const sel = document.getElementById('drawerStatusSel');
+  if(!sel) return;
+  await updateStatus(id, sel.value);
+  closeDrawer();
+}
+
 async function updateStatus(id, newStatus){
   const o = orders.find(o=>o.id===id);
   if(!o) return;
