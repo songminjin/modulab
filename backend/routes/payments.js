@@ -105,7 +105,8 @@ router.post('/portone/complete', authenticate, async (req, res) => {
 
     await client.query('BEGIN');
     const pgProvider = payment.channel?.pgProvider || 'portone';
-    await confirmOrderPayment(client, orderId, req.user.id, paymentId, payment.method, pgProvider);
+    const paymentMethod = payment.method?.type?.replace('PaymentMethod', '') || 'UNKNOWN';
+    await confirmOrderPayment(client, orderId, req.user.id, paymentId, paymentMethod, pgProvider);
     await client.query('COMMIT');
 
     res.json({ success: true, orderId });
