@@ -83,12 +83,12 @@ a{text-decoration:none;color:inherit;}
 .period-range{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);margin-left:auto;white-space:nowrap;}
 
 /* SUMMARY CARDS */
-.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px;}
+.summary-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px;}
 .sc{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:20px 22px;}
 .sc.blue{border-left:3px solid var(--blue);}.sc.green{border-left:3px solid var(--green);}.sc.red{border-left:3px solid var(--red);}.sc.yellow{border-left:3px solid var(--yellow);}
 .sc-icon{font-size:18px;margin-bottom:8px;}
 .sc-label{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.04em;text-transform:uppercase;margin-bottom:9px;}
-.sc-value{font-family:'JetBrains Mono',monospace;font-size:21px;font-weight:500;color:var(--text);line-height:1;}
+.sc-value{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:500;color:var(--text);line-height:1;}
 .sc-sub{font-size:11px;color:var(--text3);margin-top:6px;}
 
 /* SECTION CARD */
@@ -245,7 +245,7 @@ td{padding:11px 14px;font-size:13px;vertical-align:middle;}
           <div class="page-title-sub">내 장부 확인용 · 공식 정산금액은 토스 파트너센터 기준</div>
         </div>
         <div class="title-btns">
-          <button class="btn btn-outline" onclick="render(); showToast('새로고침 완료');">🔄 새로고침</button>
+          <button class="btn btn-outline" onclick="render()">🔄 새로고침</button>
           <button class="btn btn-green" onclick="exportExcel()">⬇️ 엑셀 다운로드</button>
         </div>
       </div>
@@ -286,11 +286,17 @@ td{padding:11px 14px;font-size:13px;vertical-align:middle;}
           <div class="sc-value" id="scRefund">—</div>
           <div class="sc-sub" id="scRefundSub">—</div>
         </div>
+        <div class="sc" style="border-left:3px solid #7C3AED;">
+          <div class="sc-icon">🏦</div>
+          <div class="sc-label">PG 수수료(예상)</div>
+          <div class="sc-value" id="scFee" style="color:#7C3AED;">—</div>
+          <div class="sc-sub" id="scFeeSub">결제수단별 추산</div>
+        </div>
         <div class="sc green">
           <div class="sc-icon">✅</div>
           <div class="sc-label">실 수령액</div>
           <div class="sc-value" id="scNet">—</div>
-          <div class="sc-sub">환불 차감 후</div>
+          <div class="sc-sub">환불·수수료 차감 후</div>
         </div>
         <div class="sc yellow">
           <div class="sc-icon">🧾</div>
@@ -362,143 +368,132 @@ td{padding:11px 14px;font-size:13px;vertical-align:middle;}
 <div id="toast"><span id="toastMsg"></span></div>
 
 <script>
-/* AUTH */
+const API_URL = 'https://modulab-production.up.railway.app';
+
+/* AUTH — 사용자 이름 표시 */
 (function(){
   try{
     const u=JSON.parse(localStorage.getItem('user'));
-    if(!u)return;
+    if(!u) return;
     const av=document.getElementById('userAvatar'), nm=document.getElementById('userName');
     if(nm) nm.textContent = u.name||'관리자';
     if(av&&u.name) av.textContent = u.name.charAt(0).toUpperCase();
   }catch(e){}
 })();
 
-/* MOCK DATA – 3, 4, 5, 6월 주문 포함 */
-const ALL_ORDERS = [
-  // June 2026
-  {id:'ORD-2026060401',product:'프로젝트 관리 자동화',price:19900,pay:'card',    status:'paid',  date:'2026-06-04'},
-  {id:'ORD-2026060402',product:'가계부 자동화',        price:9900, pay:'kakao',   status:'sent',  date:'2026-06-04'},
-  {id:'ORD-2026060403',product:'급여 관리 자동화',     price:29900,pay:'toss',    status:'done',  date:'2026-06-04'},
-  {id:'ORD-2026060404',product:'마진 계산기',          price:9900, pay:'naver',   status:'paid',  date:'2026-06-04'},
-  {id:'ORD-2026060405',product:'구글시트 CRM 자동화',  price:29900,pay:'transfer',status:'paid',  date:'2026-06-04'},
-  {id:'ORD-2026060406',product:'프로젝트 관리 자동화', price:19900,pay:'card',    status:'refund',date:'2026-06-03'},
-  {id:'ORD-2026060407',product:'가계부 자동화',        price:9900, pay:'kakao',   status:'sent',  date:'2026-06-03'},
-  {id:'ORD-2026060408',product:'구글시트 프로젝트 관리',price:19900,pay:'toss',   status:'done',  date:'2026-06-03'},
-  {id:'ORD-2026060409',product:'급여 관리 자동화',     price:29900,pay:'card',    status:'paid',  date:'2026-06-03'},
-  {id:'ORD-2026060410',product:'마진 계산기',          price:9900, pay:'naver',   status:'paid',  date:'2026-06-03'},
-  {id:'ORD-2026060411',product:'프로젝트 관리 자동화', price:19900,pay:'card',    status:'sent',  date:'2026-06-03'},
-  {id:'ORD-2026060412',product:'구글시트 CRM 자동화',  price:29900,pay:'transfer',status:'paid',  date:'2026-06-03'},
-  // May 2026
-  {id:'ORD-2026050101',product:'가계부 자동화',        price:9900, pay:'kakao',   status:'done',  date:'2026-05-28'},
-  {id:'ORD-2026050102',product:'프로젝트 관리 자동화', price:19900,pay:'card',    status:'done',  date:'2026-05-25'},
-  {id:'ORD-2026050103',product:'급여 관리 자동화',     price:29900,pay:'toss',    status:'done',  date:'2026-05-22'},
-  {id:'ORD-2026050104',product:'마진 계산기',          price:9900, pay:'naver',   status:'done',  date:'2026-05-18'},
-  {id:'ORD-2026050105',product:'구글시트 CRM 자동화',  price:29900,pay:'transfer',status:'done',  date:'2026-05-14'},
-  {id:'ORD-2026050106',product:'프로젝트 관리 자동화', price:19900,pay:'card',    status:'refund',date:'2026-05-10'},
-  {id:'ORD-2026050107',product:'구글시트 프로젝트 관리',price:19900,pay:'kakao',  status:'done',  date:'2026-05-07'},
-  {id:'ORD-2026050108',product:'가계부 자동화',        price:9900, pay:'naver',   status:'done',  date:'2026-05-03'},
-  // April 2026
-  {id:'ORD-2026040101',product:'가계부 자동화',        price:9900, pay:'card',    status:'done',  date:'2026-04-26'},
-  {id:'ORD-2026040102',product:'구글시트 프로젝트 관리',price:19900,pay:'kakao',  status:'done',  date:'2026-04-19'},
-  {id:'ORD-2026040103',product:'급여 관리 자동화',     price:29900,pay:'card',    status:'done',  date:'2026-04-12'},
-  {id:'ORD-2026040104',product:'마진 계산기',          price:9900, pay:'naver',   status:'done',  date:'2026-04-05'},
-  // March 2026
-  {id:'ORD-2026030101',product:'프로젝트 관리 자동화', price:19900,pay:'card',    status:'done',  date:'2026-03-20'},
-  {id:'ORD-2026030102',product:'마진 계산기',          price:9900, pay:'kakao',   status:'done',  date:'2026-03-10'},
-  {id:'ORD-2026030103',product:'가계부 자동화',        price:9900, pay:'card',    status:'done',  date:'2026-03-05'},
-];
+/* PG 수수료율 (부가세 포함 PortOne 스몰비즈 기준) */
+const PG_FEE_RATES = {
+  CARD: 0.033, card: 0.033,
+  EASY_PAY: 0.022, kakao: 0.022, naver: 0.022, toss: 0.022,
+  VIRTUAL_ACCOUNT: 0.011, TRANSFER: 0.011, transfer: 0.011,
+  PAYPAL: 0.044,
+};
+
+/* 결제수단 표시명 */
+const PAY_INFO = {
+  CARD:            { label:'신용·체크카드',   color:'#2563EB' },
+  EASY_PAY:        { label:'간편결제',        color:'#7C3AED' },
+  VIRTUAL_ACCOUNT: { label:'가상계좌',        color:'#0EA5E9' },
+  TRANSFER:        { label:'실시간계좌이체',  color:'#0EA5E9' },
+  PAYPAL:          { label:'PayPal',          color:'#003087' },
+  card:            { label:'신용·체크카드',   color:'#2563EB' },
+  kakao:           { label:'카카오페이',      color:'#F59E0B' },
+  naver:           { label:'네이버페이',      color:'#16A34A' },
+  toss:            { label:'토스페이',        color:'#7C3AED' },
+  transfer:        { label:'실시간계좌이체',  color:'#0EA5E9' },
+};
 
 /* STATE */
 let curPeriod = 'thisMonth';
 let customFrom = '', customTo = '';
+let curData = null; /* 마지막 API 응답 캐시 */
 
-/* PERIOD HELPERS */
-const pad = n => String(n).padStart(2,'0');
-function getRange(period){
+/* ── PERIOD HELPERS ── */
+const pad = n => String(n).padStart(2, '0');
+
+function getRange(period) {
   const now = new Date();
-  const y = now.getFullYear(), m = now.getMonth()+1;
-  if(period==='thisMonth'){
-    const last = new Date(y,m,0).getDate();
-    return {from:`${y}-${pad(m)}-01`,to:`${y}-${pad(m)}-${last}`,label:`${y}년 ${m}월`};
+  const y = now.getFullYear(), m = now.getMonth() + 1;
+  if (period === 'thisMonth') {
+    const last = new Date(y, m, 0).getDate();
+    return { from:`${y}-${pad(m)}-01`, to:`${y}-${pad(m)}-${last}`, label:`${y}년 ${m}월` };
   }
-  if(period==='lastMonth'){
+  if (period === 'lastMonth') {
     const lm = m===1?12:m-1, ly = m===1?y-1:y;
-    const last = new Date(ly,lm,0).getDate();
-    return {from:`${ly}-${pad(lm)}-01`,to:`${ly}-${pad(lm)}-${last}`,label:`${ly}년 ${lm}월`};
+    const last = new Date(ly, lm, 0).getDate();
+    return { from:`${ly}-${pad(lm)}-01`, to:`${ly}-${pad(lm)}-${last}`, label:`${ly}년 ${lm}월` };
   }
-  if(period==='thisYear')
-    return {from:`${y}-01-01`,to:`${y}-12-31`,label:`${y}년 전체`};
-  return {from:customFrom,to:customTo,label:customFrom&&customTo?`${customFrom} ~ ${customTo}`:'기간 미설정'};
-}
-function filterOrders(orders,from,to){
-  return orders.filter(o=>{
-    const d=o.date.slice(0,10);
-    if(from&&d<from)return false;
-    if(to&&d>to)return false;
-    return true;
-  });
+  if (period === 'thisYear')
+    return { from:`${y}-01-01`, to:`${y}-12-31`, label:`${y}년 전체` };
+  return { from:customFrom, to:customTo, label: customFrom&&customTo ? `${customFrom} ~ ${customTo}` : '기간 미설정' };
 }
 
-/* UI */
-function setPeriod(period,btn){
-  curPeriod=period;
-  document.querySelectorAll('.period-tab').forEach(t=>t.classList.remove('active'));
+/* ── UI EVENTS ── */
+function setPeriod(period, btn) {
+  curPeriod = period;
+  document.querySelectorAll('.period-tab').forEach(t => t.classList.remove('active'));
   btn.classList.add('active');
-  period==='custom'
+  period === 'custom'
     ? document.getElementById('customRange').classList.add('show')
     : document.getElementById('customRange').classList.remove('show');
-  if(period!=='custom') render();
-}
-function applyCustom(){
-  customFrom=document.getElementById('dateFrom').value;
-  customTo=document.getElementById('dateTo').value;
-  if(customFrom&&customTo) render();
+  if (period !== 'custom') render();
 }
 
-const fmtWon = n => '₩'+Number(n||0).toLocaleString('ko-KR');
-
-/* SUMMARY */
-function renderSummary(orders){
-  const refunds = orders.filter(o=>o.status==='refund');
-  const valid   = orders.filter(o=>o.status!=='refund');
-  const gross   = orders.reduce((s,o)=>s+o.price,0);
-  const refAmt  = refunds.reduce((s,o)=>s+o.price,0);
-  document.getElementById('scGross').textContent   = fmtWon(gross);
-  document.getElementById('scGrossSub').textContent= `총 ${orders.length}건`;
-  document.getElementById('scRefund').textContent  = refAmt>0 ? `-${fmtWon(refAmt)}` : '₩0';
-  document.getElementById('scRefundSub').textContent=`환불 ${refunds.length}건`;
-  document.getElementById('scNet').textContent     = fmtWon(gross-refAmt);
-  document.getElementById('scCount').textContent   = `${valid.length}건`;
-  document.getElementById('scCountSub').textContent= refunds.length>0?`환불 ${refunds.length}건 제외`:'환불 없음';
+function applyCustom() {
+  customFrom = document.getElementById('dateFrom').value;
+  customTo   = document.getElementById('dateTo').value;
+  if (customFrom && customTo) render();
 }
 
-/* TREND CHART */
-function renderTrend(){
-  const now=new Date(), y=now.getFullYear(), curM=now.getMonth()+1;
-  document.getElementById('trendBadge').textContent=`${y}년`;
-  const months=[];
-  for(let m=1;m<=12;m++){
-    const prefix=`${y}-${pad(m)}`;
-    const mo=ALL_ORDERS.filter(o=>o.date.startsWith(prefix));
-    const valid=mo.filter(o=>o.status!=='refund');
-    months.push({
-      label:`${m}월`,
-      amount:valid.reduce((s,o)=>s+o.price,0),
-      count:valid.length,
-      refCnt:mo.filter(o=>o.status==='refund').length,
-      isCur:m===curM, isFuture:m>curM
-    });
+const fmtWon = n => '₩' + Number(n||0).toLocaleString('ko-KR');
+
+function calcPgFee(payments) {
+  return (payments||[]).reduce((sum, p) => {
+    const rate = PG_FEE_RATES[p.payment_method] ?? 0.033;
+    return sum + Math.round(p.amount * rate);
+  }, 0);
+}
+
+/* ── SUMMARY ── */
+function renderSummary(s, payments) {
+  const pgFee = calcPgFee(payments);
+  const net   = Math.max(0, s.gross - s.refund_amount - pgFee);
+
+  document.getElementById('scGross').textContent    = fmtWon(s.gross);
+  document.getElementById('scGrossSub').textContent = `총 ${s.total_count}건`;
+  document.getElementById('scRefund').textContent   = s.refund_amount > 0 ? `-${fmtWon(s.refund_amount)}` : '₩0';
+  document.getElementById('scRefundSub').textContent= `환불 ${s.refund_count}건`;
+  document.getElementById('scFee').textContent      = pgFee > 0 ? `-${fmtWon(pgFee)}` : '₩0';
+  document.getElementById('scFeeSub').textContent   = '카드 3.3% / 간편결제 2.2% 기준';
+  document.getElementById('scNet').textContent      = fmtWon(net);
+  document.getElementById('scCount').textContent    = `${s.valid_count}건`;
+  document.getElementById('scCountSub').textContent = s.refund_count > 0 ? `환불 ${s.refund_count}건 제외` : '환불 없음';
+}
+
+/* ── TREND CHART ── */
+function renderTrend(monthly) {
+  const now = new Date(), y = now.getFullYear(), curM = now.getMonth() + 1;
+  document.getElementById('trendBadge').textContent = `${y}년`;
+
+  const monthMap = {};
+  (monthly||[]).forEach(m => { monthMap[m.month] = m; });
+
+  const months = [];
+  for (let m = 1; m <= 12; m++) {
+    const d = monthMap[m] || { valid_count:0, refund_count:0, amount:0, refund_amount:0 };
+    months.push({ label:`${m}월`, amount:d.amount, count:d.valid_count, refCnt:d.refund_count, isCur:m===curM });
   }
-  const maxAmt=Math.max(...months.map(m=>m.amount),1);
-  const BAR_MAX=116; // px (matches .trend-bar-area height)
-  document.getElementById('trendChart').innerHTML=months.map(m=>{
-    const h=m.amount>0?Math.max(Math.round((m.amount/maxAmt)*BAR_MAX),4):2;
-    const valStr=m.amount>=10000?Math.round(m.amount/1000)+'K':'';
-    const barCls='trend-bar'+(m.isCur?' current':m.amount>0?' filled':'');
-    const monCls='trend-month'+(m.isCur?' current':'');
-    const tip=m.amount>0
-      ?`${m.label}: ${fmtWon(m.amount)} · ${m.count}건${m.refCnt>0?` (환불 ${m.refCnt}건)`:''}`
-      :`${m.label}: 판매 없음`;
+
+  const maxAmt = Math.max(...months.map(m => m.amount), 1);
+  const BAR_MAX = 116;
+  document.getElementById('trendChart').innerHTML = months.map(m => {
+    const h = m.amount > 0 ? Math.max(Math.round((m.amount/maxAmt)*BAR_MAX), 4) : 2;
+    const valStr = m.amount >= 10000 ? Math.round(m.amount/1000) + 'K' : '';
+    const barCls = 'trend-bar' + (m.isCur ? ' current' : m.amount > 0 ? ' filled' : '');
+    const monCls = 'trend-month' + (m.isCur ? ' current' : '');
+    const tip = m.amount > 0
+      ? `${m.label}: ${fmtWon(m.amount)} · ${m.count}건${m.refCnt>0?` (환불 ${m.refCnt}건)`:''}`
+      : `${m.label}: 판매 없음`;
     return `<div class="trend-col">
       <div class="trend-tip">${tip}</div>
       <div class="trend-val">${valStr}</div>
@@ -508,131 +503,163 @@ function renderTrend(){
   }).join('');
 }
 
-/* PRODUCT TABLE */
-function renderProduct(orders){
-  const tbody=document.getElementById('productBody');
-  const empty=document.getElementById('productEmpty');
-  const table=document.getElementById('productTable');
-  const valid=orders.filter(o=>o.status!=='refund');
-  const refOrds=orders.filter(o=>o.status==='refund');
+/* ── PRODUCT TABLE ── */
+function renderProduct(products) {
+  const tbody = document.getElementById('productBody');
+  const empty = document.getElementById('productEmpty');
+  const table = document.getElementById('productTable');
 
-  if(valid.length===0&&refOrds.length===0){
-    table.style.display='none'; empty.style.display='block'; return;
+  if (!products || products.length === 0) {
+    table.style.display = 'none'; empty.style.display = 'block'; return;
   }
-  table.style.display=''; empty.style.display='none';
+  table.style.display = ''; empty.style.display = 'none';
 
-  const map={};
-  orders.forEach(o=>{
-    if(!map[o.product]) map[o.product]={name:o.product,count:0,gross:0,refund:0};
-    if(o.status==='refund') map[o.product].refund+=o.price;
-    else{ map[o.product].count++; map[o.product].gross+=o.price; }
-  });
+  const totalNet = products.reduce((s, p) => s + (p.gross - p.refund_amount), 0) || 1;
+  const maxNet   = Math.max(...products.map(p => p.gross - p.refund_amount), 1);
 
-  const products=Object.values(map).sort((a,b)=>b.gross-a.gross);
-  const totalNet=products.reduce((s,p)=>s+(p.gross-p.refund),0)||1;
-  const maxNet=Math.max(...products.map(p=>p.gross-p.refund),1);
-
-  tbody.innerHTML=products.map((p,i)=>{
-    const net=p.gross-p.refund;
-    const pct=Math.round((net/totalNet)*100);
-    const barW=Math.round((net/maxNet)*80);
+  tbody.innerHTML = products.map((p, i) => {
+    const net  = p.gross - p.refund_amount;
+    const pct  = Math.round((net / totalNet) * 100);
+    const barW = Math.round((net / maxNet) * 80);
+    const em   = p.emoji || '📦';
     return `<tr>
       <td class="td-rank">${String(i+1).padStart(2,'0')}</td>
-      <td class="td-name">${p.name}</td>
-      <td class="td-mono">${p.count}건</td>
+      <td class="td-name">${em} ${p.name}</td>
+      <td class="td-mono">${p.sale_count}건</td>
       <td class="td-mono">${fmtWon(p.gross)}</td>
-      <td class="td-mono td-red">${p.refund>0?`-${fmtWon(p.refund)}`:'—'}</td>
+      <td class="td-mono td-red">${p.refund_amount>0?`-${fmtWon(p.refund_amount)}`:'—'}</td>
       <td class="td-mono td-green" style="font-weight:600;">${fmtWon(net)}</td>
       <td><div class="pct-wrap"><div class="pct-bar" style="width:${barW}px;"></div><span class="pct-txt">${pct}%</span></div></td>
     </tr>`;
   }).join('');
 }
 
-/* PAYMENT CHART */
-function renderPay(orders){
-  const el=document.getElementById('payChart');
-  const empty=document.getElementById('payEmpty');
-  const valid=orders.filter(o=>o.status!=='refund');
-  if(valid.length===0){el.style.display='none';empty.style.display='block';return;}
-  el.style.display='flex';empty.style.display='none';
-  const PAY=[
-    {key:'card',    label:'신용·체크카드', color:'#2563EB'},
-    {key:'kakao',   label:'카카오페이',    color:'#F59E0B'},
-    {key:'naver',   label:'네이버페이',    color:'#16A34A'},
-    {key:'toss',    label:'토스페이',      color:'#7C3AED'},
-    {key:'transfer',label:'실시간 계좌이체',color:'#0EA5E9'},
-  ];
-  const totalAmt=valid.reduce((s,o)=>s+o.price,0)||1;
-  const rows=PAY.map(p=>{
-    const items=valid.filter(o=>o.pay===p.key);
-    return {...p,amount:items.reduce((s,o)=>s+o.price,0),count:items.length,pct:Math.round((items.reduce((s,o)=>s+o.price,0)/totalAmt)*100)};
-  }).filter(p=>p.count>0).sort((a,b)=>b.amount-a.amount);
-  el.innerHTML=rows.map(p=>`
-    <div>
+/* ── PAYMENT CHART ── */
+function renderPay(payments) {
+  const el    = document.getElementById('payChart');
+  const empty = document.getElementById('payEmpty');
+
+  if (!payments || payments.length === 0) {
+    el.style.display = 'none'; empty.style.display = 'block'; return;
+  }
+  el.style.display = 'flex'; empty.style.display = 'none';
+
+  const totalAmt = payments.reduce((s, p) => s + p.amount, 0) || 1;
+  const rows = payments.map(p => {
+    const info = PAY_INFO[p.payment_method] || { label: p.payment_method || '기타', color: '#94A3B8' };
+    const pct  = Math.round((p.amount / totalAmt) * 100);
+    const rate = PG_FEE_RATES[p.payment_method] ?? 0.033;
+    const fee  = Math.round(p.amount * rate);
+    return `<div>
       <div class="pay-row-head">
         <div class="pay-row-left">
-          <div class="pay-dot" style="background:${p.color};"></div>
-          ${p.label}
+          <div class="pay-dot" style="background:${info.color};"></div>
+          ${info.label}
           <span class="pay-cnt">(${p.count}건)</span>
         </div>
         <div class="pay-row-right">
           <span class="pay-amt">${fmtWon(p.amount)}</span>
-          <span class="pay-pct">${p.pct}%</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#7C3AED;min-width:70px;text-align:right;">수수료 ${fmtWon(fee)}</span>
+          <span class="pay-pct">${pct}%</span>
         </div>
       </div>
       <div class="pay-bar-bg">
-        <div class="pay-bar-fill" style="width:${p.pct}%;background:${p.color};opacity:.7;"></div>
+        <div class="pay-bar-fill" style="width:${pct}%;background:${info.color};opacity:.7;"></div>
       </div>
-    </div>`).join('');
+    </div>`;
+  });
+  el.innerHTML = rows.join('');
 }
 
-/* RENDER ALL */
-function render(){
-  const {from,to,label}=getRange(curPeriod);
-  document.getElementById('periodRange').textContent=label;
-  const orders=filterOrders(ALL_ORDERS,from,to);
-  renderSummary(orders);
-  renderTrend();
-  renderProduct(orders);
-  renderPay(orders);
+/* ── MAIN RENDER (API 호출) ── */
+async function render() {
+  const { from, to, label } = getRange(curPeriod);
+  document.getElementById('periodRange').textContent = label;
+
+  /* 로딩 표시 */
+  ['scGross','scRefund','scFee','scNet','scCount'].forEach(id => {
+    document.getElementById(id).textContent = '···';
+  });
+
+  try {
+    const params = new URLSearchParams();
+    if (from) params.set('dateFrom', from);
+    if (to)   params.set('dateTo',   to);
+
+    const res = await fetch(`${API_URL}/api/admin/settlement?${params}`, { credentials:'include' });
+    if (!res.ok) throw new Error(`서버 오류 (${res.status})`);
+    curData = await res.json();
+
+    renderSummary(curData.summary, curData.payments);
+    renderTrend(curData.monthly);
+    renderProduct(curData.products);
+    renderPay(curData.payments);
+  } catch (err) {
+    console.error('[settlement]', err);
+    showToast('데이터 조회 실패: ' + err.message);
+    ['scGross','scRefund','scFee','scNet','scCount'].forEach(id => {
+      document.getElementById(id).textContent = '—';
+    });
+  }
 }
 
-/* EXCEL EXPORT */
-function exportExcel(){
-  const {from,to,label}=getRange(curPeriod);
-  const orders=filterOrders(ALL_ORDERS,from,to);
-  if(!orders.length){showToast('다운로드할 내역이 없습니다');return;}
-  const valid=orders.filter(o=>o.status!=='refund');
-  const refunds=orders.filter(o=>o.status==='refund');
-  const gross=orders.reduce((s,o)=>s+o.price,0);
-  const refAmt=refunds.reduce((s,o)=>s+o.price,0);
-  const PAY_L={card:'신용체크카드',kakao:'카카오페이',naver:'네이버페이',toss:'토스페이',transfer:'실시간계좌이체'};
-  const STS_L={paid:'결제완료',sent:'발송완료',done:'구매확정',resend:'재발송필요',refund:'환불처리'};
-  const rows=[
+/* ── EXCEL EXPORT ── */
+function exportExcel() {
+  if (!curData) { showToast('먼저 데이터를 조회해주세요'); return; }
+  const { label } = getRange(curPeriod);
+  const s = curData.summary;
+  const pgFee = calcPgFee(curData.payments);
+  const net = Math.max(0, s.gross - s.refund_amount - pgFee);
+
+  const PAY_ROWS = (curData.payments||[]).map(p => {
+    const info = PAY_INFO[p.payment_method] || { label: p.payment_method || '기타' };
+    const rate = PG_FEE_RATES[p.payment_method] ?? 0.033;
+    return [info.label, p.count + '건', p.amount, Math.round(p.amount * rate)];
+  });
+
+  const PROD_ROWS = (curData.products||[]).map(p => [
+    p.name, p.sale_count + '건', p.gross, p.refund_amount, p.gross - p.refund_amount
+  ]);
+
+  const rows = [
     [`모듈랩 정산 내역 — ${label}`],
     [`작성일: ${new Date().toLocaleDateString('ko-KR')}`],
     [],
-    ['[요약]'],
-    ['총 매출액',gross,'원'],['환불 차감',refAmt,'원'],['실 수령액',gross-refAmt,'원'],['유효 판매건수',valid.length,'건'],
+    ['[기간 요약]'],
+    ['총 매출액', s.gross, '원'],
+    ['환불 차감', s.refund_amount, '원'],
+    ['PG 수수료(예상)', pgFee, '원'],
+    ['실 수령액(예상)', net, '원'],
+    ['총 주문건수', s.total_count, '건'],
+    ['유효 판매건수', s.valid_count, '건'],
+    ['환불건수', s.refund_count, '건'],
     [],
-    ['[상세 내역]'],
-    ['주문번호','상품명','결제금액(원)','결제수단','상태','주문일자'],
-    ...orders.map(o=>[o.id,o.product,o.price,PAY_L[o.pay]||o.pay,STS_L[o.status]||o.status,o.date])
+    ['[결제수단별]'],
+    ['결제수단', '건수', '매출액(원)', 'PG수수료(원)'],
+    ...PAY_ROWS,
+    [],
+    ['[상품별]'],
+    ['상품명', '판매건수', '매출액(원)', '환불액(원)', '순매출(원)'],
+    ...PROD_ROWS
   ];
-  const csv='﻿'+rows.map(r=>r.length===0?'':r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
-  const a=document.createElement('a');
-  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
-  a.download=`modulab_정산_${label.replace(/ /g,'_')}_${new Date().toISOString().slice(0,10)}.csv`;
+
+  const csv = '﻿' + rows.map(r =>
+    r.length === 0 ? '' : r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')
+  ).join('\n');
+
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = `modulab_정산_${label.replace(/ /g,'_')}_${new Date().toISOString().slice(0,10)}.csv`;
   a.click();
   showToast('엑셀 파일을 다운로드했습니다');
 }
 
-/* TOAST */
-function showToast(msg){
-  const t=document.getElementById('toast');
-  document.getElementById('toastMsg').textContent=msg;
+/* ── TOAST ── */
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
   t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),3000);
+  setTimeout(() => t.classList.remove('show'), 3000);
 }
 
 render();

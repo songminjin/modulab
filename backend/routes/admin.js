@@ -612,6 +612,93 @@ router.get('/members', authenticate, isAdmin, async (req, res) => {
   }
 });
 
+// GET /api/admin/settlement — 정산 현황판
+router.get('/settlement', authenticate, isAdmin, async (req, res) => {
+  try {
+    const { dateFrom, dateTo } = req.query;
+    const now = new Date();
+    const year = now.getFullYear();
+    const pad = n => String(n).padStart(2, '0');
+    const from = dateFrom || `${year}-${pad(now.getMonth()+1)}-01`;
+    const to   = dateTo   || `${year}-${pad(now.getMonth()+1)}-${new Date(year, now.getMonth()+1, 0).getDate()}`;
+
+    const [summaryRes, monthlyRes, productRes, paymentRes] = await Promise.all([
+      // 기간 요약 (주문 레벨)
+      db.query(`
+        SELECT
+          COUNT(*)::int                                                     AS total_count,
+          COUNT(*) FILTER (WHERE status != 'refund')::int                  AS valid_count,
+          COUNT(*) FILTER (WHERE status  = 'refund')::int                  AS refund_count,
+          COALESCE(SUM(final_amount), 0)::int                              AS gross,
+          COALESCE(SUM(final_amount) FILTER (WHERE status='refund'), 0)::int AS refund_amount
+        FROM orders
+        WHERE status IN ('paid','sent','done','resend','refund')
+          AND paid_at >= $1
+          AND paid_at <  $2::date + interval '1 day'
+      `, [from, to]),
+
+      // 올해 월별 추이
+      db.query(`
+        SELECT
+          EXTRACT(MONTH FROM paid_at)::int                                      AS month,
+          COUNT(*) FILTER (WHERE status != 'refund')::int                       AS valid_count,
+          COUNT(*) FILTER (WHERE status  = 'refund')::int                       AS refund_count,
+          COALESCE(SUM(final_amount) FILTER (WHERE status != 'refund'), 0)::int AS amount,
+          COALESCE(SUM(final_amount) FILTER (WHERE status  = 'refund'), 0)::int AS refund_amount
+        FROM orders
+        WHERE status IN ('paid','sent','done','resend','refund')
+          AND paid_at >= $1
+          AND paid_at <  $2
+        GROUP BY EXTRACT(MONTH FROM paid_at)
+        ORDER BY month
+      `, [`${year}-01-01`, `${year+1}-01-01`]),
+
+      // 상품별 현황 (order_items 기준, 부분 환불 반영)
+      db.query(`
+        SELECT
+          p.name,
+          p.emoji,
+          COUNT(oi.id) FILTER (WHERE oi.status='active')::int            AS sale_count,
+          COUNT(oi.id) FILTER (WHERE oi.status='refunded')::int          AS refund_count,
+          COALESCE(SUM(oi.price) FILTER (WHERE oi.status='active'),   0)::int AS gross,
+          COALESCE(SUM(oi.price) FILTER (WHERE oi.status='refunded'), 0)::int AS refund_amount
+        FROM order_items oi
+        JOIN products p ON p.id = oi.product_id
+        JOIN orders   o ON o.id = oi.order_id
+        WHERE o.status IN ('paid','sent','done','resend','refund')
+          AND o.paid_at >= $1
+          AND o.paid_at <  $2::date + interval '1 day'
+        GROUP BY p.id, p.name, p.emoji
+        ORDER BY gross DESC
+      `, [from, to]),
+
+      // 결제수단별 비중 (유효 주문만)
+      db.query(`
+        SELECT
+          payment_method,
+          COUNT(*)::int                          AS count,
+          COALESCE(SUM(final_amount), 0)::int    AS amount
+        FROM orders
+        WHERE status IN ('paid','sent','done','resend')
+          AND paid_at >= $1
+          AND paid_at <  $2::date + interval '1 day'
+        GROUP BY payment_method
+        ORDER BY amount DESC
+      `, [from, to])
+    ]);
+
+    res.json({
+      summary:  summaryRes.rows[0],
+      monthly:  monthlyRes.rows,
+      products: productRes.rows,
+      payments: paymentRes.rows
+    });
+  } catch (err) {
+    console.error('[admin/settlement]', err);
+    res.status(500).json({ error: '정산 데이터 조회 중 오류가 발생했습니다.' });
+  }
+});
+
 // GET /api/admin/users
 router.get('/users', authenticate, isAdmin, async (req, res) => {
   const { rows } = await db.query(

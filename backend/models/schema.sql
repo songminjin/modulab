@@ -53,6 +53,7 @@ CREATE TABLE IF NOT EXISTS orders (
   status VARCHAR(30) DEFAULT 'pending',  -- pending, paid, cancelled, refunded
   payment_key VARCHAR(255),              -- 토스페이먼츠 결제키
   payment_method VARCHAR(50),
+  pg_provider VARCHAR(50),
   coupon_id UUID,
   created_at TIMESTAMP DEFAULT NOW(),
   paid_at TIMESTAMP
@@ -252,3 +253,6 @@ ALTER TABLE orders ADD COLUMN IF NOT EXISTS coupon_event_download_id UUID;
 
 -- Migration: coupon_events 에 applicable_grades 추가
 ALTER TABLE coupon_events ADD COLUMN IF NOT EXISTS applicable_grades JSONB DEFAULT '[]';
+
+-- Migration: orders 테이블에 pg_provider 추가
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS pg_provider VARCHAR(50);
