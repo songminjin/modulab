@@ -464,6 +464,9 @@ async function loadOrders() {
     const statusCls = { paid: 's-paid', vbank_pending: 's-pending', pending: 's-pending', cancelled: 's-cancelled', refund: 's-cancelled', refunded: 's-refunded' };
     container.innerHTML = orders.map(o => {
       const items = Array.isArray(o.items) ? o.items : [];
+      const refundBtn = o.status === 'paid'
+        ? `<button class="mp-btn mp-btn-danger" style="font-size:13px;padding:7px 14px;margin-top:12px;" onclick="requestRefund('${o.id}')">환불 신청</button>`
+        : '';
       return `<div class="order-card">
         <div class="order-card-head">
           <div>
@@ -479,11 +482,28 @@ async function loadOrders() {
               <div class="order-item-price">₩${Number(item.price || 0).toLocaleString('ko-KR')}</div>
             </div>`).join('')}
           <div class="order-total">합계: ₩${Number(o.final_amount || 0).toLocaleString('ko-KR')}</div>
+          ${refundBtn}
         </div>
       </div>`;
     }).join('');
   } catch(e) {
     container.innerHTML = '<div class="mp-empty"><div class="mp-empty-icon">⚠️</div><div class="mp-empty-msg">불러오기에 실패했습니다.</div></div>';
+  }
+}
+
+async function requestRefund(orderId) {
+  if (!confirm('정말 환불하시겠습니까?\n환불 후 다운로드 권한이 삭제됩니다.')) return;
+  try {
+    const res = await fetch(`${API}/api/payments/refund/${orderId}`, {
+      method: 'POST',
+      credentials: 'include'
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || '환불 처리에 실패했습니다.');
+    showToast('환불이 완료되었습니다.');
+    loadOrders();
+  } catch(e) {
+    showToast(e.message || '환불 처리 중 오류가 발생했습니다.');
   }
 }
 
