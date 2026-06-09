@@ -25,7 +25,7 @@ router.get('/stats', async (req, res) => {
 // 전체 상품 조회
 router.get('/', async (req, res) => {
   const { category, sort } = req.query;
-  let query = 'SELECT id, name, description, price, category, emoji, thumbnail_url, view_count, download_count, created_at FROM products WHERE is_active = true';
+  let query = 'SELECT id, name, description, short_description, price, discount_price, category, emoji, thumbnail_url, new_badge, best_badge, sale_type, view_count, download_count, created_at FROM products WHERE is_active = true';
   const params = [];
 
   if (category) { params.push(category); query += ` AND category = $${params.length}`; }

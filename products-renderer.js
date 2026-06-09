@@ -22,21 +22,30 @@
 
   async function fetchProducts() {
     try {
-      const [jsonRes, statsMap] = await Promise.all([
-        fetch(RAW_URL, { cache: 'no-cache' }),
+      const [apiRes, statsMap] = await Promise.all([
+        fetch(`${API_URL}/api/products`, { cache: 'no-cache' }),
         fetchStats()
       ]);
-      if (jsonRes.ok) {
-        const products = await jsonRes.json();
-        if (Object.keys(statsMap).length) {
-          products.forEach(p => {
-            if (p.uuid && statsMap[p.uuid]) {
-              p.views = statsMap[p.uuid].views;
-              p.downloads = statsMap[p.uuid].downloads;
-            }
-          });
-        }
-        return products;
+      if (apiRes.ok) {
+        const apiProducts = await apiRes.json();
+        return apiProducts.map(p => ({
+          id:        p.id,
+          uuid:      p.id,
+          name:      p.name,
+          cat:       p.category,
+          price:     p.price,
+          discount:  p.discount_price || 0,
+          type:      p.sale_type || 'file',
+          emoji:     p.emoji || '📦',
+          desc:      p.short_description || '',
+          detail:    p.description || '',
+          thumbUrl:  p.thumbnail_url || '',
+          newBadge:  p.new_badge === true,
+          bestBadge: p.best_badge === true,
+          visible:   true,
+          views:     statsMap[p.id]?.views     ?? p.view_count     ?? 0,
+          downloads: statsMap[p.id]?.downloads ?? p.download_count ?? 0,
+        }));
       }
     } catch {}
     return null;
