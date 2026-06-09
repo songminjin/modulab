@@ -526,15 +526,18 @@ async function loadOrders(){
     const data = await res.json();
     // DB 컬럼 → UI 포맷 변환
     orders = (data.orders || []).map(o => ({
-      id:      o.id,
-      buyer:   o.buyer_name,
-      email:   o.buyer_email,
-      product: o.product_names,
-      price:   o.final_amount,
-      pay:     o.payment_method || '',
-      status:  o.status,
-      date:    new Date(o.created_at).toLocaleString('ko-KR'),
-      fileUrl: ''
+      id:          o.id,
+      buyer:       o.buyer_name,
+      email:       o.buyer_email,
+      product:     o.product_names,
+      price:       o.final_amount,
+      pay:         o.payment_method || '',
+      status:      o.status,
+      date:        new Date(o.created_at).toLocaleString('ko-KR'),
+      paidAt:      o.paid_at ? new Date(o.paid_at).toLocaleString('ko-KR') : null,
+      paymentKey:  o.payment_key || null,
+      pgProvider:  o.pg_provider || null,
+      fileUrl:     ''
     }));
     updateSummary();
     renderTable();
@@ -728,8 +731,18 @@ function openDetail(id){
       <div class="detail-row"><span class="detail-key">상품명</span><span class="detail-val">${o.product}</span></div>
       <div class="detail-row"><span class="detail-key">결제금액</span><span class="detail-val mono" style="color:var(--blue);font-size:15px;font-weight:700;">₩${o.price.toLocaleString()}</span></div>
       <div class="detail-row"><span class="detail-key">결제수단</span><span class="detail-val">${payInfo[o.pay]||o.pay}</span></div>
+      <div class="detail-row"><span class="detail-key">PG사</span><span class="detail-val">${o.pgProvider || '—'}</span></div>
+      <div class="detail-row"><span class="detail-key">결제 키</span><span class="detail-val mono" style="font-size:11px;word-break:break-all;">${o.paymentKey || '—'}</span></div>
       <div class="detail-row"><span class="detail-key">주문일시</span><span class="detail-val mono">${o.date}</span></div>
+      <div class="detail-row"><span class="detail-key">결제완료일시</span><span class="detail-val mono">${o.paidAt || '—'}</span></div>
       <div class="detail-row"><span class="detail-key">주문 상태</span><span class="detail-val"><span class="badge ${statusBadge[o.status]}">${statusLabel[o.status]}</span></span></div>
+      ${o.paymentKey && o.pgProvider !== 'paypal' ? `
+      <div class="detail-row">
+        <span class="detail-key">포트원 확인</span>
+        <span class="detail-val">
+          <a href="https://admin.portone.io/payments?query=${encodeURIComponent(o.paymentKey)}" target="_blank" style="color:var(--blue);text-decoration:underline;font-size:13px;">포트원 대시보드에서 확인 ↗</a>
+        </span>
+      </div>` : ''}
     </div>
     <div class="detail-section">
       <div class="detail-section-title">파일 정보</div>
