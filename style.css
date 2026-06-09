@@ -367,6 +367,67 @@ img { max-width: 100%; display: block; }
 .trust-text span { font-size: 12px; color: var(--text3); }
 .trust-divider { width: 1px; height: 36px; background: var(--border); flex-shrink: 0; }
 
+/* ───── 창업 3단계 흐름 ───── */
+.startup-steps-section {
+  background: var(--white);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.startup-steps-section .section-wrap { padding-top: 52px; padding-bottom: 52px; }
+.startup-steps-header { text-align: center; margin-bottom: 40px; }
+.startup-steps-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 500;
+  color: var(--blue); background: var(--blue-light);
+  display: inline-block; padding: 4px 10px; border-radius: 4px;
+  letter-spacing: .08em; text-transform: uppercase; margin-bottom: 12px;
+}
+.startup-steps-title {
+  font-size: clamp(18px, 2.5vw, 24px); font-weight: 700; color: var(--text);
+}
+.startup-steps-grid {
+  display: flex; align-items: stretch;
+}
+.startup-step-card {
+  flex: 1; background: var(--white);
+  border: 1px solid var(--border); border-radius: 12px;
+  padding: 28px 24px; display: flex; flex-direction: column; gap: 10px;
+  text-decoration: none; color: inherit;
+  transition: box-shadow .15s, transform .15s;
+}
+.startup-step-card:hover {
+  box-shadow: 0 6px 24px rgba(0,0,0,.08); transform: translateY(-3px);
+}
+.startup-step-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 700;
+  display: inline-block; padding: 4px 10px;
+  border-radius: 6px; letter-spacing: .06em; width: fit-content;
+}
+.startup-step-badge--blue  { background: var(--blue-light); color: var(--blue); }
+.startup-step-badge--green { background: #DCFCE7; color: #16A34A; }
+.startup-step-badge--orange{ background: #FFF7ED; color: #EA580C; }
+.startup-step-name { font-size: 17px; font-weight: 700; color: var(--text); }
+.startup-step-desc { font-size: 13px; color: var(--text2); line-height: 1.5; }
+.startup-step-items {
+  list-style: none; padding: 0; margin: 4px 0 0;
+  display: flex; flex-direction: column; gap: 6px; flex: 1;
+}
+.startup-step-items li {
+  font-size: 13px; color: var(--text2);
+  padding-left: 16px; position: relative;
+}
+.startup-step-items li::before {
+  content: '·'; position: absolute; left: 4px; color: var(--text3);
+}
+.startup-step-link {
+  margin-top: 6px; font-size: 13px; font-weight: 600; color: var(--blue);
+}
+.startup-step-arrow {
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 16px; font-size: 22px; color: var(--text3); flex-shrink: 0;
+}
+
 /* ───── SHARED SECTION WRAPPER ───── */
 .section-wrap {
   max-width: 1280px; margin: 0 auto;
@@ -924,6 +985,9 @@ footer { background: var(--navy); color: white; }
 
   .section-wrap { padding: 48px 24px; }
 
+  .startup-steps-grid { gap: 0; }
+  .startup-step-card { padding: 22px 18px; }
+
   .promo-grid { grid-template-columns: 1fr 1fr; }
   .promo-card:nth-child(3) { grid-column: 1 / -1; }
 
@@ -968,6 +1032,9 @@ footer { background: var(--navy); color: white; }
   .trust-item { min-width: 140px; }
 
   .section-wrap { padding: 40px 20px; }
+
+  .startup-steps-grid { flex-direction: column; }
+  .startup-step-arrow { transform: rotate(90deg); padding: 8px 0; }
 
   .promo-grid { grid-template-columns: 1fr; }
   .promo-card:nth-child(3) { grid-column: auto; }
