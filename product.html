@@ -508,6 +508,15 @@
   <div class="prod-related-grid" id="relatedGrid"></div>
 </div>
 
+<!-- 퍼널: 다음 단계 크로스셀 -->
+<div class="prod-funnel-section" id="prodFunnelSection" style="display:none;">
+  <div class="prod-funnel-header">
+    <div class="prod-funnel-label" id="prodFunnelLabel">다음 단계</div>
+    <div class="prod-funnel-title" id="prodFunnelTitle"></div>
+  </div>
+  <div class="prod-funnel-grid" id="prodFunnelGrid"></div>
+</div>
+
 <!-- FOOTER -->
 <footer>
   <div class="footer-cs-bar">
@@ -814,6 +823,7 @@ function init() {
   renderDetailTab();
   loadReviews();
   renderRelated();
+  renderFunnelCross();
 
   // Cart badge
   const cart = JSON.parse(localStorage.getItem('modulab_cart') || '[]');
@@ -1216,6 +1226,46 @@ function renderRelated() {
         </div>
       </a>`;
   }).join('');
+}
+
+function renderFunnelCross() {
+  const cat = product.cat;
+  const FUNNEL = {
+    excel:   { step: 'STEP 02', title: '내부 시스템 완성! 다음은 온라인으로 나갈 차례입니다', cards: [
+      { emoji:'🖼️', name:'상세페이지 맞춤 제작', desc:'상품을 매력적으로 온라인에 소개', badge:'STEP 02', badgeStyle:'background:#DCFCE7;color:#16A34A', href:'category-detail.html', link:'보기 →' },
+      { emoji:'🌐', name:'홈페이지 맞춤 제작',   desc:'브랜드 홈페이지로 신뢰도 높이기',  badge:'STEP 02', badgeStyle:'background:#DCFCE7;color:#16A34A', href:'category-web.html', link:'보기 →' },
+      { emoji:'🎬', name:'숏폼 편집 템플릿',     desc:'콘텐츠로 고객에게 알리기',          badge:'STEP 03', badgeStyle:'background:#FFF7ED;color:#EA580C', href:'category-short.html', link:'보기 →' },
+    ]},
+    sheets:  { step: 'STEP 02', title: '내부 시스템 완성! 다음은 온라인으로 나갈 차례입니다', cards: [
+      { emoji:'🖼️', name:'상세페이지 맞춤 제작', desc:'상품을 매력적으로 온라인에 소개', badge:'STEP 02', badgeStyle:'background:#DCFCE7;color:#16A34A', href:'category-detail.html', link:'보기 →' },
+      { emoji:'🌐', name:'홈페이지 맞춤 제작',   desc:'브랜드 홈페이지로 신뢰도 높이기',  badge:'STEP 02', badgeStyle:'background:#DCFCE7;color:#16A34A', href:'category-web.html', link:'보기 →' },
+      { emoji:'🎬', name:'숏폼 편집 템플릿',     desc:'콘텐츠로 고객에게 알리기',          badge:'STEP 03', badgeStyle:'background:#FFF7ED;color:#EA580C', href:'category-short.html', link:'보기 →' },
+    ]},
+    detail:  { step: 'STEP 03', title: '온라인 준비 완성! 이제 콘텐츠로 알릴 차례입니다', cards: [
+      { emoji:'🎬', name:'숏폼 편집 템플릿', desc:'짧은 영상으로 수백 명의 잠재 고객 확보', badge:'STEP 03', badgeStyle:'background:#FFF7ED;color:#EA580C', href:'category-short.html', link:'보기 →' },
+      { emoji:'🔧', name:'엑셀 자동화 프로그램', desc:'내부 업무 시스템도 함께 갖추세요', badge:'STEP 01', badgeStyle:'background:#EFF6FF;color:#2563EB', href:'category-excel.html', link:'보기 →' },
+    ]},
+    web:     { step: 'STEP 03', title: '온라인 준비 완성! 이제 콘텐츠로 알릴 차례입니다', cards: [
+      { emoji:'🎬', name:'숏폼 편집 템플릿', desc:'짧은 영상으로 수백 명의 잠재 고객 확보', badge:'STEP 03', badgeStyle:'background:#FFF7ED;color:#EA580C', href:'category-short.html', link:'보기 →' },
+      { emoji:'🔧', name:'엑셀 자동화 프로그램', desc:'내부 업무 시스템도 함께 갖추세요', badge:'STEP 01', badgeStyle:'background:#EFF6FF;color:#2563EB', href:'category-excel.html', link:'보기 →' },
+    ]},
+    short:   { step: 'STEP 01', title: '콘텐츠 준비됐다면 내부 시스템도 갖춰보세요', cards: [
+      { emoji:'📊', name:'엑셀 자동화 프로그램', desc:'업무 흐름을 자동화해 시간을 절약', badge:'STEP 01', badgeStyle:'background:#EFF6FF;color:#2563EB', href:'category-excel.html', link:'보기 →' },
+      { emoji:'⚙️', name:'구글시트 자동화',      desc:'클라우드 기반 실시간 업무 관리',   badge:'STEP 01', badgeStyle:'background:#EFF6FF;color:#2563EB', href:'category-sheets.html', link:'보기 →' },
+    ]},
+  };
+  const f = FUNNEL[cat];
+  if (!f) return;
+  const section = document.getElementById('prodFunnelSection');
+  document.getElementById('prodFunnelTitle').textContent = f.title;
+  document.getElementById('prodFunnelGrid').innerHTML = f.cards.map(c => `
+    <a href="${c.href}" class="prod-funnel-card">
+      <div class="prod-funnel-card-badge" style="${c.badgeStyle}">${c.badge}</div>
+      <div class="prod-funnel-card-name">${c.emoji} ${c.name}</div>
+      <div class="prod-funnel-card-desc">${c.desc}</div>
+      <div class="prod-funnel-card-link">${c.link}</div>
+    </a>`).join('');
+  section.style.display = 'block';
 }
 
 /* ── CART ── */

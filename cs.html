@@ -93,6 +93,55 @@
   <span>고객센터</span>
 </div>
 
+<!-- 창업 단계 가이드 -->
+<div class="cs-funnel-guide">
+  <div class="cs-funnel-inner">
+    <div class="cs-funnel-title">어느 단계에 계신가요?</div>
+    <div class="cs-funnel-steps">
+      <button class="cs-funnel-btn active" onclick="selectFunnelStep(1, this)">
+        <span class="cs-funnel-badge cs-funnel-badge--blue">STEP 01</span>
+        <span class="cs-funnel-step-name">내부 시스템 구축</span>
+        <span class="cs-funnel-step-sub">엑셀 · 구글시트 · 프로그램</span>
+      </button>
+      <div class="cs-funnel-sep">→</div>
+      <button class="cs-funnel-btn" onclick="selectFunnelStep(2, this)">
+        <span class="cs-funnel-badge cs-funnel-badge--green">STEP 02</span>
+        <span class="cs-funnel-step-name">온라인 판매 준비</span>
+        <span class="cs-funnel-step-sub">상세페이지 · 홈페이지 제작</span>
+      </button>
+      <div class="cs-funnel-sep">→</div>
+      <button class="cs-funnel-btn" onclick="selectFunnelStep(3, this)">
+        <span class="cs-funnel-badge cs-funnel-badge--orange">STEP 03</span>
+        <span class="cs-funnel-step-name">콘텐츠로 알리기</span>
+        <span class="cs-funnel-step-sub">숏폼 편집 템플릿</span>
+      </button>
+    </div>
+    <div class="cs-funnel-contents">
+      <div class="cs-funnel-content active" id="cs-funnel-1">
+        <div class="cs-funnel-content-text">엑셀 자동화, 구글시트, 맞춤 프로그램에 대해 문의하시는군요!<br>아래 1:1 문의 또는 카카오톡으로 편하게 연락 주세요.</div>
+        <div class="cs-funnel-links">
+          <a href="category-excel.html" class="cs-funnel-link">엑셀 상품 보기 →</a>
+          <a href="category-sheets.html" class="cs-funnel-link">구글시트 상품 보기 →</a>
+          <a href="category-program.html" class="cs-funnel-link">맞춤 프로그램 보기 →</a>
+        </div>
+      </div>
+      <div class="cs-funnel-content" id="cs-funnel-2">
+        <div class="cs-funnel-content-text">상세페이지 · 홈페이지 제작 문의이시군요!<br>레퍼런스 이미지와 함께 문의 주시면 빠른 견적이 가능합니다.</div>
+        <div class="cs-funnel-links">
+          <a href="category-detail.html" class="cs-funnel-link">상세페이지 제작 보기 →</a>
+          <a href="category-web.html" class="cs-funnel-link">홈페이지 제작 보기 →</a>
+        </div>
+      </div>
+      <div class="cs-funnel-content" id="cs-funnel-3">
+        <div class="cs-funnel-content-text">숏폼 편집 템플릿 문의이시군요!<br>어떤 스타일의 영상을 만드실지 함께 알려주시면 더 빠른 안내가 가능합니다.</div>
+        <div class="cs-funnel-links">
+          <a href="category-short.html" class="cs-funnel-link">숏폼 템플릿 보기 →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- TAB NAV -->
 <div class="cs-tabs-wrap">
   <div class="cs-tabs-inner">
@@ -403,6 +452,13 @@
 
 <script src="auth.js"></script>
 <script>
+function selectFunnelStep(step, btn) {
+  document.querySelectorAll('.cs-funnel-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.cs-funnel-content').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  const content = document.getElementById('cs-funnel-' + step);
+  if (content) content.classList.add('active');
+}
 function openDrawer() {
   const d = document.getElementById('drawerOverlay');
   d.style.display = 'block';

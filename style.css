@@ -428,6 +428,195 @@ img { max-width: 100%; display: block; }
   padding: 0 16px; font-size: 22px; color: var(--text3); flex-shrink: 0;
 }
 
+/* ═══════════════════════════════════════════════
+   퍼널 넥스트 스텝 — 카테고리 페이지 하단
+   ═══════════════════════════════════════════════ */
+.funnel-next {
+  background: var(--navy2);
+  border-top: 1px solid rgba(255,255,255,.06);
+}
+.funnel-next-inner {
+  max-width: 1280px; margin: 0 auto; padding: 52px 40px;
+  display: flex; flex-direction: column; gap: 36px;
+}
+/* 진행 바 */
+.funnel-progress {
+  display: flex; align-items: center; justify-content: center;
+  gap: 0; background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 12px; padding: 20px 28px;
+}
+.funnel-progress-step {
+  display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1;
+}
+.funnel-step-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 700;
+  padding: 4px 10px; border-radius: 6px; letter-spacing: .06em;
+}
+.funnel-step-done    { background: rgba(22,163,74,.2);  color: #4ADE80; }
+.funnel-step-current { background: rgba(37,99,235,.3);  color: #93C5FD; }
+.funnel-step-current-g { background: rgba(234,88,12,.25); color: #FB923C; }
+.funnel-step-todo    { background: rgba(255,255,255,.08); color: rgba(255,255,255,.3); }
+.funnel-step-name {
+  font-size: 12px; font-weight: 500; color: rgba(255,255,255,.55); text-align: center;
+}
+.funnel-step-name.done-label { color: #4ADE80; }
+.funnel-step-name.current-label { color: rgba(255,255,255,.9); font-weight: 700; }
+.funnel-progress-arrow {
+  font-size: 18px; color: rgba(255,255,255,.18); padding: 0 20px; flex-shrink: 0;
+}
+.funnel-arrow-active { color: #93C5FD; }
+.funnel-arrow-done   { color: #4ADE80; }
+/* CTA 영역 */
+.funnel-next-cta { display: flex; flex-direction: column; gap: 14px; }
+.funnel-next-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 500;
+  color: #93C5FD; letter-spacing: .08em; text-transform: uppercase;
+}
+.funnel-next-label-orange { color: #FB923C; }
+.funnel-next-title {
+  font-size: clamp(18px, 2.5vw, 24px); font-weight: 700;
+  color: var(--white); line-height: 1.35;
+}
+.funnel-next-desc { font-size: 14px; color: rgba(255,255,255,.55); line-height: 1.6; }
+.funnel-next-btns { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 4px; }
+.funnel-btn-primary {
+  display: inline-flex; align-items: center;
+  background: var(--blue); color: white;
+  padding: 11px 22px; border-radius: 8px;
+  font-size: 14px; font-weight: 600;
+  text-decoration: none; transition: background .15s;
+}
+.funnel-btn-primary:hover { background: var(--blue-dark); }
+.funnel-btn-primary-orange { background: #EA580C; }
+.funnel-btn-primary-orange:hover { background: #C2410C; }
+.funnel-btn-ghost {
+  display: inline-flex; align-items: center;
+  background: rgba(255,255,255,.08); color: rgba(255,255,255,.75);
+  padding: 11px 22px; border-radius: 8px;
+  font-size: 14px; font-weight: 600;
+  text-decoration: none; border: 1px solid rgba(255,255,255,.12);
+  transition: background .15s;
+}
+.funnel-btn-ghost:hover { background: rgba(255,255,255,.14); }
+
+/* ═══════════════════════════════════════════════
+   퍼널 크로스셀 — 상품 상세 페이지
+   ═══════════════════════════════════════════════ */
+.prod-funnel-section {
+  max-width: 1280px; margin: 0 auto; padding: 0 40px 60px;
+  border-top: 1px solid var(--border); padding-top: 40px;
+}
+.prod-funnel-header { margin-bottom: 20px; }
+.prod-funnel-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 500;
+  color: var(--blue); background: var(--blue-light);
+  display: inline-block; padding: 3px 8px; border-radius: 4px;
+  letter-spacing: .06em; margin-bottom: 8px;
+}
+.prod-funnel-title { font-size: 17px; font-weight: 700; color: var(--text); }
+.prod-funnel-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.prod-funnel-card {
+  display: flex; flex-direction: column; gap: 8px;
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 12px; padding: 20px;
+  text-decoration: none; color: inherit;
+  transition: box-shadow .15s, border-color .15s;
+}
+.prod-funnel-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.08); border-color: var(--blue-mid); }
+.prod-funnel-card-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; font-weight: 700;
+  padding: 3px 8px; border-radius: 5px; width: fit-content;
+  letter-spacing: .06em;
+}
+.prod-funnel-card-name { font-size: 14px; font-weight: 700; color: var(--text); }
+.prod-funnel-card-desc { font-size: 12px; color: var(--text2); line-height: 1.5; flex: 1; }
+.prod-funnel-card-link { font-size: 12px; font-weight: 600; color: var(--blue); margin-top: 4px; }
+
+/* ═══════════════════════════════════════════════
+   마이페이지 다음 단계 추천 서비스
+   ═══════════════════════════════════════════════ */
+.mp-next-service { margin-top: 16px; }
+.mp-next-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 14px;
+}
+.mp-next-card {
+  display: flex; flex-direction: column; gap: 6px;
+  background: var(--slate-light); border: 1px solid var(--border);
+  border-radius: 10px; padding: 16px;
+  text-decoration: none; color: inherit;
+  transition: border-color .15s, box-shadow .15s;
+}
+.mp-next-card:hover { border-color: var(--blue-mid); box-shadow: 0 2px 10px rgba(37,99,235,.08); }
+.mp-next-step-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; font-weight: 700;
+  padding: 3px 8px; border-radius: 5px; width: fit-content; letter-spacing: .05em;
+}
+.mp-next-card-name { font-size: 13px; font-weight: 700; color: var(--text); }
+.mp-next-card-desc { font-size: 12px; color: var(--text2); line-height: 1.4; }
+
+/* ═══════════════════════════════════════════════
+   CS 페이지 창업 단계 가이드
+   ═══════════════════════════════════════════════ */
+.cs-funnel-guide {
+  background: var(--slate-light);
+  border-bottom: 1px solid var(--border);
+}
+.cs-funnel-inner {
+  max-width: 960px; margin: 0 auto;
+  padding: 32px 40px; display: flex; flex-direction: column; gap: 20px;
+}
+.cs-funnel-title {
+  font-size: 14px; font-weight: 700; color: var(--text); text-align: center;
+}
+.cs-funnel-steps {
+  display: flex; align-items: stretch; gap: 0;
+}
+.cs-funnel-btn {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px;
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 10px; padding: 14px 10px;
+  cursor: pointer; font-family: inherit;
+  transition: border-color .15s, box-shadow .15s;
+}
+.cs-funnel-btn:hover { border-color: var(--blue-mid); }
+.cs-funnel-btn.active { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
+.cs-funnel-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; font-weight: 700;
+  padding: 3px 8px; border-radius: 5px; letter-spacing: .06em;
+}
+.cs-funnel-badge--blue   { background: var(--blue-light); color: var(--blue); }
+.cs-funnel-badge--green  { background: #DCFCE7; color: #16A34A; }
+.cs-funnel-badge--orange { background: #FFF7ED; color: #EA580C; }
+.cs-funnel-step-name { font-size: 13px; font-weight: 700; color: var(--text); }
+.cs-funnel-step-sub  { font-size: 11px; color: var(--text3); text-align: center; }
+.cs-funnel-sep {
+  display: flex; align-items: center; padding: 0 14px;
+  font-size: 18px; color: var(--text3); flex-shrink: 0;
+}
+.cs-funnel-contents { }
+.cs-funnel-content { display: none; }
+.cs-funnel-content.active {
+  display: flex; flex-direction: column; gap: 10px;
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 10px; padding: 18px 20px;
+}
+.cs-funnel-content-text { font-size: 14px; color: var(--text2); line-height: 1.6; }
+.cs-funnel-links { display: flex; gap: 10px; flex-wrap: wrap; }
+.cs-funnel-link {
+  font-size: 13px; font-weight: 600; color: var(--blue);
+  padding: 6px 14px; background: var(--blue-light);
+  border-radius: 6px; text-decoration: none;
+  transition: background .15s;
+}
+.cs-funnel-link:hover { background: var(--blue-mid); }
+
 /* ───── SHARED SECTION WRAPPER ───── */
 .section-wrap {
   max-width: 1280px; margin: 0 auto;
@@ -988,6 +1177,14 @@ footer { background: var(--navy); color: white; }
   .startup-steps-grid { gap: 0; }
   .startup-step-card { padding: 22px 18px; }
 
+  .funnel-next-inner { padding: 40px 24px; }
+  .funnel-progress { padding: 16px 20px; gap: 0; }
+  .funnel-progress-arrow { padding: 0 10px; font-size: 14px; }
+  .prod-funnel-section { padding: 28px 24px 48px; }
+  .prod-funnel-grid { grid-template-columns: 1fr 1fr; }
+  .mp-next-grid { grid-template-columns: 1fr 1fr; }
+  .cs-funnel-inner { padding: 24px; }
+
   .promo-grid { grid-template-columns: 1fr 1fr; }
   .promo-card:nth-child(3) { grid-column: 1 / -1; }
 
@@ -1035,6 +1232,20 @@ footer { background: var(--navy); color: white; }
 
   .startup-steps-grid { flex-direction: column; }
   .startup-step-arrow { transform: rotate(90deg); padding: 8px 0; }
+
+  .funnel-next-inner { padding: 32px 20px; gap: 24px; }
+  .funnel-progress { flex-direction: column; gap: 8px; padding: 16px; }
+  .funnel-progress-step { flex-direction: row; gap: 10px; width: 100%; justify-content: flex-start; }
+  .funnel-progress-arrow { transform: rotate(90deg); padding: 4px 0; font-size: 16px; }
+  .funnel-step-name { text-align: left; }
+  .funnel-next-btns { flex-direction: column; }
+  .funnel-btn-primary, .funnel-btn-ghost { justify-content: center; text-align: center; }
+  .prod-funnel-section { padding: 24px 20px 40px; }
+  .prod-funnel-grid { grid-template-columns: 1fr; }
+  .mp-next-grid { grid-template-columns: 1fr; }
+  .cs-funnel-inner { padding: 20px 16px; }
+  .cs-funnel-steps { flex-direction: column; gap: 8px; }
+  .cs-funnel-sep { transform: rotate(90deg); padding: 0; align-self: center; }
 
   .promo-grid { grid-template-columns: 1fr; }
   .promo-card:nth-child(3) { grid-column: auto; }
