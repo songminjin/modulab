@@ -99,6 +99,11 @@ async function runMigrations() {
     `ALTER TABLE orders ADD COLUMN IF NOT EXISTS coupon_event_download_id UUID`,
     `ALTER TABLE coupon_events ADD COLUMN IF NOT EXISTS applicable_grades JSONB DEFAULT '[]'`,
     `ALTER TABLE order_items ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'active'`,
+    `ALTER TABLE products ADD COLUMN IF NOT EXISTS short_description TEXT`,
+    `ALTER TABLE products ADD COLUMN IF NOT EXISTS discount_price INTEGER`,
+    `ALTER TABLE products ADD COLUMN IF NOT EXISTS new_badge BOOLEAN DEFAULT false`,
+    `ALTER TABLE products ADD COLUMN IF NOT EXISTS best_badge BOOLEAN DEFAULT false`,
+    `ALTER TABLE products ADD COLUMN IF NOT EXISTS sale_type VARCHAR(20)`,
     `CREATE TABLE IF NOT EXISTS portfolios (
        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
        title VARCHAR(200) NOT NULL,

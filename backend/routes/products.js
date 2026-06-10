@@ -24,17 +24,22 @@ router.get('/stats', async (req, res) => {
 
 // 전체 상품 조회
 router.get('/', async (req, res) => {
-  const { category, sort } = req.query;
-  let query = 'SELECT id, name, description, short_description, price, discount_price, category, emoji, thumbnail_url, new_badge, best_badge, sale_type, view_count, download_count, created_at FROM products WHERE is_active = true';
-  const params = [];
+  try {
+    const { category, sort } = req.query;
+    let query = 'SELECT id, name, description, short_description, price, discount_price, category, emoji, thumbnail_url, new_badge, best_badge, sale_type, view_count, download_count, created_at FROM products WHERE is_active = true';
+    const params = [];
 
-  if (category) { params.push(category); query += ` AND category = $${params.length}`; }
+    if (category) { params.push(category); query += ` AND category = $${params.length}`; }
 
-  const sortMap = { price_asc: 'price ASC', price_desc: 'price DESC', popular: 'download_count DESC', newest: 'created_at DESC' };
-  query += ` ORDER BY ${sortMap[sort] || 'created_at DESC'}`;
+    const sortMap = { price_asc: 'price ASC', price_desc: 'price DESC', popular: 'download_count DESC', newest: 'created_at DESC' };
+    query += ` ORDER BY ${sortMap[sort] || 'created_at DESC'}`;
 
-  const { rows } = await db.query(query, params);
-  res.json(rows);
+    const { rows } = await db.query(query, params);
+    res.json(rows);
+  } catch (err) {
+    console.error('[products GET /]', err.message);
+    res.status(500).json({ error: '상품 목록 조회 실패' });
+  }
 });
 
 // 상품 상세 조회
