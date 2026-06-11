@@ -223,12 +223,26 @@ a{text-decoration:none;color:inherit;}
       <img id="imgPreview" class="preview-img" alt="미리보기">
     </div>
     <div class="form-group">
-      <label class="form-label">버튼 텍스트</label>
-      <input type="text" class="form-input" id="fBtnText" placeholder="예: 지금 보러가기">
+      <label class="form-label">이미지 클릭 시 이동 페이지<span class="req">*</span></label>
+      <select class="form-input" id="fBtnUrlSelect" onchange="syncBtnUrl(this.value)">
+        <option value="">— 페이지 선택 —</option>
+        <option value="index.html">🏠 전체 상품 (홈)</option>
+        <option value="category-excel.html">📊 엑셀 프로그램</option>
+        <option value="category-sheets.html">🔧 구글시트 자동화</option>
+        <option value="category-short.html">🎬 숏폼 템플릿</option>
+        <option value="category-detail.html">🖼️ 상세페이지 제작</option>
+        <option value="category-web.html">🌐 홈페이지 제작</option>
+        <option value="category-program.html">⚙️ 프로그램 제작</option>
+        <option value="event.html">🎁 이벤트 / 할인</option>
+        <option value="__custom__">✏️ 직접 입력</option>
+      </select>
+      <input type="text" class="form-input" id="fBtnUrl" placeholder="https://... 또는 category-excel.html"
+             style="margin-top:8px;display:none;" oninput="syncSelectFromUrl(this.value)">
+      <div class="form-hint">배너 이미지 전체를 클릭했을 때 이동할 페이지입니다</div>
     </div>
     <div class="form-group">
-      <label class="form-label">버튼 링크</label>
-      <input type="text" class="form-input" id="fBtnUrl" placeholder="예: category-excel.html">
+      <label class="form-label">버튼 텍스트 <span style="font-weight:400;color:var(--text3);">(선택)</span></label>
+      <input type="text" class="form-input" id="fBtnText" placeholder="예: 지금 보러가기 → (없으면 버튼 미표시)">
     </div>
     <div class="form-group">
       <label class="form-label">노출 순서</label>
@@ -293,6 +307,43 @@ function renderBanners(banners) {
   `).join('');
 }
 
+const SITE_PAGES = ['index.html','category-excel.html','category-sheets.html','category-short.html','category-detail.html','category-web.html','category-program.html','event.html'];
+
+function syncBtnUrl(val) {
+  const input = document.getElementById('fBtnUrl');
+  if (val === '__custom__') {
+    input.style.display = 'block';
+    input.value = '';
+    input.focus();
+  } else {
+    input.style.display = 'none';
+    input.value = val;
+  }
+}
+
+function syncSelectFromUrl(val) {
+  const sel = document.getElementById('fBtnUrlSelect');
+  sel.value = SITE_PAGES.includes(val) ? val : '__custom__';
+}
+
+function setBtnUrlField(url) {
+  const sel = document.getElementById('fBtnUrlSelect');
+  const input = document.getElementById('fBtnUrl');
+  if (!url) {
+    sel.value = '';
+    input.style.display = 'none';
+    input.value = '';
+  } else if (SITE_PAGES.includes(url)) {
+    sel.value = url;
+    input.style.display = 'none';
+    input.value = url;
+  } else {
+    sel.value = '__custom__';
+    input.style.display = 'block';
+    input.value = url;
+  }
+}
+
 function previewImg(url) {
   const img = document.getElementById('imgPreview');
   if (url) { img.src = url; img.style.display = 'block'; }
@@ -345,9 +396,10 @@ async function uploadBannerImg(file) {
 function openModal() {
   document.getElementById('modalTitle').textContent = '배너 등록';
   document.getElementById('editId').value = '';
-  ['fTitle','fSubtitle','fImageUrl','fBtnText','fBtnUrl'].forEach(id => document.getElementById(id).value = '');
+  ['fTitle','fSubtitle','fImageUrl','fBtnText'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('fSortOrder').value = 0;
   document.getElementById('imgPreview').style.display = 'none';
+  setBtnUrlField('');
   document.getElementById('modalBg').classList.add('open');
 }
 
@@ -358,8 +410,8 @@ function openEdit(b) {
   document.getElementById('fSubtitle').value = b.subtitle || '';
   document.getElementById('fImageUrl').value = b.image_url || '';
   document.getElementById('fBtnText').value = b.btn_text || '';
-  document.getElementById('fBtnUrl').value = b.btn_url || '';
   document.getElementById('fSortOrder').value = b.sort_order || 0;
+  setBtnUrlField(b.btn_url || '');
   previewImg(b.image_url || '');
   document.getElementById('modalBg').classList.add('open');
 }

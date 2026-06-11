@@ -179,6 +179,10 @@ img { max-width: 100%; display: block; }
   background-size: cover; background-position: center;
   opacity: .35;
 }
+.hero-slide-link {
+  position: absolute; inset: 0; z-index: 2;
+  cursor: pointer;
+}
 .hero-slide-content {
   position: relative; z-index: 1;
   max-width: 760px; padding: 80px 80px;
