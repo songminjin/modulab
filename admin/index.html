@@ -148,6 +148,7 @@ async function doLogin() {
     if (!res.ok) throw new Error(data.error || '로그인 실패');
     const user = data.user || data;
     if (user.role !== 'admin') throw new Error('관리자 계정이 아닙니다.');
+    if (data.token) sessionStorage.setItem('adminToken', data.token);
     location.href = 'dashboard.html';
   } catch (err) {
     errEl.textContent = err.message;

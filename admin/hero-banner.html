@@ -265,7 +265,7 @@ const API = (window.location.hostname === 'localhost' || window.location.hostnam
 
 async function loadBanners() {
   try {
-    const res = await fetch(`${API}/api/banners/admin/all`, { credentials: 'include' });
+    const res = await adminFetch(`${API}/api/banners/admin/all`);
     const banners = await res.json();
     renderBanners(banners);
   } catch (e) {
@@ -369,9 +369,8 @@ async function uploadBannerImg(file) {
 
   try {
     bar.style.width = '60%';
-    const res = await fetch(`${API}/api/upload/image`, {
+    const res = await adminFetch(`${API}/api/upload/image`, {
       method: 'POST',
-      credentials: 'include',
       body: formData
     });
     bar.style.width = '90%';
@@ -434,7 +433,7 @@ async function saveBanner() {
   const url = id ? `${API}/api/banners/admin/${id}` : `${API}/api/banners/admin`;
   const method = id ? 'PUT' : 'POST';
   try {
-    const res = await fetch(url, { method, credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const res = await adminFetch(url, { method, body: JSON.stringify(body) });
     if (!res.ok) { const e = await res.json(); showToast('❌ ' + e.error); return; }
     showToast(id ? '✅ 수정됐습니다' : '✅ 등록됐습니다');
     closeModal(); loadBanners();
@@ -443,7 +442,7 @@ async function saveBanner() {
 
 async function toggleBanner(id, el) {
   try {
-    const res = await fetch(`${API}/api/banners/admin/${id}/toggle`, { method: 'PATCH', credentials: 'include' });
+    const res = await adminFetch(`${API}/api/banners/admin/${id}/toggle`, { method: 'PATCH' });
     const data = await res.json();
     el.checked = data.is_active;
     showToast(data.is_active ? '✅ 노출 활성화' : '⏸️ 노출 비활성화');
@@ -453,7 +452,7 @@ async function toggleBanner(id, el) {
 async function deleteBanner(id) {
   if (!confirm('정말 삭제하시겠습니까?')) return;
   try {
-    await fetch(`${API}/api/banners/admin/${id}`, { method: 'DELETE', credentials: 'include' });
+    await adminFetch(`${API}/api/banners/admin/${id}`, { method: 'DELETE' });
     showToast('🗑️ 삭제됐습니다'); loadBanners();
   } catch (e) { showToast('❌ 삭제 실패'); }
 }
