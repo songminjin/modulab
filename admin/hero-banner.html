@@ -265,10 +265,7 @@ const API = (window.location.hostname === 'localhost' || window.location.hostnam
 
 async function loadBanners() {
   try {
-    const token = localStorage.getItem('adminToken');
-    const res = await fetch(`${API}/api/banners/admin/all`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+    const res = await fetch(`${API}/api/banners/admin/all`, { credentials: 'include' });
     const banners = await res.json();
     renderBanners(banners);
   } catch (e) {
@@ -369,13 +366,12 @@ async function uploadBannerImg(file) {
 
   const formData = new FormData();
   formData.append('image', file);
-  const token = localStorage.getItem('adminToken');
 
   try {
     bar.style.width = '60%';
     const res = await fetch(`${API}/api/upload/image`, {
       method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}` },
+      credentials: 'include',
       body: formData
     });
     bar.style.width = '90%';
@@ -435,11 +431,10 @@ async function saveBanner() {
     sort_order: parseInt(document.getElementById('fSortOrder').value) || 0,
     is_active: true
   };
-  const token = localStorage.getItem('adminToken');
   const url = id ? `${API}/api/banners/admin/${id}` : `${API}/api/banners/admin`;
   const method = id ? 'PUT' : 'POST';
   try {
-    const res = await fetch(url, { method, headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${token}` }, body: JSON.stringify(body) });
+    const res = await fetch(url, { method, credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
     if (!res.ok) { const e = await res.json(); showToast('❌ ' + e.error); return; }
     showToast(id ? '✅ 수정됐습니다' : '✅ 등록됐습니다');
     closeModal(); loadBanners();
@@ -447,9 +442,8 @@ async function saveBanner() {
 }
 
 async function toggleBanner(id, el) {
-  const token = localStorage.getItem('adminToken');
   try {
-    const res = await fetch(`${API}/api/banners/admin/${id}/toggle`, { method:'PATCH', headers:{'Authorization':`Bearer ${token}`} });
+    const res = await fetch(`${API}/api/banners/admin/${id}/toggle`, { method: 'PATCH', credentials: 'include' });
     const data = await res.json();
     el.checked = data.is_active;
     showToast(data.is_active ? '✅ 노출 활성화' : '⏸️ 노출 비활성화');
@@ -458,9 +452,8 @@ async function toggleBanner(id, el) {
 
 async function deleteBanner(id) {
   if (!confirm('정말 삭제하시겠습니까?')) return;
-  const token = localStorage.getItem('adminToken');
   try {
-    await fetch(`${API}/api/banners/admin/${id}`, { method:'DELETE', headers:{'Authorization':`Bearer ${token}`} });
+    await fetch(`${API}/api/banners/admin/${id}`, { method: 'DELETE', credentials: 'include' });
     showToast('🗑️ 삭제됐습니다'); loadBanners();
   } catch (e) { showToast('❌ 삭제 실패'); }
 }
