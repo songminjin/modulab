@@ -95,11 +95,12 @@ body {
   position: absolute; inset: 0;
   background-size: cover;
   background-position: center;
+  opacity: 1 !important;
 }
 .hero-slide-bg::after {
   content: '';
   position: absolute; inset: 0;
-  background: linear-gradient(135deg, rgba(11,13,18,.96) 0%, rgba(11,13,18,.75) 60%, rgba(11,13,18,.5) 100%);
+  background: linear-gradient(135deg, rgba(11,13,18,.72) 0%, rgba(11,13,18,.45) 60%, rgba(11,13,18,.25) 100%);
 }
 .hero-slide-content {
   position: relative;
