@@ -404,7 +404,7 @@ function renderSlider() {
   const dotsEl = document.getElementById('heroDots');
 
   container.innerHTML = slides.map((s, i) => `
-    <div class="hero-slide">
+    <div class="hero-slide${s.image_url ? ' has-image' : ''}">
       ${s.image_url ? `<div class="hero-slide-bg" style="background-image:url('${s.image_url}')"></div>` : ''}
       ${s.btn_url ? `<a href="${s.btn_url}" class="hero-slide-link" aria-label="${s.title||'배너 링크'}"></a>` : ''}
       <div class="hero-slide-content">

@@ -97,10 +97,16 @@ body {
   background-position: center;
   opacity: 1 !important;
 }
-.hero-slide-bg::after {
+/* 이미지 없는 슬라이드만 다크 오버레이 적용 */
+.hero-slide:not(.has-image) .hero-slide-bg::after {
   content: '';
   position: absolute; inset: 0;
   background: linear-gradient(135deg, rgba(11,13,18,.72) 0%, rgba(11,13,18,.45) 60%, rgba(11,13,18,.25) 100%);
+}
+/* 이미지 있는 슬라이드 — 오버레이 없음, 이미지 전체 표시 */
+.has-image .hero-slide-bg {
+  background-size: cover;
+  background-position: center;
 }
 .hero-slide-content {
   position: relative;
