@@ -87,7 +87,20 @@ a{text-decoration:none;color:inherit;}
 .form-input,.form-textarea{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;color:var(--text);outline:none;transition:border-color .15s;background:var(--white);}
 .form-input:focus,.form-textarea:focus{border-color:var(--blue);}
 .form-hint{font-size:11px;color:var(--text3);margin-top:5px;}
-.preview-img{width:100%;height:120px;object-fit:cover;border-radius:8px;margin-top:8px;display:none;}
+.preview-img{width:100%;height:140px;object-fit:cover;border-radius:8px;margin-top:8px;display:none;}
+/* 업로드 존 */
+.img-upload-zone{border:2px dashed var(--border);border-radius:10px;padding:28px 16px;text-align:center;cursor:pointer;transition:all .2s;background:var(--slate-light);position:relative;margin-bottom:10px;}
+.img-upload-zone:hover,.img-upload-zone.drag{border-color:var(--blue);background:var(--blue-light);}
+.img-upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.img-upload-icon{font-size:26px;margin-bottom:6px;}
+.img-upload-title{font-size:13px;font-weight:600;color:var(--text2);margin-bottom:3px;}
+.img-upload-sub{font-size:11px;color:var(--text3);}
+.img-upload-progress{display:none;margin-top:8px;}
+.img-upload-bar-wrap{height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+.img-upload-bar{height:100%;width:0;background:var(--blue);border-radius:2px;transition:width .3s;}
+.img-divider{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.img-divider::before,.img-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+.img-divider span{font-size:11px;color:var(--text3);white-space:nowrap;}
 .modal-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:24px;padding-top:20px;border-top:1px solid var(--border);}
 #toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--navy);color:white;padding:13px 24px;border-radius:10px;font-size:14px;font-weight:500;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);transition:transform .3s,opacity .3s;opacity:0;z-index:9000;}
 #toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
@@ -188,9 +201,25 @@ a{text-decoration:none;color:inherit;}
       <input type="text" class="form-input" id="fSubtitle" placeholder="배너 부제목 (선택)">
     </div>
     <div class="form-group">
-      <label class="form-label">이미지 URL</label>
+      <label class="form-label">배너 이미지</label>
+
+      <div class="img-upload-zone" id="imgUploadZone"
+           ondragover="event.preventDefault();this.classList.add('drag')"
+           ondragleave="this.classList.remove('drag')"
+           ondrop="handleImgDrop(event)">
+        <input type="file" id="imgFileInput" accept="image/*" onchange="uploadBannerImg(this.files[0])">
+        <div class="img-upload-icon">🖼️</div>
+        <div class="img-upload-title">클릭 또는 드래그하여 이미지 업로드</div>
+        <div class="img-upload-sub">JPG, PNG, WebP · 최대 5MB · 권장 비율 16:6</div>
+      </div>
+      <div class="img-upload-progress" id="imgProgress">
+        <div class="img-upload-bar-wrap"><div class="img-upload-bar" id="imgBar"></div></div>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px;">업로드 중...</div>
+      </div>
+
+      <div class="img-divider"><span>또는 URL 직접 입력</span></div>
       <input type="text" class="form-input" id="fImageUrl" placeholder="https://..." oninput="previewImg(this.value)">
-      <div class="form-hint">배너 배경 이미지 URL을 입력하세요</div>
+      <div class="form-hint">이미지를 업로드하면 URL이 자동으로 채워집니다</div>
       <img id="imgPreview" class="preview-img" alt="미리보기">
     </div>
     <div class="form-group">
@@ -270,6 +299,49 @@ function previewImg(url) {
   else img.style.display = 'none';
 }
 
+function handleImgDrop(e) {
+  e.preventDefault();
+  document.getElementById('imgUploadZone').classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if (file) uploadBannerImg(file);
+}
+
+async function uploadBannerImg(file) {
+  if (!file) return;
+  if (!file.type.startsWith('image/')) { showToast('❌ 이미지 파일만 업로드 가능합니다'); return; }
+  if (file.size > 5 * 1024 * 1024) { showToast('❌ 5MB 이하 파일만 업로드 가능합니다'); return; }
+
+  const progress = document.getElementById('imgProgress');
+  const bar = document.getElementById('imgBar');
+  progress.style.display = 'block';
+  bar.style.width = '30%';
+
+  const formData = new FormData();
+  formData.append('image', file);
+  const token = localStorage.getItem('adminToken');
+
+  try {
+    bar.style.width = '60%';
+    const res = await fetch(`${API}/api/upload/image`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` },
+      body: formData
+    });
+    bar.style.width = '90%';
+    if (!res.ok) { const e = await res.json(); throw new Error(e.error); }
+    const { url } = await res.json();
+    bar.style.width = '100%';
+    document.getElementById('fImageUrl').value = url;
+    previewImg(url);
+    showToast('✅ 이미지 업로드 완료');
+  } catch (err) {
+    showToast('❌ ' + (err.message || '업로드 실패'));
+  } finally {
+    setTimeout(() => { progress.style.display = 'none'; bar.style.width = '0'; }, 800);
+    document.getElementById('imgFileInput').value = '';
+  }
+}
+
 function openModal() {
   document.getElementById('modalTitle').textContent = '배너 등록';
   document.getElementById('editId').value = '';
@@ -292,7 +364,12 @@ function openEdit(b) {
   document.getElementById('modalBg').classList.add('open');
 }
 
-function closeModal() { document.getElementById('modalBg').classList.remove('open'); }
+function closeModal() {
+  document.getElementById('modalBg').classList.remove('open');
+  document.getElementById('imgFileInput').value = '';
+  document.getElementById('imgProgress').style.display = 'none';
+  document.getElementById('imgBar').style.width = '0';
+}
 
 async function saveBanner() {
   const title = document.getElementById('fTitle').value.trim();

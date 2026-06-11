@@ -6,6 +6,7 @@
 <title id="pageTitle">상품 상세 — 모듈랩</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style-v2.css">
 <style>
 .prod-wrap { max-width: 1280px; margin: 0 auto; padding: 28px 40px 80px; }
 .prod-layout { display: grid; grid-template-columns: 1fr 440px; gap: 48px; align-items: start; margin-bottom: 64px; }
@@ -1285,7 +1286,7 @@ function addToCart(redirect = false) {
 }
 
 function buyNow() { addToCart(true); }
-function goInquiry() { location.href = 'cs.html'; }
+function goInquiry() { window.open('http://pf.kakao.com/_HWDGX/chat', '_blank'); }
 
 /* ── TABS ── */
 function switchTab(tab, btn) {

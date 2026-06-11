@@ -48,6 +48,7 @@ app.use('/api/payments', require('./routes/payments'));
 app.use('/api/events', require('./routes/events'));
 app.use('/api/portfolios', require('./routes/portfolios'));
 app.use('/api/banners', require('./routes/banners'));
+app.use('/api/upload', require('./routes/upload'));
 
 // ── 헬스체크 ──
 app.get('/health', (req, res) => res.json({ status: 'ok', env: process.env.NODE_ENV }));
