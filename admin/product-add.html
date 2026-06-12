@@ -1322,6 +1322,58 @@ async function submitProduct() {
   showToast(isEdit ? '✓ 상품이 수정되었습니다!' : '✓ 상품이 등록되었습니다!', 'success');
   GhSync.syncAll(showToast);
 
+  // Railway DB 동기화
+  try {
+    const dbPayload = {
+      name:              normalized.name,
+      short_description: normalized.desc        || null,
+      description:       normalized.detail       || null,
+      price:             normalized.price,
+      discount_price:    normalized.discount     || 0,
+      category:          normalized.cat,
+      emoji:             normalized.emoji        || '📦',
+      sale_type:         normalized.type         || 'file',
+      file_url:          normalized.fileUrl      || null,
+      file_name:         normalized.fileName     || null,
+      file_type:         normalized.fileType     || null,
+      is_active:         normalized.visible      !== false,
+      new_badge:         !!normalized.newBadge,
+      best_badge:        !!normalized.bestBadge,
+      thumbnail_url:     normalized.thumbUrl     || null,
+      detail_images:     normalized.detailImageUrls || [],
+    };
+
+    const dbUUID = normalized.uuid;
+    const isUUID = dbUUID && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(dbUUID);
+
+    if (isUUID) {
+      await fetch(`${API_URL}/api/admin/products/${dbUUID}`, {
+        method: 'PUT', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dbPayload),
+      });
+    } else {
+      const dbRes = await fetch(`${API_URL}/api/admin/products`, {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dbPayload),
+      });
+      if (dbRes.ok) {
+        const dbProduct = await dbRes.json();
+        if (dbProduct.id) {
+          const idx2 = existingProducts.findIndex(p => p.id === savedId);
+          if (idx2 >= 0) {
+            existingProducts[idx2].uuid = dbProduct.id;
+            localStorage.setItem('modulab_products', JSON.stringify(existingProducts));
+            GhSync.syncAll(showToast);
+          }
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('[DB sync 실패]', e);
+  }
+
   setTimeout(() => {
     if (confirm('상품 목록 페이지로 이동할까요?')) location.href = 'products.html';
   }, 1200);

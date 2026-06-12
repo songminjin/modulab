@@ -256,12 +256,12 @@ router.get('/products', authenticate, isAdmin, async (req, res) => {
 // POST /api/admin/products
 router.post('/products', authenticate, isAdmin, async (req, res) => {
   try {
-    const { name, short_description, description, price, discount_price, category, emoji, sale_type, file_url, file_name, file_type, is_active, new_badge, best_badge, meta_title, meta_description, detail_images } = req.body;
+    const { name, short_description, description, price, discount_price, category, emoji, sale_type, file_url, file_name, file_type, is_active, new_badge, best_badge, meta_title, meta_description, detail_images, thumbnail_url } = req.body;
     if (!name || !price || !category) return res.status(400).json({ error: '상품명, 가격, 카테고리는 필수입니다.' });
     const { rows } = await db.query(
-      `INSERT INTO products (name, short_description, description, price, discount_price, category, emoji, sale_type, file_url, file_name, file_type, is_active, new_badge, best_badge, meta_title, meta_description, detail_images)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17) RETURNING *`,
-      [name, short_description||null, description||null, price, discount_price||0, category, emoji||'📦', sale_type||'file', file_url||null, file_name||null, file_type||null, is_active!==false, new_badge!==false, !!best_badge, meta_title||null, meta_description||null, JSON.stringify(detail_images||[])]
+      `INSERT INTO products (name, short_description, description, price, discount_price, category, emoji, sale_type, file_url, file_name, file_type, is_active, new_badge, best_badge, meta_title, meta_description, detail_images, thumbnail_url)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18) RETURNING *`,
+      [name, short_description||null, description||null, price, discount_price||0, category, emoji||'📦', sale_type||'file', file_url||null, file_name||null, file_type||null, is_active!==false, !!new_badge, !!best_badge, meta_title||null, meta_description||null, JSON.stringify(detail_images||[]), thumbnail_url||null]
     );
     res.status(201).json(rows[0]);
   } catch (err) {
@@ -273,11 +273,11 @@ router.post('/products', authenticate, isAdmin, async (req, res) => {
 // PUT /api/admin/products/:id
 router.put('/products/:id', authenticate, isAdmin, async (req, res) => {
   try {
-    const { name, short_description, description, price, discount_price, category, emoji, sale_type, file_url, file_name, file_type, is_active, new_badge, best_badge, meta_title, meta_description, detail_images } = req.body;
+    const { name, short_description, description, price, discount_price, category, emoji, sale_type, file_url, file_name, file_type, is_active, new_badge, best_badge, meta_title, meta_description, detail_images, thumbnail_url } = req.body;
     const { rows } = await db.query(
-      `UPDATE products SET name=$1, short_description=$2, description=$3, price=$4, discount_price=$5, category=$6, emoji=$7, sale_type=$8, file_url=$9, file_name=$10, file_type=$11, is_active=$12, new_badge=$13, best_badge=$14, meta_title=$15, meta_description=$16, detail_images=$17
-       WHERE id=$18 RETURNING *`,
-      [name, short_description||null, description||null, price, discount_price||0, category, emoji||'📦', sale_type||'file', file_url||null, file_name||null, file_type||null, is_active!==false, new_badge!==false, !!best_badge, meta_title||null, meta_description||null, JSON.stringify(detail_images||[]), req.params.id]
+      `UPDATE products SET name=$1, short_description=$2, description=$3, price=$4, discount_price=$5, category=$6, emoji=$7, sale_type=$8, file_url=$9, file_name=$10, file_type=$11, is_active=$12, new_badge=$13, best_badge=$14, meta_title=$15, meta_description=$16, detail_images=$17, thumbnail_url=$18
+       WHERE id=$19 RETURNING *`,
+      [name, short_description||null, description||null, price, discount_price||0, category, emoji||'📦', sale_type||'file', file_url||null, file_name||null, file_type||null, is_active!==false, !!new_badge, !!best_badge, meta_title||null, meta_description||null, JSON.stringify(detail_images||[]), thumbnail_url||null, req.params.id]
     );
     if (!rows[0]) return res.status(404).json({ error: '상품을 찾을 수 없습니다.' });
     res.json(rows[0]);

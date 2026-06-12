@@ -105,6 +105,11 @@ async function runMigrations() {
     `ALTER TABLE products ADD COLUMN IF NOT EXISTS new_badge BOOLEAN DEFAULT false`,
     `ALTER TABLE products ADD COLUMN IF NOT EXISTS best_badge BOOLEAN DEFAULT false`,
     `ALTER TABLE products ADD COLUMN IF NOT EXISTS sale_type VARCHAR(20)`,
+    `ALTER TABLE products ADD COLUMN IF NOT EXISTS file_name VARCHAR(255)`,
+    `ALTER TABLE products ADD COLUMN IF NOT EXISTS file_type VARCHAR(50)`,
+    `ALTER TABLE products ADD COLUMN IF NOT EXISTS meta_title VARCHAR(255)`,
+    `ALTER TABLE products ADD COLUMN IF NOT EXISTS meta_description TEXT`,
+    `ALTER TABLE products ADD COLUMN IF NOT EXISTS detail_images JSONB DEFAULT '[]'`,
     `CREATE TABLE IF NOT EXISTS portfolios (
        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
        title VARCHAR(200) NOT NULL,
