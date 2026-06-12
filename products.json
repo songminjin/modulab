@@ -249,7 +249,7 @@
   {
     "id": "EXCEL-MQAFJO87",
     "name": "독서 습관 트래커",
-    "cat": "excel",
+    "cat": "sheets",
     "type": "file",
     "emoji": "📊",
     "price": 10000,
