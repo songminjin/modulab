@@ -1354,15 +1354,34 @@ async function submitProduct() {
       detail_images:     normalized.detailImageUrls || [],
     };
 
-    const dbUUID = normalized.uuid;
-    const isUUID = dbUUID && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(dbUUID);
+    let dbUUID = normalized.uuid;
+    const isUUID = u => u && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(u);
 
-    if (isUUID) {
+    // UUID 없으면 DB에서 동일 상품명으로 검색
+    if (!isUUID(dbUUID)) {
+      try {
+        const listRes = await fetch(`${API_URL}/api/admin/products`, { credentials: 'include' });
+        if (listRes.ok) {
+          const allDb = await listRes.json();
+          const match = allDb.find(p => p.name === normalized.name && p.is_active !== false);
+          if (match) dbUUID = match.id;
+        }
+      } catch {}
+    }
+
+    if (isUUID(dbUUID)) {
       await fetch(`${API_URL}/api/admin/products/${dbUUID}`, {
         method: 'PUT', credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(dbPayload),
       });
+      // products.json에 uuid 저장
+      const idx2 = existingProducts.findIndex(p => p.id === savedId);
+      if (idx2 >= 0 && existingProducts[idx2].uuid !== dbUUID) {
+        existingProducts[idx2].uuid = dbUUID;
+        localStorage.setItem('modulab_products', JSON.stringify(existingProducts));
+        GhSync.syncAll(showToast);
+      }
     } else {
       const dbRes = await fetch(`${API_URL}/api/admin/products`, {
         method: 'POST', credentials: 'include',
