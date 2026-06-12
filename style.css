@@ -1192,6 +1192,7 @@ footer { background: var(--navy); color: white; }
   .promo-card:nth-child(3) { grid-column: 1 / -1; }
 
   .product-grid { grid-template-columns: repeat(2, 1fr); }
+  .product-grid-2 { grid-template-columns: repeat(2, 1fr); }
 
   .banner-inner { padding: 0 40px; grid-template-columns: 1fr; }
   .banner-right { display: none; }
