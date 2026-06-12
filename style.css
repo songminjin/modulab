@@ -686,8 +686,7 @@ img { max-width: 100%; display: block; }
   display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
 }
 .product-grid-2 {
-  display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;
-  max-width: 660px;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
 }
 .product-card {
   border: 1px solid var(--border); border-radius: 12px;
@@ -1255,7 +1254,7 @@ footer { background: var(--navy); color: white; }
   .promo-card:nth-child(3) { grid-column: auto; }
 
   .product-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-  .product-grid-2 { grid-template-columns: 1fr; max-width: 100%; }
+  .product-grid-2 { grid-template-columns: repeat(2, 1fr); gap: 12px; }
 
   .banner-inner { padding: 0 20px; }
 
