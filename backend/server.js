@@ -110,6 +110,11 @@ async function runMigrations() {
     `ALTER TABLE products ADD COLUMN IF NOT EXISTS meta_title VARCHAR(255)`,
     `ALTER TABLE products ADD COLUMN IF NOT EXISTS meta_description TEXT`,
     `ALTER TABLE products ADD COLUMN IF NOT EXISTS detail_images JSONB DEFAULT '[]'`,
+    `CREATE TABLE IF NOT EXISTS admin_settings (
+       key VARCHAR(100) PRIMARY KEY,
+       value TEXT,
+       updated_at TIMESTAMP DEFAULT NOW()
+     )`,
     `CREATE TABLE IF NOT EXISTS portfolios (
        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
        title VARCHAR(200) NOT NULL,

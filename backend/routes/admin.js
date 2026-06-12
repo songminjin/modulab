@@ -699,6 +699,34 @@ router.get('/settlement', authenticate, isAdmin, async (req, res) => {
   }
 });
 
+// GET /api/admin/settings — 관리자 설정 조회 (토큰 등)
+router.get('/settings', authenticate, isAdmin, async (req, res) => {
+  try {
+    const { rows } = await db.query('SELECT key, value FROM admin_settings');
+    const settings = {};
+    rows.forEach(r => { settings[r.key] = r.value; });
+    res.json(settings);
+  } catch (err) {
+    res.status(500).json({ error: '설정 조회 실패' });
+  }
+});
+
+// PUT /api/admin/settings — 관리자 설정 저장
+router.put('/settings', authenticate, isAdmin, async (req, res) => {
+  try {
+    const { key, value } = req.body;
+    if (!key) return res.status(400).json({ error: 'key 필수' });
+    await db.query(
+      `INSERT INTO admin_settings (key, value) VALUES ($1, $2)
+       ON CONFLICT (key) DO UPDATE SET value = $2, updated_at = NOW()`,
+      [key, value]
+    );
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: '설정 저장 실패' });
+  }
+});
+
 // GET /api/admin/users
 router.get('/users', authenticate, isAdmin, async (req, res) => {
   const { rows } = await db.query(

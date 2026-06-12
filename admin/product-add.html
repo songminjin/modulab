@@ -952,6 +952,17 @@ a { text-decoration: none; color: inherit; }
 <script>
 const API_URL = 'https://modulab-production.up.railway.app';
 
+// DB에서 GitHub 토큰 로드 → localStorage에 동기화
+(async function loadGhTokenFromDB() {
+  try {
+    const res = await fetch(`${API_URL}/api/admin/settings`, { credentials: 'include' });
+    if (res.ok) {
+      const s = await res.json();
+      if (s.gh_token) localStorage.setItem('modulab_gh_token', s.gh_token);
+    }
+  } catch {}
+})();
+
 /* ── EDIT MODE SETUP ── */
 const EDIT_ID = new URLSearchParams(location.search).get('edit');
 let editingOriginalId = null;

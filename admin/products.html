@@ -398,17 +398,39 @@ function exportCSV(){
   showToast('CSV 다운로드 완료');
 }
 function showToast(msg, isError){ const t=document.getElementById('toast'); document.getElementById('toastMsg').textContent=msg; t.classList.add('show'); if(isError) t.style.background='#DC2626'; else t.style.background=''; setTimeout(()=>{ t.classList.remove('show'); t.style.background=''; },3000); }
-function saveGhToken() {
+async function saveGhToken() {
   const t = document.getElementById('ghTokenInput').value.trim();
   if (!t) return;
+  // DB에 저장 (기본)
+  try {
+    await fetch(`${API_URL}/api/admin/settings`, {
+      method: 'PUT', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key: 'gh_token', value: t })
+    });
+  } catch {}
+  // localStorage 병행 저장 (오프라인 폴백)
   localStorage.setItem('modulab_gh_token', t);
   document.getElementById('ghTokenInput').value = '';
   document.getElementById('ghTokenStatus').textContent = '✓ 토큰 저장됨';
   showToast('GitHub 토큰이 저장되었습니다.');
 }
-(function initGhBar(){
-  const token = localStorage.getItem('modulab_gh_token');
+(async function initGhBar(){
   const status = document.getElementById('ghTokenStatus');
+  // 1순위: DB에서 토큰 로드
+  try {
+    const res = await fetch(`${API_URL}/api/admin/settings`, { credentials: 'include' });
+    if (res.ok) {
+      const s = await res.json();
+      if (s.gh_token) {
+        localStorage.setItem('modulab_gh_token', s.gh_token);
+        if (status) status.textContent = '✓ 토큰 설정됨';
+        return;
+      }
+    }
+  } catch {}
+  // 2순위: localStorage 폴백
+  const token = localStorage.getItem('modulab_gh_token');
   if (token && status) status.textContent = '✓ 토큰 설정됨';
 })();
 load();
