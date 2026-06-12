@@ -245,5 +245,31 @@
     "newBadge": false,
     "bestBadge": false,
     "uuid": "c939e536-de8d-5a32-a603-c6b56db08309"
+  },
+  {
+    "id": "EXCEL-MQAFJO87",
+    "name": "독서 습관 트래커",
+    "cat": "excel",
+    "type": "file",
+    "emoji": "📊",
+    "price": 10000,
+    "discount": 0,
+    "visible": true,
+    "newBadge": true,
+    "bestBadge": false,
+    "desc": "독서 관리부터 습관 형성까지 ",
+    "detail": "읽고 싶은 책부터 완독 후 기록까지, 나의 독서 라이프 전체를 한 곳에서\n\n관리하세요.\n\n책 표지는 API로 자동 검색되고, 습관은 레벨 시스템으로 동기부여되며, 연간\n\n통계로 나의 성장을 한눈에 확인할 수 있습니다.\n\n\n\n---\n\n이런 분께 추천합니다\n\n\n\n- 읽은 책 목록을 깔끔하게 정리하고 싶은 분\n\n- 독서 습관을 꾸준히 만들고 싶은 분\n\n- 도서관 대여 반납일을 자주 놓치는 분\n\n- 연말에 \"올해 몇 권 읽었지?\" 궁금했던 분\n\n- 예쁜 책 표지 갤러리를 만들고 싶은 분\n\n---\n\n\n\n│ 통합 대시보드 │ 완독 현황, 장르 분포, 차트 자동 집계 │\n\n\n\n│ 독서 트래커 │ 메인 기록 시트 — 14개 항목 관리 │\n\n\n\n│ TBR 위시리스트 │ 읽고 싶은 책 목록 & 우선순위 │\n\n\n\n│ 커버 갤러리 │ 완독 도서 표지를 이미지로 모아보기 │\n\n\n\n│ 습관 트래커 │ 10가지 습관 일별 체크박스 │\n\n\n\n│ 캐릭터방 │ 독서 일수에 따른 Lv.0~4 레벨 시스템 │\n\n\n\n│ 신간&습관 캘린더 │ 월별 캘린더 + 신간 출시 예정 D-day │\n\n\n\n│ 대여 현황 │ 도서관 대여·반납일 D-day 자동 계산 │\n\n\n\n│ 연간 통계 │ 연도별 완독 수, 평균 별점, 월별 추이 │\n\n\n\n│ 기록 저장소 │ 인상 구절 & 독서 메모 아카이브 │\n\n\n\n│ 설정 │ 목표 권수, 닉네임, 장르 커스텀 │\n\n\n\n│ 사용 설명서 │ 시트 내 내장 가이드 │\n\n\n\n---\n\n핵심 자동화 기능\n\n\n\n책 표지 자동 검색\n\n제목과 저자만 입력하면 네이버 도서 API + Google Books API에서 표지를\n\n자동으로 가져옵니다. URL을 직접 찾을 필요가 없습니다.\n\n\n\n캘린더 월별 자동 저장\n\n연도·월을 변경하면 이전 달 메모가 자동 저장되고 새 달 데이터가\n\n불러와집니다. 매달 기록이 사라지지 않습니다.\n\n대여 현황 자동 연동\n\n독서 트래커에서 보유형태를 \"대여\"로 선택하는 순간 대여 현황 시트에\n\n자동으로 추가됩니다. 원래반납일만 입력하면 D-day와 연장 처리가 자동으로\n\n계산됩니다.\n\n\n\n독서 레벨 시스템\n\n이달 독서 습관 체크 일수에 따라 캐릭터 레벨이 올라갑니다. 잠자는 독자 →\n\n독서 새싹 → 중급자 → 독서 고수 → 독서 마스터\n\n\n\n---\n\n구매 후 받는 것\n\n\n\n- BookTracker Pro Google Sheets 파일 링크 (사본 만들기)\n\n- Apps *script 코드 파일 (cover_api_only.gs)\n\n- PDF 사용설명서",
+    "fileType": "gsheet",
+    "fileUrl": "https://docs.google.com/spreadsheets/d/1X6YMrHkuTa8m4nhNCdNYBLEfe9R0-XMN3ch6UGJvsNU/edit?gid=1862482991#gid=1862482991",
+    "fileName": "독서 습관 트래커",
+    "thumbUrl": "https://raw.githubusercontent.com/songminjin/modulab/main/images/products/thumb-EXCEL-MQAFJO87.png",
+    "detailImageUrls": [
+      "https://raw.githubusercontent.com/songminjin/modulab/main/images/products/detail-EXCEL-MQAFJO87-0.png",
+      "https://raw.githubusercontent.com/songminjin/modulab/main/images/products/detail-EXCEL-MQAFJO87-1.png",
+      "https://raw.githubusercontent.com/songminjin/modulab/main/images/products/detail-EXCEL-MQAFJO87-2.png"
+    ],
+    "date": "2026-06-12",
+    "views": 0,
+    "downloads": 0
   }
 ]
