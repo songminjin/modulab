@@ -2,6 +2,16 @@
 
 공유 페이지: https://songminjin.github.io/modulab/crm-sprint.html
 
+무료 자가진단: https://songminjin.github.io/modulab/consultation-audit.html
+
+30초 작동 데모: https://songminjin.github.io/modulab/crm-demo.html
+
+## 0. 처음 연락하는 사업자용 — 허락 먼저 받기
+
+안녕하세요. 공개된 상담 안내를 보고 연락드렸습니다. 문의 이후 일정과 후속 연락을 관리하는 방식과 관련해 2분짜리 무료 자가점검표를 만들었는데, 광고 링크부터 보내지 않고 먼저 여쭙습니다. 운영 담당자분께 전달드려도 괜찮을까요?
+
+허락을 받은 경우에만 자가진단 링크를 전달합니다. 첫 메시지부터 55만원 상품이나 결제를 요구하지 않습니다.
+
 ## 1. 기존 지인·고객에게 보내는 첫 메시지
 
 안녕하세요. 혹시 고객 문의를 카톡·메모·엑셀에 나눠 관리하다가 후속 연락이나 미팅을 놓친 적 있으세요?

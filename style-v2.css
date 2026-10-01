@@ -38,6 +38,27 @@ body {
   font-weight: 400;
 }
 
+/* ─── 72시간 상담 누락 진단 프로모션 ─── */
+.audit-promo {
+  min-height: 48px;
+  padding: 11px max(20px, calc((100vw - 1280px) / 2));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 26px;
+  color: rgba(255,255,255,.86);
+  background: linear-gradient(90deg, #1D4ED8, #2563EB);
+  text-decoration: none;
+  font-size: 13px;
+}
+.audit-promo b { color: #FEF3C7; margin-right: 8px; }
+.audit-promo strong { color: #FFFFFF; white-space: nowrap; }
+.audit-promo:hover { background: linear-gradient(90deg, #1E40AF, #1D4ED8); }
+@media (max-width: 600px) {
+  .audit-promo { justify-content: space-between; gap: 12px; padding: 10px 14px; font-size: 11px; line-height: 1.45; }
+  .audit-promo span b { display: block; margin: 0; }
+}
+
 /* ─── NAVBAR — 다크 글래스 ─── */
 .nav {
   background: rgba(11,13,18,0.92);
