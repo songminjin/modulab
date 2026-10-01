@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="상담 누락 방지 자동화 15분 진단 신청서입니다. 현재 상담 관리 방식과 필요한 범위를 먼저 확인합니다.">
+  <meta property="og:title" content="15분 진단 신청 | ModuLab">
+  <meta property="og:description" content="현재 상담 흐름을 알려주시면 자동화가 필요한지부터 확인합니다.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://songminjin.github.io/modulab/crm-apply.html">
+  <title>15분 진단 신청 | ModuLab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
+  <style>
+    :root{--ink:#101828;--muted:#667085;--line:#dfe4ea;--soft:#f8fafc;--blue:#2563eb;--blue-dark:#1d4ed8;--green:#047857;--white:#fff;--shadow:0 18px 50px rgba(16,24,40,.1)}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:var(--ink);background:var(--soft);font-family:"Noto Sans KR",sans-serif;word-break:keep-all}a{color:inherit}.wrap{width:min(880px,calc(100% - 32px));margin:0 auto}
+    nav{height:66px;display:flex;align-items:center;border-bottom:1px solid var(--line);background:rgba(255,255,255,.94);position:sticky;top:0;z-index:10}.nav-inner{display:flex;align-items:center;justify-content:space-between}.logo{text-decoration:none;font-size:20px;font-weight:900;letter-spacing:-.04em}.logo span{color:var(--blue)}.back{color:var(--muted);font-size:13px;font-weight:700;text-decoration:none}
+    .hero{padding:58px 0 28px;text-align:center;background:linear-gradient(180deg,#eff6ff 0%,var(--soft) 100%)}.badge{display:inline-flex;padding:7px 11px;border-radius:999px;color:#1e40af;background:#dbeafe;font-size:12px;font-weight:900}.hero h1{margin:16px 0 12px;font-size:clamp(34px,6vw,52px);line-height:1.18;letter-spacing:-.05em}.hero p{margin:0;color:var(--muted);line-height:1.75}.steps{display:flex;justify-content:center;align-items:center;gap:8px;margin-top:22px;flex-wrap:wrap}.steps span{padding:7px 10px;border-radius:8px;color:#475467;background:#fff;border:1px solid var(--line);font-size:11px;font-weight:700}.steps i{color:#98a2b3;font-style:normal}
+    main{padding:22px 0 78px}.card{padding:30px;border:1px solid var(--line);border-radius:22px;background:#fff;box-shadow:var(--shadow)}.section-title{margin:0 0 6px;font-size:21px;letter-spacing:-.03em}.section-desc{margin:0 0 24px;color:var(--muted);font-size:13px;line-height:1.65}.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.field{display:grid;gap:8px}.field.full{grid-column:1/-1}.field label,.legend{font-size:13px;font-weight:800}.required{color:#dc2626}.field input,.field select,.field textarea{width:100%;padding:13px 14px;border:1px solid #cfd6df;border-radius:10px;color:var(--ink);background:#fff;font:inherit;font-size:14px;outline:none}.field textarea{min-height:116px;resize:vertical;line-height:1.6}.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.11)}.choices{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.choice{display:flex;align-items:center;gap:8px;padding:12px;border:1px solid var(--line);border-radius:10px;color:#475467;font-size:12px;font-weight:700}.choice:has(input:checked){border-color:#93c5fd;background:#eff6ff;color:#1e40af}.choice input{width:auto;margin:0}.hint{color:#98a2b3;font-size:11px;line-height:1.5}
+    .consent{display:flex;gap:10px;margin:22px 0 0;padding:14px;border-radius:11px;background:#f8fafc;color:#475467;font-size:12px;line-height:1.6}.consent input{margin-top:3px}.submit{width:100%;margin-top:16px;padding:16px;border:0;border-radius:12px;color:#fff;background:var(--blue);font-size:15px;font-weight:900;cursor:pointer}.submit:hover{background:var(--blue-dark)}
+    .result{display:none}.result.show{display:block}.result-box{padding:20px;border:1px solid #bfdbfe;border-radius:14px;background:#eff6ff}.result-box h2{margin:0 0 8px;font-size:21px}.result-box p{margin:0;color:#475467;font-size:13px;line-height:1.7}.summary{margin:18px 0;padding:18px;border-radius:12px;background:#101828;color:#fff;white-space:pre-wrap;font-size:12px;line-height:1.75}.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}.btn{padding:14px;border:0;border-radius:11px;text-decoration:none;text-align:center;font-size:13px;font-weight:900;cursor:pointer}.primary{color:#fff;background:var(--blue)}.kakao{color:#3c1e1e;background:#fee500}.secondary{color:#344054;background:#fff;border:1px solid #d0d5dd}.fine{margin-top:14px;color:#667085;font-size:11px;line-height:1.65}.notice{margin-top:16px;padding:16px;border:1px solid var(--line);border-radius:14px;background:#fff}.notice strong{display:block;margin-bottom:6px;font-size:13px}.notice p{margin:0;color:var(--muted);font-size:11px;line-height:1.65}.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,15px);padding:11px 16px;border-radius:9px;color:#fff;background:#101828;opacity:0;transition:.2s;pointer-events:none;font-size:12px}.toast.show{opacity:1;transform:translate(-50%,0)}
+    @media(max-width:680px){.hero{padding-top:44px}.grid{grid-template-columns:1fr}.field.full{grid-column:auto}.card{padding:20px}.choices{grid-template-columns:1fr}.actions{grid-template-columns:1fr}.steps i{display:none}}
+  </style>
+</head>
+<body>
+  <nav><div class="wrap nav-inner"><a class="logo" href="index.html">Modu<span>Lab</span></a><a class="back" href="crm-sprint.html">← 서비스 안내</a></div></nav>
+  <header class="hero"><div class="wrap"><span class="badge">15분 무료 진단 신청</span><h1>자동화가 필요한지부터<br>먼저 확인합니다</h1><p>아래 내용을 작성하면 신청 문구가 완성됩니다.<br>사이트 서버에는 입력 내용을 저장하지 않습니다.</p><div class="steps"><span>1. 신청서 작성</span><i>→</i><span>2. 15분 진단</span><i>→</i><span>3. 범위·조건 확인</span><i>→</i><span>4. 결제 후 구축</span></div></div></header>
+  <main><div class="wrap">
+    <section class="card" id="formCard">
+      <h2 class="section-title">현재 상담 흐름을 알려주세요</h2>
+      <p class="section-desc">진단 결과 적용이 어렵거나 자동화 효과가 작으면 구매를 권하지 않습니다.</p>
+      <form id="applyForm">
+        <div class="grid">
+          <div class="field"><label for="business">업체명 또는 성함 <span class="required">*</span></label><input id="business" name="business" required autocomplete="organization" placeholder="예: 모듈학원 김대표"></div>
+          <div class="field"><label for="industry">업종 <span class="required">*</span></label><select id="industry" name="industry" required><option value="">선택해 주세요</option><option>학원·교육</option><option>보험·재무상담</option><option>부동산</option><option>필라테스·운동센터</option><option>컨설팅</option><option>웨딩·예약 서비스</option><option>기타</option></select></div>
+          <div class="field"><label for="volume">월평균 문의 수 <span class="required">*</span></label><select id="volume" name="volume" required><option value="">선택해 주세요</option><option>10건 미만</option><option>10~19건</option><option>20~49건</option><option>50~99건</option><option>100건 이상</option></select></div>
+          <div class="field"><label for="contact">회신 받을 연락처 <span class="required">*</span></label><input id="contact" name="contact" required autocomplete="email" placeholder="이메일 또는 전화번호"></div>
+          <fieldset class="field full" style="border:0;padding:0;margin:0"><legend class="legend">현재 관리 방식 <span class="required">*</span></legend><div class="choices"><label class="choice"><input type="radio" name="method" value="카카오·문자·DM" required> 카카오·문자·DM</label><label class="choice"><input type="radio" name="method" value="메모·수기"> 메모·수기</label><label class="choice"><input type="radio" name="method" value="엑셀·Google Sheets"> 엑셀·Google Sheets</label><label class="choice"><input type="radio" name="method" value="CRM 사용 중"> CRM 사용 중</label><label class="choice"><input type="radio" name="method" value="담당자 기억에 의존"> 담당자 기억에 의존</label><label class="choice"><input type="radio" name="method" value="기타"> 기타</label></div></fieldset>
+          <div class="field full"><label for="pain">가장 불편한 점 또는 최근 누락 사례 <span class="required">*</span></label><textarea id="pain" name="pain" required placeholder="예: 체험 상담 후 다음 주에 다시 연락하기로 했지만 기록이 없어 놓쳤습니다."></textarea></div>
+          <div class="field"><label for="time">15분 통화 가능한 시간 1</label><input id="time" name="time" placeholder="예: 10/2 오후 2~4시"></div>
+          <div class="field"><label for="time2">15분 통화 가능한 시간 2</label><input id="time2" name="time2" placeholder="예: 10/3 오전 10~12시"></div>
+        </div>
+        <label class="consent"><input id="consent" type="checkbox" required><span>진단 회신을 위해 위 정보를 이메일 또는 카카오톡으로 보내는 데 동의합니다. 이 페이지 자체는 작성 내용을 서버에 저장하지 않으며, 전송할 앱에서 최종 내용을 다시 확인할 수 있습니다.</span></label>
+        <button class="submit" type="submit">신청 내용 확인하기</button>
+      </form>
+    </section>
+
+    <section class="card result" id="result">
+      <div class="result-box"><h2>신청서가 준비됐습니다</h2><p>아래 두 방법 중 편한 채널로 보내주세요. 보내기 전 내용은 직접 수정할 수 있습니다.</p></div>
+      <div class="summary" id="summary"></div>
+      <div class="actions"><a class="btn primary" id="emailButton" href="#">이메일로 신청서 보내기</a><button class="btn kakao" id="kakaoButton" type="button">카카오로 신청서 보내기</button><button class="btn secondary" id="copyButton" type="button">신청서만 복사</button><button class="btn secondary" id="editButton" type="button">내용 수정</button></div>
+      <p class="fine">진단 후 포함 기능·제외 기능·55만원 비용·납기·환불 조건을 문서로 확인합니다. 결제는 범위에 동의한 뒤 별도 안내하며, 결제와 필수 정보 전달이 완료된 시점부터 48시간 구축이 시작됩니다.</p>
+    </section>
+    <aside class="notice"><strong>온라인 결제에 바로 연결하지 않는 이유</strong><p>맞춤 구축은 업종과 현재 흐름에 따라 적용 가능 범위가 다릅니다. 결제 전에 범위와 제외 사항을 먼저 합의해 불필요한 구매와 분쟁을 줄입니다.</p></aside>
+  </div></main>
+  <div class="toast" id="toast" role="status" aria-live="polite">신청 내용을 복사했습니다.</div>
+  <script>
+    const form = document.getElementById('applyForm');
+    const result = document.getElementById('result');
+    const summary = document.getElementById('summary');
+    const params = new URLSearchParams(location.search);
+    let applicationText = '';
+    function extraContext(){
+      const items=[];
+      if(params.get('score')) items.push(`자가진단 점수: ${params.get('score')}/14점`);
+      if(params.get('grade')) items.push(`자가진단 등급: ${params.get('grade')}`);
+      if(params.get('weak')) items.push(`먼저 손볼 항목: ${params.get('weak')}`);
+      const source=['utm_source','utm_medium','utm_campaign'].map(k=>params.get(k)).filter(Boolean).join(' / ');
+      if(source) items.push(`유입 경로: ${source}`);
+      return items;
+    }
+    function showToast(){const t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800)}
+    async function copyText(){try{await navigator.clipboard.writeText(applicationText);showToast();return true}catch(error){window.prompt('아래 신청 내용을 복사해 주세요.',applicationText);return false}}
+    form.addEventListener('submit',event=>{
+      event.preventDefault();
+      const data=new FormData(form);
+      const context=extraContext();
+      applicationText=[
+        '[상담 누락 방지 자동화 15분 진단 신청]',
+        `업체명/성함: ${data.get('business')}`,
+        `업종: ${data.get('industry')}`,
+        `월평균 문의 수: ${data.get('volume')}`,
+        `회신 연락처: ${data.get('contact')}`,
+        `현재 관리 방식: ${data.get('method')}`,
+        `가장 불편한 점: ${data.get('pain')}`,
+        `가능 시간 1: ${data.get('time')||'미정'}`,
+        `가능 시간 2: ${data.get('time2')||'미정'}`,
+        ...context,
+        '',
+        '서비스 안내: https://songminjin.github.io/modulab/crm-sprint.html'
+      ].join('\n');
+      summary.textContent=applicationText;
+      const subject=`[ModuLab 진단 신청] ${data.get('business')}`;
+      document.getElementById('emailButton').href=`mailto:songminjin123@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(applicationText)}`;
+      document.getElementById('formCard').style.display='none';
+      result.classList.add('show');
+      result.scrollIntoView({behavior:'smooth',block:'start'});
+    });
+    document.getElementById('copyButton').addEventListener('click',copyText);
+    document.getElementById('kakaoButton').addEventListener('click',async()=>{await copyText();window.open('https://pf.kakao.com/_HWDGX/chat','_blank','noopener')});
+    document.getElementById('editButton').addEventListener('click',()=>{result.classList.remove('show');document.getElementById('formCard').style.display='block';document.getElementById('formCard').scrollIntoView({behavior:'smooth'})});
+  </script>
+</body>
+</html>
