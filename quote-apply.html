@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="현재 견적 업무와 기존 양식을 알려주시면 55만원 견적 발송·후속 연락 자동화의 호환성을 결제 전에 확인합니다.">
+  <title>견적 자동화 호환성 확인 | ModuLab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="quote-offer.css">
+</head>
+<body>
+  <div class="top-note">신청만으로 결제되지 않습니다. 고객정보를 가린 샘플로 호환성을 먼저 확인합니다.</div>
+  <nav class="nav"><div class="wrap nav-inner"><a class="logo" href="index.html">Modu<span>Lab</span></a><div class="nav-links"><a href="quote-automation.html">서비스 설명</a><a href="quote-demo.html">2분 데모</a></div></div></nav>
+  <header class="sub-hero wrap"><div class="eyebrow"><i class="eyebrow-dot"></i> 결제 전 무료 확인</div><h1>우리 견적 업무에 맞는지<br>3분만에 알려주세요</h1><p>정확한 연락처와 현재 흐름이 있어야 일반적인 영업 답변이 아니라, 가능한 범위와 제외 범위를 구체적으로 답할 수 있습니다.</p></header>
+
+  <main class="wrap" style="max-width:860px;padding-bottom:90px">
+    <section class="panel" id="formPanel">
+      <h2>호환성 확인 신청</h2><p class="panel-intro">별표(*) 항목은 필수입니다. 실제 고객명·전화번호·금액은 적지 마세요.</p>
+      <form id="applyForm">
+        <div class="form-grid">
+          <div class="field"><label for="business">회사/브랜드명 *</label><input id="business" name="business" required placeholder="예: 모듈교육"></div>
+          <div class="field"><label for="name">신청자명 *</label><input id="name" name="name" required placeholder="예: 김대표"></div>
+          <div class="field"><label for="contact">회신 이메일 *</label><input id="contact" name="contact" type="email" required placeholder="name@company.com"></div>
+          <div class="field"><label for="industry">업종 *</label><input id="industry" name="industry" required placeholder="예: 기업교육, 청소, 디자인대행"></div>
+          <div class="field"><label for="volume">월 견적 건수 *</label><select id="volume" name="volume" required><option value="">선택</option><option>1~4건</option><option>5~10건</option><option>11~30건</option><option>31건 이상</option></select></div>
+          <div class="field"><label for="workspace">Google Workspace 사용 *</label><select id="workspace" name="workspace" required><option value="">선택</option><option>사용 가능</option><option>검토 가능</option><option>사용 불가</option></select></div>
+          <div class="field full"><label for="current">현재 견적 처리 흐름 *</label><textarea id="current" name="current" required placeholder="예: 네이버 문의 확인 → 엑셀에 고객정보 입력 → 지난 한글 견적서 복사 → PDF 저장 → Gmail 발송 → 3일 뒤 메모"></textarea></div>
+          <div class="field full"><label for="pain">가장 자주 생기는 문제 *</label><textarea id="pain" name="pain" required placeholder="예: 품목 가격을 잘못 복사하거나, 보낸 뒤 다시 연락할 날짜를 놓칩니다."></textarea></div>
+          <div class="field"><label for="format">기존 견적 양식</label><select id="format" name="format"><option>있음 · PDF/한글/엑셀</option><option>있음 · Google Docs/Sheets</option><option>없음 · 기본 템플릿 필요</option></select></div>
+          <div class="field"><label for="call">연락 가능한 시간</label><input id="call" name="call" placeholder="예: 평일 14~17시"></div>
+          <div class="field full"><label for="need">꼭 필요한 기능 또는 연동</label><textarea id="need" name="need" placeholder="예: 옵션별 단가, 할인, 담당자별 알림. 세금계산서나 카카오 연동이 필수라면 꼭 적어주세요."></textarea></div>
+        </div>
+        <label class="check-line"><input id="consent" required type="checkbox"><span>호환성 확인과 회신을 위해 위 정보를 이메일로 전달하는 데 동의합니다. 실제 고객 개인정보는 보내지 않으며, 샘플 파일은 고객정보를 가린 뒤 별도로 첨부하겠습니다. *</span></label>
+        <div class="button-row"><button class="btn btn-primary" type="submit">신청 내용 확인하기</button><a class="btn btn-secondary" href="quote-demo.html">데모 다시 보기</a></div>
+      </form>
+    </section>
+
+    <section class="panel result-box" id="result">
+      <h2 id="resultTitle">신청 내용이 준비되었습니다</h2>
+      <p class="panel-intro" id="fitMessage"></p>
+      <pre id="summary" style="padding:18px;border-radius:12px;color:#e7f3e9;background:#13291c;white-space:pre-wrap;font-family:inherit;font-size:11px;line-height:1.75"></pre>
+      <div class="button-row"><a class="btn btn-primary" id="emailButton" href="#">이메일 앱 열어 보내기</a><button class="btn btn-secondary" type="button" id="copyButton">내용 복사</button><button class="btn btn-secondary" type="button" id="editButton">수정하기</button></div>
+      <div class="privacy-note"><strong>보낼 때 확인:</strong> 이메일 앱이 열리면 받는 주소가 <b>songminjin123@gmail.com</b>인지 확인하고, 고객정보를 가린 기존 견적서 1개가 있다면 첨부하세요. ‘내용 복사’만으로는 신청이 접수되지 않습니다.</div>
+    </section>
+
+    <section style="margin-top:23px;padding:22px;border:1px dashed #bdcbbd;border-radius:16px;color:#5c695e;background:#f6f9f3;font-size:12px;line-height:1.8"><strong>이후 과정</strong><br>① 신청 메일 확인 → ② 마스킹 샘플로 기술 호환성 확인 → ③ 포함·제외 범위와 증빙/결제 방식 서면 안내 → ④ 동의와 결제 후 자료·권한이 준비된 시점부터 48시간 구축. 신청 단계에서는 비용이 발생하지 않습니다.</section>
+  </main>
+  <div class="toast" id="toast">복사했습니다.</div>
+  <footer class="footer"><div class="wrap footer-inner"><span>© ModuLab · 견적 발송·후속 연락 자동화</span><span><a href="privacy.html">개인정보처리방침</a> · songminjin123@gmail.com</span></div></footer>
+  <script>
+    const form=document.getElementById('applyForm');
+    const result=document.getElementById('result');
+    let prepared='';
+    const params=new URLSearchParams(location.search);
+    function val(id){return document.getElementById(id).value.trim();}
+    function toast(message){const el=document.getElementById('toast');el.textContent=message;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),1800);}
+    form.addEventListener('submit',event=>{
+      event.preventDefault();
+      if(!form.reportValidity()) return;
+      const volume=val('volume'), workspace=val('workspace');
+      const likelyFit=volume!=='1~4건' && workspace!=='사용 불가';
+      document.getElementById('resultTitle').textContent=likelyFit?'자동화 적합성을 구체적으로 확인해볼 수 있습니다':'신청 전에 범위 확인이 특히 필요합니다';
+      document.getElementById('fitMessage').textContent=likelyFit?'반복 건수와 사용 환경이 기본 적합 기준에 가깝습니다. 아래 내용을 보내면 샘플 기준으로 최종 판단합니다.':'월 건수가 적거나 Google 사용이 어려우면 55만원 맞춤 구축보다 간단한 템플릿이 경제적일 수 있습니다. 구매를 권하지 않고 대안까지 함께 검토합니다.';
+      prepared=`[견적 자동화 호환성 확인]\n\n회사/브랜드: ${val('business')}\n신청자: ${val('name')}\n회신 이메일: ${val('contact')}\n업종: ${val('industry')}\n월 견적 건수: ${volume}\nGoogle Workspace: ${workspace}\n기존 양식: ${val('format')}\n연락 가능 시간: ${val('call')||'미기재'}\n\n현재 처리 흐름\n${val('current')}\n\n가장 자주 생기는 문제\n${val('pain')}\n\n필수 기능/연동\n${val('need')||'미기재'}\n\n유입 정보\nsource=${params.get('utm_source')||'direct'} / medium=${params.get('utm_medium')||'none'} / campaign=${params.get('utm_campaign')||'quote_automation'}\n\n※ 실제 고객 개인정보가 없는 내용이며, 기존 견적서는 개인정보를 가린 뒤 별도 첨부합니다.`;
+      document.getElementById('summary').textContent=prepared;
+      const subject=`[호환성 확인] ${val('business')} · 견적 자동화`;
+      document.getElementById('emailButton').href=`mailto:songminjin123@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(prepared)}`;
+      document.getElementById('formPanel').style.display='none';result.classList.add('show');result.scrollIntoView({behavior:'smooth',block:'start'});
+    });
+    document.getElementById('copyButton').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(prepared);toast('신청 내용을 복사했습니다. 이메일로 꼭 보내주세요.');}catch(error){toast('브라우저에서 복사를 허용해 주세요.');}});
+    document.getElementById('editButton').addEventListener('click',()=>{result.classList.remove('show');document.getElementById('formPanel').style.display='block';document.getElementById('formPanel').scrollIntoView({behavior:'smooth'});});
+  </script>
+</body>
+</html>

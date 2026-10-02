@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="회사명, 고객명, 품목과 금액을 입력해 견적서 PDF와 이메일 초안 자동화 결과를 브라우저에서 체험하세요.">
+  <title>견적 자동화 2분 체험 | ModuLab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="quote-offer.css">
+</head>
+<body>
+  <div class="top-note">이 데모는 브라우저 안에서만 계산되며 입력값을 서버에 전송하거나 저장하지 않습니다.</div>
+  <nav class="nav"><div class="wrap nav-inner"><a class="logo" href="index.html">Modu<span>Lab</span></a><div class="nav-links"><a href="quote-automation.html">서비스 설명</a><a class="nav-cta" href="quote-apply.html?utm_source=quote_demo&amp;utm_medium=nav">내 양식 호환성 확인</a></div></div></nav>
+
+  <header class="sub-hero wrap">
+    <div class="eyebrow"><i class="eyebrow-dot"></i> 저장 없는 브라우저 데모</div>
+    <h1>값을 바꾸면 견적서와<br>메일 초안이 함께 바뀝니다</h1>
+    <p>실제 구축에서는 이 입력을 Google Sheets에 기록하고, 회사 양식의 PDF·Gmail 초안·후속 연락 일정을 한 번에 만듭니다.</p>
+  </header>
+
+  <main class="wrap tool-shell">
+    <section class="panel input-panel">
+      <h2>샘플 견적 입력</h2><p class="panel-intro">실제 고객정보 대신 예시값으로 체험하세요.</p>
+      <div class="form-grid">
+        <div class="field"><label for="seller">보내는 회사</label><input id="seller" value="모듈랩"></div>
+        <div class="field"><label for="client">받는 회사</label><input id="client" value="샘플상사"></div>
+        <div class="field"><label for="customer">담당자</label><input id="customer" value="김고객"></div>
+        <div class="field"><label for="email">이메일</label><input id="email" type="email" value="sample@example.com"></div>
+        <div class="field full"><label for="item1">품목 1</label><input id="item1" value="업무 흐름 진단"></div>
+        <div class="field"><label for="qty1">수량</label><input id="qty1" type="number" min="0" step="1" value="1"></div>
+        <div class="field"><label for="price1">단가</label><input id="price1" type="number" min="0" step="1000" value="100000"></div>
+        <div class="field full"><label for="item2">품목 2</label><input id="item2" value="견적·후속 연락 자동화 구축"></div>
+        <div class="field"><label for="qty2">수량</label><input id="qty2" type="number" min="0" step="1" value="1"></div>
+        <div class="field"><label for="price2">단가</label><input id="price2" type="number" min="0" step="1000" value="450000"></div>
+        <div class="field"><label for="tax">부가세</label><select id="tax"><option value="0.1" selected>10%</option><option value="0">면세/별도 확인</option></select></div>
+        <div class="field"><label for="follow">다음 연락일</label><input id="follow" type="date"></div>
+      </div>
+      <div class="button-row"><button class="btn btn-primary" type="button" id="refresh">미리보기 갱신</button><button class="btn btn-secondary" type="button" id="copyMail">메일 초안 복사</button></div>
+      <div class="privacy-note">실제 납품본도 고객 메일을 자동 발송하지 않습니다. PDF가 첨부된 Gmail 초안을 만든 뒤 담당자가 직접 확인하고 보내도록 설계했습니다.</div>
+    </section>
+
+    <section class="panel preview-panel">
+      <div class="quote-paper" id="printArea">
+        <div class="quote-paper-head"><h3>견 적 서</h3><div class="quote-meta">견적번호 <b id="quoteNo"></b><br>작성일 <span id="today"></span><br>유효기한 <span id="valid"></span></div></div>
+        <div class="quote-to"><strong id="clientOut"></strong> · <span id="customerOut"></span> 님<br><small>아래와 같이 견적드립니다.</small></div>
+        <table class="quote-table"><thead><tr><th>품목</th><th>수량</th><th>단가</th><th>공급가액</th></tr></thead><tbody><tr><td id="item1Out"></td><td id="qty1Out"></td><td id="price1Out"></td><td id="amount1Out"></td></tr><tr><td id="item2Out"></td><td id="qty2Out"></td><td id="price2Out"></td><td id="amount2Out"></td></tr></tbody></table>
+        <div class="totals"><div class="total-line"><span>공급가액</span><b id="supplyOut"></b></div><div class="total-line"><span>부가세</span><b id="taxOut"></b></div><div class="total-line grand"><span>합계</span><strong id="totalOut"></strong></div></div>
+        <div style="margin-top:34px;padding-top:17px;border-top:1px solid #d8e0d8;font-size:10px;color:#69746b"><strong id="sellerOut"></strong><br>본 화면은 기능 체험용 샘플 견적서입니다.</div>
+      </div>
+      <div class="mail-preview"><b>✉️ Gmail 초안 미리보기</b><pre id="mailOut"></pre></div>
+      <div class="button-row"><button class="btn btn-secondary" type="button" onclick="window.print()">견적 화면 인쇄 / PDF</button><a class="btn btn-primary" href="quote-apply.html?utm_source=quote_demo&amp;utm_medium=result">내 양식으로 구축 문의</a></div>
+    </section>
+  </main>
+  <div class="toast" id="toast">복사했습니다.</div>
+  <footer class="footer"><div class="wrap footer-inner"><span>© ModuLab · 견적 발송·후속 연락 자동화</span><span><a href="quote-automation.html">서비스 범위 보기</a> · songminjin123@gmail.com</span></div></footer>
+
+  <script>
+    const $ = id => document.getElementById(id);
+    const won = value => `${Math.round(Number(value) || 0).toLocaleString('ko-KR')}원`;
+    const iso = date => {
+      const year=date.getFullYear();
+      const month=String(date.getMonth()+1).padStart(2,'0');
+      const day=String(date.getDate()).padStart(2,'0');
+      return `${year}-${month}-${day}`;
+    };
+    const safeNumber = id => Math.max(0, Number($(id).value) || 0);
+    const demoParams = new URLSearchParams(location.search);
+    ['seller','client','customer','item1','item2'].forEach(id=>{
+      const value=demoParams.get(id);
+      if(value) $(id).value=value.slice(0,80);
+    });
+    ['qty1','qty2','price1','price2'].forEach(id=>{
+      if(!demoParams.has(id)) return;
+      const value=Number(demoParams.get(id));
+      if(Number.isFinite(value) && value>=0) $(id).value=String(value);
+    });
+    const now = new Date();
+    const follow = new Date(now); follow.setDate(follow.getDate() + 2); $('follow').value = iso(follow);
+    function render() {
+      const qty1=safeNumber('qty1'), qty2=safeNumber('qty2'), price1=safeNumber('price1'), price2=safeNumber('price2');
+      const amount1=qty1*price1, amount2=qty2*price2, supply=amount1+amount2, tax=Math.round(supply*Number($('tax').value)), total=supply+tax;
+      const valid=new Date(); valid.setDate(valid.getDate()+14);
+      const quoteNo=`DEMO-${iso(now).replaceAll('-','')}-001`;
+      $('quoteNo').textContent=quoteNo; $('today').textContent=iso(now); $('valid').textContent=iso(valid);
+      $('clientOut').textContent=$('client').value || '고객사'; $('customerOut').textContent=$('customer').value || '담당자'; $('sellerOut').textContent=$('seller').value || '보내는 회사';
+      ['1','2'].forEach(n=>{ $(`item${n}Out`).textContent=$(`item${n}`).value || '-'; $(`qty${n}Out`).textContent=safeNumber(`qty${n}`).toLocaleString('ko-KR'); $(`price${n}Out`).textContent=won(safeNumber(`price${n}`)); });
+      $('amount1Out').textContent=won(amount1); $('amount2Out').textContent=won(amount2); $('supplyOut').textContent=won(supply); $('taxOut').textContent=won(tax); $('totalOut').textContent=won(total);
+      const person=$('customer').value || '담당자';
+      $('mailOut').textContent=`받는 사람: ${$('email').value || 'customer@example.com'}\n제목: [${$('seller').value || '회사'}] 견적서 ${quoteNo} 전달드립니다\n\n${person}님, 안녕하세요.\n요청하신 견적서를 첨부드립니다.\n견적번호: ${quoteNo}\n합계: ${won(total)}\n유효기한: ${iso(valid)}\n\n내용을 확인하신 뒤 궁금한 점은 회신 부탁드립니다.\n\n다음 확인 일정: ${$('follow').value || '미지정'}`;
+    }
+    function toast(message){ const el=$('toast'); el.textContent=message; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),1800); }
+    document.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',render));
+    $('refresh').addEventListener('click',()=>{render();toast('미리보기를 갱신했습니다.');});
+    $('copyMail').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('mailOut').textContent);toast('메일 초안을 복사했습니다.');}catch(error){toast('브라우저에서 복사를 허용해 주세요.');}});
+    render();
+  </script>
+</body>
+</html>

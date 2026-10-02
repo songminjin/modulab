@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="견적을 자주 보내는 1~10인 서비스업을 위해 문의 기록, 견적 PDF, Gmail 초안, 후속 연락 일정을 48시간 안에 연결하는 맞춤 자동화 서비스입니다.">
+  <meta property="og:title" content="견적 발송·후속 연락 자동화 | ModuLab">
+  <meta property="og:description" content="견적서를 만들고도 다시 연락하지 못해 놓치는 일을 줄이세요. 결제 전 샘플 호환성부터 확인합니다.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://songminjin.github.io/modulab/quote-automation.html">
+  <title>견적 발송·후속 연락 자동화 | ModuLab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="quote-offer.css">
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"Service","name":"견적 발송·후속 연락 자동화 구축","provider":{"@type":"Organization","name":"ModuLab"},"areaServed":"KR","description":"1~10인 서비스업의 문의 기록, 견적 PDF, Gmail 초안, 후속 연락 일정을 연결하는 맞춤 자동화 구축","offers":{"@type":"Offer","price":"550000","priceCurrency":"KRW"}}
+  </script>
+</head>
+<body>
+  <div class="top-note">세금계산서·결제 자동화가 아닌, ‘견적 작성과 후속 연락’ 한 구간에 집중합니다.</div>
+  <nav class="nav">
+    <div class="wrap nav-inner">
+      <a class="logo" href="index.html">Modu<span>Lab</span></a>
+      <div class="nav-links">
+        <a href="#fit">대상 확인</a>
+        <a href="quote-demo.html">직접 체험</a>
+        <a class="nav-cta" href="quote-apply.html?utm_source=quote_landing&amp;utm_medium=nav">내 업무 호환성 확인</a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div>
+          <div class="eyebrow"><i class="eyebrow-dot"></i> 견적을 월 5건 이상 보내는 1~10인 서비스업</div>
+          <h1>견적은 보냈는데,<br><em>다시 연락할 때</em>를<br>놓치고 있나요?</h1>
+          <p class="lead">문의 내용을 다시 옮겨 적고, 견적서를 복사해 PDF로 저장하고, 메일을 쓰고, 며칠 뒤 연락할 날짜를 기억하는 흐름을 하나로 연결합니다.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="quote-demo.html?utm_source=quote_landing&amp;utm_medium=hero">샘플 견적 2분 체험</a>
+            <a class="btn btn-secondary" href="quote-apply.html?utm_source=quote_landing&amp;utm_medium=hero">구축 가능 여부 확인</a>
+          </div>
+          <p class="micro">바로 결제받지 않습니다. 마스킹한 견적서 1개로 호환성과 범위를 먼저 확인합니다.</p>
+        </div>
+        <div class="workflow-window" aria-label="견적 자동화 처리 흐름 미리보기">
+          <div class="window-head"><div class="window-dots"><i></i><i></i><i></i></div><span>견적 업무 보드 · Q20261001-003</span></div>
+          <div class="workflow">
+            <div class="workflow-title"><span>샘플상사 · 김고객</span><span class="status">견적 생성</span></div>
+            <div class="flow-line"><div class="flow-icon">📝</div><div><b>문의 정보 등록</b><span>회사·담당자·품목을 한 번만 입력</span></div><div class="flow-ok">완료</div></div>
+            <div class="flow-line"><div class="flow-icon">📄</div><div><b>견적 PDF 만들기</b><span>기존 양식과 가격 규칙 반영</span></div><div class="flow-ok">완료</div></div>
+            <div class="flow-line"><div class="flow-icon">✉️</div><div><b>Gmail 초안 생성</b><span>첨부파일·제목·본문까지 준비</span></div><div class="flow-ok">검토 필요</div></div>
+            <div class="flow-line"><div class="flow-icon">📅</div><div><b>후속 연락 일정</b><span>2026-10-03 · 캘린더 등록</span></div><div class="flow-ok">예약</div></div>
+            <div class="sum-card"><div><span>견적 합계</span><strong>605,000원</strong></div><div class="flow-ok">사람이 확인 후 발송 →</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="signal-bar">
+      <div class="wrap signals">
+        <div class="signal"><strong>한 번만 입력</strong><span>문의 내용을 문서와 메일에 재사용</span></div>
+        <div class="signal"><strong>사람이 최종 확인</strong><span>고객 메일은 자동 발송하지 않음</span></div>
+        <div class="signal"><strong>고객 계정 안에서 실행</strong><span>Google Sheets·Docs·Gmail·Calendar 사용</span></div>
+      </div>
+    </div>
+
+    <section class="section" id="fit">
+      <div class="wrap">
+        <div class="section-label">WHO IT IS FOR</div>
+        <h2>이런 회사라면 맞습니다</h2>
+        <p class="section-copy">업종보다 ‘반복되는 견적 흐름’이 있는지가 중요합니다.</p>
+        <div class="fit-grid">
+          <article class="card"><div class="card-num">01</div><h3>교육·컨설팅·대행사</h3><p>회사명과 옵션만 바뀌는 제안 견적을 반복해 보내고, 검토 여부를 다시 물어봐야 하는 팀.</p></article>
+          <article class="card"><div class="card-num">02</div><h3>청소·수리·렌탈·시공</h3><p>현장이나 문의 내용을 바탕으로 여러 품목을 조합해 견적서를 발행하는 소규모 사업자.</p></article>
+          <article class="card"><div class="card-num">03</div><h3>제작·B2B 서비스</h3><p>엑셀·한글·PDF를 복사해 쓰고, 보낸 뒤 후속 연락일은 메모나 기억에 의존하는 회사.</p></article>
+        </div>
+        <div class="evidence"><strong>적합 기준:</strong> 월 견적 5건 이상, 품목·가격 규칙이 어느 정도 정해져 있고, Google Workspace 사용이 가능해야 합니다. 가격을 매번 완전히 새로 판단하거나 복잡한 ERP·세금계산서 연동이 필요한 경우에는 이 상품보다 별도 개발이 맞습니다.</div>
+      </div>
+    </section>
+
+    <section class="section soft">
+      <div class="wrap">
+        <div class="section-label">BEFORE → AFTER</div>
+        <h2>새 CRM을 배우는 일이 아니라<br>지금 하던 4단계를 잇습니다</h2>
+        <div class="compare-grid">
+          <div class="compare before"><div class="compare-label">지금</div><ul><li>문의 내용을 엑셀에 다시 입력</li><li>지난 견적서를 복사하고 계산</li><li>PDF 저장 후 메일에 다시 첨부</li><li>재연락 시점을 기억하거나 누락</li></ul></div>
+          <div class="compare after"><div class="compare-label">구축 후</div><ul><li>Google Sheets 한 행과 품목만 등록</li><li>기존 회사 양식으로 금액·부가세가 계산된 PDF 생성</li><li>PDF가 첨부된 Gmail 초안을 열어 사람이 검토 후 발송</li><li>다음 연락일은 Calendar와 대표자 요약으로 확인</li></ul></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="offer">
+      <div class="wrap">
+        <div class="section-label">DELIVERABLE</div>
+        <h2>48시간 맞춤 구축 범위</h2>
+        <p class="section-copy">필수 자료와 권한이 준비되고 결제가 확인된 시점부터 48시간입니다.</p>
+        <div class="deliver-grid">
+          <div>
+            <div class="deliver-list">
+              <div class="deliver-item"><i>1</i><div><b>견적 요청·품목·단가 Google Sheets</b><span>견적번호, 고객, 상태, 다음 연락일과 품목별 수량·단가를 관리합니다.</span></div></div>
+              <div class="deliver-item"><i>2</i><div><b>회사 양식 견적 PDF 생성</b><span>기존 견적서 1종의 로고·항목·부가세 규칙을 Google Docs 템플릿에 반영합니다.</span></div></div>
+              <div class="deliver-item"><i>3</i><div><b>Gmail 초안 + 첨부파일</b><span>고객에게 자동 발송하지 않고, 담당자가 검토할 수 있는 이메일 초안을 만듭니다.</span></div></div>
+              <div class="deliver-item"><i>4</i><div><b>후속 연락 Calendar + 일일 요약</b><span>다음 연락일을 일정으로 만들고, 확인해야 할 견적을 대표자 이메일로 요약합니다.</span></div></div>
+              <div class="deliver-item"><i>5</i><div><b>30분 인수인계 + 7일 오류 수정</b><span>화면 공유로 사용법을 전달하고 합의한 범위의 작동 오류를 수정합니다.</span></div></div>
+            </div>
+            <div class="not-included"><strong>기본 범위에 포함되지 않음:</strong> 세금계산서 발행, 카드·계좌 결제, AI 가격 결정, ERP 연동, 카카오 알림톡, 외부 사이트 스크래핑, 견적 양식 2종 이상, 신규 기능 추가. 필요한 경우 결제 전에 별도 범위와 비용을 안내합니다.</div>
+          </div>
+          <aside class="price-panel">
+            <span class="tag">초기 검증 고객 구축가</span>
+            <div class="price-label">맞춤 구축 1회</div>
+            <div class="price">550,000<small>원</small></div>
+            <div class="fine">사업자 상태에 따라 부가세 및 증빙 방식을 계약 전에 명확히 안내합니다.</div>
+            <ul><li>기존 견적 양식 1종</li><li>Google 계정 1개 기준</li><li>합의한 업무 흐름 1개</li><li>필수자료 수령 후 48시간</li><li>7일 작동 오류 수정</li></ul>
+            <a class="btn" href="quote-apply.html?utm_source=quote_landing&amp;utm_medium=price">결제 전 호환성 확인</a>
+            <p class="fine">신청 → 샘플 확인 → 범위·증빙·결제 안내 → 구축 순서입니다. 맞지 않으면 결제를 권하지 않습니다.</p>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <section class="section dark">
+      <div class="wrap">
+        <div class="section-label">BUYING PROCESS</div>
+        <h2>구매에서 납품까지</h2>
+        <p class="section-copy">서비스의 범위가 맞는지 먼저 확인해 결제 뒤의 분쟁을 줄입니다.</p>
+        <div class="process">
+          <div class="process-card"><b>STEP 1</b><h3>3분 신청</h3><p>현재 견적 건수, 작업 방식, 가장 불편한 구간을 남깁니다.</p></div>
+          <div class="process-card"><b>STEP 2</b><h3>마스킹 샘플 확인</h3><p>고객정보를 가린 기존 견적서 1개와 원하는 흐름을 확인합니다.</p></div>
+          <div class="process-card"><b>STEP 3</b><h3>범위 확정·결제</h3><p>포함·제외 범위, 증빙 방식, 시작 시점을 서면으로 확정합니다.</p></div>
+          <div class="process-card"><b>STEP 4</b><h3>48시간 구축</h3><p>샘플 테스트, 인수인계 후 합의 범위의 7일 오류 수정을 제공합니다.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap">
+        <div class="section-label">HONEST PROOF</div>
+        <h2>후기 대신, 지금 검증할 수 있는 것</h2>
+        <p class="section-copy">이 서비스는 초기 판매 단계라 ModuLab 자체 구매 후기나 절감시간 수치를 아직 제시하지 않습니다. 존재하지 않는 사례를 만들지 않고, 작동 데모·소스 구조·귀사 샘플 호환성으로 먼저 판단받겠습니다.</p>
+        <div class="feature-grid">
+          <article class="card"><div class="card-num">A</div><h3>브라우저 데모</h3><p>품목·수량·단가를 바꿔 견적서와 이메일 초안이 어떻게 만들어지는지 직접 확인합니다.</p></article>
+          <article class="card"><div class="card-num">B</div><h3>실제 납품 스크립트</h3><p>Google Sheets·Docs·Gmail·Calendar 연결 코드가 이미 준비되어 맞춤 작업의 출발점으로 사용됩니다.</p></article>
+          <article class="card"><div class="card-num">C</div><h3>결제 전 샘플 확인</h3><p>고객정보를 가린 기존 견적서 1개로 구현 가능 여부를 확인한 뒤 구매를 결정합니다.</p></article>
+        </div>
+        <div class="button-row"><a class="btn btn-secondary" href="quote-demo.html">작동 데모 확인하기</a></div>
+      </div>
+    </section>
+
+    <section class="section soft">
+      <div class="wrap">
+        <div class="section-label">FAQ</div><h2>결정 전에 확인하세요</h2>
+        <div class="faq">
+          <details><summary>메일이 고객에게 바로 발송되나요?</summary><p>아닙니다. Gmail 초안까지만 만들며 담당자가 받는 사람, 금액, 첨부파일과 문구를 검토한 뒤 직접 발송합니다.</p></details>
+          <details><summary>고객정보는 어디에 저장되나요?</summary><p>구축한 고객의 Google 계정 안에서 Sheets, Drive, Gmail, Calendar 권한으로 작동합니다. 호환성 확인 단계에서는 고객정보를 가린 샘플만 요청합니다.</p></details>
+          <details><summary>어떤 경우 48시간 안에 어렵나요?</summary><p>복수 양식, ERP·결제·세금계산서·카카오 연동, 복잡한 승인 체계, 정해지지 않은 가격 정책은 기본 상품 밖입니다. 확인 단계에서 별도 개발 여부를 안내합니다.</p></details>
+          <details><summary>아직 견적서 양식이 없으면 가능한가요?</summary><p>간단한 기본 템플릿은 제공할 수 있지만 회사 로고, 필수 기재항목, 가격·부가세 규칙은 고객이 확정해야 합니다.</p></details>
+          <details><summary>무조건 매출이 오르나요?</summary><p>매출 상승을 보장하지 않습니다. 이 서비스는 견적 작성의 반복 입력과 후속 연락 누락 가능성을 줄이는 운영 도구입니다. 실제 수주는 상품 경쟁력과 영업 활동에 달려 있습니다.</p></details>
+        </div>
+      </div>
+    </section>
+
+    <section class="final-cta">
+      <div class="wrap"><h2>우리 회사 견적 흐름에도<br>맞는지 먼저 확인하세요</h2><p>현재 견적 방식과 마스킹 샘플을 보고, 맞지 않으면 맞지 않는 이유까지 답합니다.</p><div class="button-row"><a class="btn" style="background:var(--lime);color:#193322" href="quote-apply.html?utm_source=quote_landing&amp;utm_medium=final">무료 호환성 확인 신청</a><a class="btn" style="border:1px solid #66806d;color:#fff" href="quote-demo.html">2분 데모 먼저 보기</a></div></div>
+    </section>
+  </main>
+
+  <footer class="footer"><div class="wrap footer-inner"><span>© ModuLab · 소규모 사업자의 반복 업무를 작게, 검증 가능하게 자동화합니다.</span><span><a href="privacy.html">개인정보처리방침</a> · 문의: songminjin123@gmail.com</span></div></footer>
+  <a class="sticky-mobile" href="quote-apply.html?utm_source=quote_landing&amp;utm_medium=sticky">내 업무 호환성 확인</a>
+</body>
+</html>
